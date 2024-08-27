@@ -1,7 +1,9 @@
+const ModelUser = require('../users/ModelUser');
 const ModelAddress = require('./ModelAddress');
+const ObjectId = require('mongoose').Types.ObjectId
 
 // Thêm địa chỉ mới
-const addAddress = async (recipientName, address, email, phone) => {
+const addAddress = async (recipientName, address, email, phone,) => {
     try {
         let newAddress = new ModelAddress({ recipientName, address, email, phone });
         await newAddress.save();
@@ -11,6 +13,50 @@ const addAddress = async (recipientName, address, email, phone) => {
         throw new Error('Error when adding address');
     }
 };
+// Mới thêm
+const addAddress2 = async (recipientName, address, phone, user) => {
+    try {
+        let userInDB = await ModelUser.findById(user)
+        console.log(userInDB);
+        (userInDB);
+        if (!userInDB) {
+            throw new Error('User not found');
+        }
+        user = {
+            _id: userInDB._id,
+            email: userInDB.email,
+        }
+        let newAddress = new ModelAddress({ recipientName, address, phone, user });
+        await newAddress.save();
+        setTimeout(async() => {
+            let data = {
+                address: newAddress.address,
+                phone: newAddress.phone,
+                name: newAddress.name,
+            }
+            userInDB.address.push(data);
+            await userInDB.save();
+        }, 0);
+        return newAddress;
+    } catch (error) {
+        console.log('Error in addAddress:', error);
+        throw new Error('Error when adding address');
+    }
+};
+
+const getAddressByUser = async (user) => {
+    try {
+        const userInDB = await ModelUser.findById(user);
+        if (!userInDB) {
+            throw new Error('User not found');
+        }
+        let addresses = await ModelAddress.find({ 'user._id': new ObjectId(user) });
+        return addresses;
+    } catch (error) {
+        console.log('Error in getAddressByUser:', error);
+        throw new Error('Error when fetching addresses');
+    }
+}
 
 // Lấy tất cả địa chỉ
 const getAllAddresses = async () => {
@@ -65,4 +111,4 @@ const deleteAddress = async (id) => {
     }
 };
 
-module.exports = { addAddress, getAllAddresses, getAddressById, updateAddress, deleteAddress };
+module.exports = { addAddress, getAllAddresses, getAddressById, updateAddress, deleteAddress, addAddress2, getAddressByUser };

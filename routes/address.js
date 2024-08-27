@@ -19,6 +19,17 @@ router.post('/add', async (req, res) => {
     }
 });
 
+router.post('/', async (req, res) => {
+    const { recipientName, address, phone, user } = req.body;
+    try {
+        let result = await ControllerAddress.addAddress2(recipientName, address, phone, user);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+
 /**
  * Get All Addresses
  * method: GET
@@ -41,10 +52,20 @@ router.get('/', async (req, res) => {
  * url: http://localhost:9999/addresses/:id
  * response: address
  */
-router.get('/:id', async (req, res) => {
-    const { id } = req.params;
+// router.get('/:id', async (req, res) => {
+//     const { id } = req.params;
+//     try {
+//         let result = await ControllerAddress.getAddressById(id);
+//         return res.status(200).json({ status: true, data: result });
+//     } catch (error) {
+//         return res.status(500).json({ status: false, data: error.message });
+//     }
+// });
+
+router.get('/:user', async (req, res) => {
+    const { user } = req.params;
     try {
-        let result = await ControllerAddress.getAddressById(id);
+        let result = await ControllerAddress.getAddressByUser(user);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
