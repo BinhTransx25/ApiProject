@@ -24,10 +24,11 @@ var productsRouter = require('./routes/products');
 var shopCategoriesRouter = require('./routes/shopCategories');
 var productCategoriesRouter = require('./routes/productCategories');
 var shopOwnerAddressRouter = require('./routes/shopOwnerAddress');
-var userAddressRouter = require('./routes/shopOwnerAddress');
+var userAddressRouter = require('./routes/userAddress');
 var shipperRouter = require('./routes/shipper');
 
 var ordersRouter = require('./routes/orders');
+var cartsRouter = require('./routes/carts');
 
 var app = express();
 
@@ -55,6 +56,7 @@ app.use('/productCategories', productCategoriesRouter);
 app.use('/shopOwnerAddresses', shopOwnerAddressRouter);
 app.use('/userAddresses', userAddressRouter);
 app.use('/orders', ordersRouter);
+app.use('/carts', cartsRouter);
 app.use('/shipper', shipperRouter);
 
 

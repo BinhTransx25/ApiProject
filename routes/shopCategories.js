@@ -50,8 +50,8 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
     try {
-        const { name, description } = req.body;
-        const shopCategories = await ControllerShopCategory.insert(name,  description);
+        const { name } = req.body;
+        const shopCategories = await ControllerShopCategory.insert(name);
         return res.status(200).json({ status: true, data: shopCategories });
     } catch (error) {
         console.log('Insert product error:', error);

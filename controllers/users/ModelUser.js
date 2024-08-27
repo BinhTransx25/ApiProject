@@ -11,6 +11,7 @@ const UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     verified: { type: Boolean, default: false },
     carts: { type: [OrderSchema], default: [] }, // Mảng các đơn hàng
+    address: { type: Array, default: [] },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });

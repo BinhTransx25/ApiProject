@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 
 const ShopCategorySchema = new Schema({
     name: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String, default: '' },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
     
