@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ControllerUserAddress = require('../controllers/address/UserAddressController');
+const ControllerUserAddress = require('../controllers/address/User/ControllerAddressUser');
 
 router.post('/add', async (req, res) => {
     const { userId, recipientName, address, latitude, longitude, email, phone } = req.body;

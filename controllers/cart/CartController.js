@@ -17,21 +17,23 @@ const addToCart = async (user, product) => {
         user = {
             _id: userInDB._id,
             email: userInDB.email,
-        },
-            product = {
-                _id: productInDB._id,
-                name: productInDB.name,
-                price: productInDB.price,
-                image: productInDB.image,
-                quantity: 1
-            }
-        const productInCart = await CartModel.findOne({ "user._id": new ObjectId(user), "product._id": new ObjectId(product) });
+        }
+        product = {
+            _id: productInDB._id,
+            name: productInDB.name,
+            price: productInDB.price,
+            image: productInDB.image,
+            quantity: 1
+        }
+        const productInCart = await CartModel.findOne({ "user._id": new ObjectId(user._id), "product._id": new ObjectId(product._id) });
+        // console.log(productInCart);
+        
         if (!productInCart) {
             let newCart = new CartModel({ user, product });
             await newCart.save();
             return newCart;
         } else {
-            productInCart.quantity += 1;
+            productInCart.product.quantity += 1;
             productInCart.markModified('product');
             productInCart.updatedAt = Date.now();
             const result = await productInCart.save();

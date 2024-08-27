@@ -1,4 +1,4 @@
-const UserAddress = require('../../models/UserAddress');
+const UserAddress = require('../User/ModelAddressUser');
 
 // Thêm địa chỉ mới cho user
 const addUserAddress = async (userId, recipientName, address, latitude, longitude, email, phone) => {
