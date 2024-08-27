@@ -11,8 +11,11 @@ require('./controllers/products/ModelProduct');
 require('./controllers/categories/ShopCategory/ModelShopCategory');
 require('./controllers/categories/ProductCategory/ModelProductCategory');
 require('./controllers/order/ModelOrder');
-require('./controllers/address/ModelAddress');
+require('./controllers/address/User/ModelAddressUser');
+require('./controllers/address/ShopOwner/ModelAddressShopOwner');
 require('./controllers/shopowner/ModelShopOwner')
+require('./controllers/shipper/ModelShipper')
+
 
 
 var indexRouter = require('./routes/index');
@@ -20,7 +23,10 @@ var usersRouter = require('./routes/users');
 var productsRouter = require('./routes/products');
 var shopCategoriesRouter = require('./routes/shopCategories');
 var productCategoriesRouter = require('./routes/productCategories');
-var addressRouter = require('./routes/address');
+var shopOwnerAddressRouter = require('./routes/shopOwnerAddress');
+var userAddressRouter = require('./routes/shopOwnerAddress');
+var shipperRouter = require('./routes/shipper');
+
 var ordersRouter = require('./routes/orders');
 
 var app = express();
@@ -46,8 +52,11 @@ app.use('/users', usersRouter);
 app.use('/products', productsRouter);
 app.use('/shopCategories', shopCategoriesRouter);
 app.use('/productCategories', productCategoriesRouter);
-app.use('/addresses', addressRouter);
+app.use('/shopOwnerAddresses', shopOwnerAddressRouter);
+app.use('/userAddresses', userAddressRouter);
 app.use('/orders', ordersRouter);
+app.use('/shipper', shipperRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

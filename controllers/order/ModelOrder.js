@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const AddressSchema = require('../address/ModelAddress');
+const AddressSchema = require('../address/User/ModelAddressUser');
 
 const OrderItemSchema = new Schema({
     name: { type: String, required: true },

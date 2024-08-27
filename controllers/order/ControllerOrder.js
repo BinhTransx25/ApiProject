@@ -1,6 +1,6 @@
 const ModelOrder = require('./ModelOrder');
 const ModelUser = require('../users/ModelUser');
-const ModelAddress = require('../address/ModelAddress');
+const ModelAddress = require('../address/User/ModelAddressUser');
 const ModelShopOwner = require('../shopowner/ModelShopOwner');
 
 /**
