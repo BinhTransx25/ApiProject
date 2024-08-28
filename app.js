@@ -15,6 +15,7 @@ require('./controllers/address/User/ModelAddressUser');
 require('./controllers/address/ShopOwner/ModelAddressShopOwner');
 require('./controllers/shopowner/ModelShopOwner')
 require('./controllers/shipper/ModelShipper')
+require('./controllers/cart/CartModel')
 
 
 
