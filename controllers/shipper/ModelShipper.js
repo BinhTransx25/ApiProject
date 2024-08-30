@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const OrderSchema = require('../order/ModelOrder').schema;
-
 const ShipperSchema = new Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true },
@@ -10,15 +8,15 @@ const ShipperSchema = new Schema({
   address: { type: String, required: true },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   assignedOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
-  currentLocation: { // New field for location
+  currentLocation: {
     type: {
       type: String,
       enum: ['Point'],
-      required: false,
+      default: 'Point', // Set default value
     },
     coordinates: {
       type: [Number], // Array of [longitude, latitude]
-      required: false,
+      default: [0, 0], // Default coordinates
     }
   },
   created_at: { type: Date, default: Date.now },

@@ -12,7 +12,6 @@ require('./controllers/categories/ShopCategory/ModelShopCategory');
 require('./controllers/categories/ProductCategory/ModelProductCategory');
 require('./controllers/order/ModelOrder');
 require('./controllers/address/User/ModelAddressUser');
-require('./controllers/address/ShopOwner/ModelAddressShopOwner');
 require('./controllers/shopowner/ModelShopOwner')
 require('./controllers/shipper/ModelShipper')
 require('./controllers/cart/CartModel')
@@ -24,10 +23,8 @@ var usersRouter = require('./routes/users');
 var productsRouter = require('./routes/products');
 var shopCategoriesRouter = require('./routes/shopCategories');
 var productCategoriesRouter = require('./routes/productCategories');
-var shopOwnerAddressRouter = require('./routes/shopOwnerAddress');
 var userAddressRouter = require('./routes/userAddress');
 var shipperRouter = require('./routes/shipper');
-
 var ordersRouter = require('./routes/orders');
 var cartsRouter = require('./routes/carts');
 
@@ -54,7 +51,6 @@ app.use('/users', usersRouter);
 app.use('/products', productsRouter);
 app.use('/shopCategories', shopCategoriesRouter);
 app.use('/productCategories', productCategoriesRouter);
-app.use('/shopOwnerAddresses', shopOwnerAddressRouter);
 app.use('/userAddresses', userAddressRouter);
 app.use('/orders', ordersRouter);
 app.use('/carts', cartsRouter);

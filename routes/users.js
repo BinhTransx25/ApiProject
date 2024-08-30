@@ -5,14 +5,14 @@ const ControllerUser = require('../controllers/users/ControllerUser');
 /**
  * Register
  * method: POST
- * body: name, email, password, phone, role, shopCategory
+ * body: name, email, password, phone, role, shopCategory_ids, address, latitude, longitude
  * url: http://localhost:9999/users/register
  * response: true/false
  */
 router.post('/register', async (req, res, next) => {
-  const { name, email, password, phone, role, shopOwners } = req.body; // Bổ sung shopCategory vào request body
+  const { name, email, password, phone, role, shopCategory_ids, address, latitude, longitude } = req.body; // Bổ sung thông tin vào request body
   try {
-    let result = await ControllerUser.register(name, email, password, phone, role, shopOwners); // Truyền shopCategory vào hàm register
+    let result = await ControllerUser.register(name, email, password, phone, role, shopCategory_ids, address, latitude, longitude); // Truyền các thông tin cần thiết vào hàm register
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during registration:', error); // Log lỗi cụ thể

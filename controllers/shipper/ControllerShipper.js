@@ -24,7 +24,7 @@ const getAllShippers = async () => {
 // Lấy thông tin shipper theo ID
 const getShipperById = async (id) => {
     try {
-        return await Shipper.findById(id);
+        return await Shipper.findById(id).populate('assignedOrders');
     } catch (error) {
         console.error('Lỗi khi lấy thông tin shipper theo ID:', error);
         throw new Error('Lỗi khi lấy thông tin shipper theo ID');
@@ -32,13 +32,10 @@ const getShipperById = async (id) => {
 };
 
 // Cập nhật thông tin shipper
-const updateShipper = async (id, { name, phone, email, address, status }) => {
+const updateShipper = async (id, updateData) => {
     try {
-        return await Shipper.findByIdAndUpdate(
-            id,
-            { name, phone, email, address, status, updated_at: Date.now() },
-            { new: true }
-        );
+        updateData.updated_at = Date.now();
+        return await Shipper.findByIdAndUpdate(id, updateData, { new: true });
     } catch (error) {
         console.error('Lỗi khi cập nhật thông tin shipper:', error);
         throw new Error('Lỗi khi cập nhật thông tin shipper');
@@ -69,12 +66,12 @@ const updateShipperLocation = async (id, coordinates) => {
     }
 };
 
-// Cập nhật status của shipper thành 'confirmed'
+// Xác nhận shipper
 const confirmShipper = async (id) => {
     try {
         return await Shipper.findByIdAndUpdate(
             id,
-            { status: 'confirmed', updated_at: Date.now() },
+            { status: 'active', updated_at: Date.now() },
             { new: true }
         );
     } catch (error) {
@@ -83,12 +80,12 @@ const confirmShipper = async (id) => {
     }
 };
 
-// Cập nhật status của shipper thành 'cancelled'
+// Hủy shipper
 const cancelShipper = async (id) => {
     try {
         return await Shipper.findByIdAndUpdate(
             id,
-            { status: 'cancelled', updated_at: Date.now() },
+            { status: 'inactive', updated_at: Date.now() },
             { new: true }
         );
     } catch (error) {

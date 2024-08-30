@@ -1,12 +1,10 @@
-// ControllerUser.js
 const ModelUser = require('./ModelUser');
 const ModelShopOwner = require('../shopowner/ModelShopOwner');
 const ModelShopCategory = require('../categories/ShopCategory/ModelShopCategory');
-
 const jwt = require('jsonwebtoken');
 
 // Hàm đăng ký người dùng hoặc shop owner
-const register = async (name, email, password, phone, role, shopCategory_ids) => {
+const register = async (name, email, password, phone, role, shopCategory_ids, address, latitude, longitude) => {
     try {
         // Kiểm tra email đã tồn tại trong hệ thống hay chưa
         let user = await ModelUser.findOne({ email });
@@ -16,19 +14,17 @@ const register = async (name, email, password, phone, role, shopCategory_ids) =>
 
         // Nếu vai trò là shopOwner, tạo một shop owner mới
         if (role === 'shopOwner') {
-
-            let shopOwners = [];
+            let shopCategories = [];
             for (const shopCategory_id of shopCategory_ids) {
                 const categoryInDB = await ModelShopCategory.findById(shopCategory_id);
                 if (!categoryInDB) {
                     throw new Error('Category not found');
                 }
-                shopOwners.push({
-                    categoryShop_id: categoryInDB._id,
-                    categoryShop_name: categoryInDB.name
+                shopCategories.push({
+                    shopCategory_id: categoryInDB._id,
+                    shopCategory_name: categoryInDB.name
                 });
             }
-
             // const shopCategoryInDB = await ModelShopCategory.findById(shopCategory_id);
             // if (!shopCategoryInDB) {
             //     throw new Error('ShopCategory not found');
@@ -39,7 +35,10 @@ const register = async (name, email, password, phone, role, shopCategory_ids) =>
                 password,
                 phone,
                 role,
-                shopOwners // Thêm thông tin danh mục cửa hàng cho shop owner
+                shopCategory: shopCategories, // Thêm thông tin danh mục cửa hàng cho shop owner
+                address,
+                latitude,
+                longitude
             });
             await shopOwner.save(); // Lưu shop owner vào cơ sở dữ liệu
         } else {
@@ -92,6 +91,9 @@ const login = async (identifier, password) => {
                 email: shopOwner.email,
                 role: 'shopOwner',
                 shopCategory: shopOwner.shopCategory, // Bao gồm thông tin danh mục cửa hàng
+                address: shopOwner.address,
+                latitude: shopOwner.latitude,
+                longitude: shopOwner.longitude,
                 token
             };
         }

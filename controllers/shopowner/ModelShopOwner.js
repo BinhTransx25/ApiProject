@@ -13,9 +13,11 @@ const ShopOwnerSchema = new Schema({
             shopCategory_name: { type: String, required: true }
         },
     ],
-    // latitude: { type: Number, required: true },  // Tọa độ vĩ độ của shop
-    // longitude: { type: Number, required: true }, // Tọa độ kinh độ của shop
-    // distance: { type: Number, default: 0 },      // Quãng đường từ shop đến địa chỉ nhận hàng
+    
+    address: { type: String, required: true },  // Địa chỉ của shop
+    latitude: { type: Number, required: true },  // Tọa độ vĩ độ của shop
+    longitude: { type: Number, required: true }, // Tọa độ kinh độ của shop
+    distance: { type: Number, default: 0 },      // Quãng đường từ shop đến địa chỉ nhận hàng
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });
