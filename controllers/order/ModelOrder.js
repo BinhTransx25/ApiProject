@@ -14,15 +14,10 @@ const OrderSchema = new Schema({
     orderDate: { type: Date, default: Date.now },
     shippingAddress: { type: AddressSchema.schema, required: true },
     paymentMethod: { type: String, required: true },
-    status: { type: String, enum: ['pending', 'processing', 'cancelled'], default: 'pending' },
-    shopOwner: {
-        type: {
-            _id: { type: Schema.Types.ObjectId, ref: 'ShopOwner', required: true },
-            name: { type: String, required: true },
-            phone: { type: Number, required: true },
-        },
-        required: true,
-    },
+    status: { type: String, enum: ['pending', 'processing', 'find delivery person', 'cancelled','completed'], default: 'pending' },
+    shopOwner: {type: Object, required: true, default: {}},
+    shipper: { type: Object, required: true, default: {}}, // Liên kết với shipper
+
 });
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);

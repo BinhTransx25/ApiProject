@@ -91,4 +91,20 @@ router.put('/cancel/:id', async (req, res) => {
     }
 });
 
+/**
+ * Route để shipper xác nhận đơn hàng.
+ * Yêu cầu: orderId trong URL parameters, shipperId trong request body.
+ */
+router.patch('/confirm-order-shipper/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const { shipperId } = req.body;
+    try {
+        const updatedOrder = await ControllerOrder.confirmOrderByShipper(orderId, shipperId);
+        res.status(200).json(updatedOrder);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 module.exports = router;

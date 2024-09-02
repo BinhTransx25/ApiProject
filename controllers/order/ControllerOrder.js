@@ -2,6 +2,7 @@ const ModelOrder = require('./ModelOrder');
 const ModelUser = require('../users/ModelUser');
 const ModelAddress = require('../address/User/ModelAddressUser');
 const ModelShopOwner = require('../shopowner/ModelShopOwner');
+const ModelShipper = require('../shipper/ModelShipper');
 
 /**
  * Thêm đơn hàng mới.
@@ -12,10 +13,10 @@ const ModelShopOwner = require('../shopowner/ModelShopOwner');
  * @param {String} shopOwnerId - ID của chủ cửa hàng.
  * @returns {Array} - Danh sách carts đã được cập nhật của người dùng.
  */
-const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId) => {
-    console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId });
+const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId) => {
+    console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId });
 
-    if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId) {
+    if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId || !shipperId) {
         const errorMessage = 'Missing required fields in request body';
         console.error(errorMessage);
         throw new Error(errorMessage);
@@ -37,6 +38,11 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             throw new Error('Shop owner not found');
         }
 
+        let shipper = await ModelShipper.findById(shipperId)
+        if(!shipper){
+            throw new Error('shipper not found');
+
+        }
         const newOrder = new ModelOrder({
             items: order.map(item => ({
                 name: item.name,
@@ -50,6 +56,11 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
                 _id: shopOwner._id,
                 name: shopOwner.name,
                 phone: shopOwner.phone
+            },
+            shipper :{
+                _id: shipper._id,
+                name: shipper.name,
+                phone: shipper.phone
             }
         });
 
@@ -101,6 +112,7 @@ const getOrdersByShop = async (shopId) => {
 /**
  * Xác nhận đơn hàng theo orderId.
  * @param {String} orderId - ID của đơn hàng.
+ * @param {String} shipperId - ID của shipper.
  * @returns {Object} - Đơn hàng đã được xác nhận.
  */
 const confirmOrder = async (orderId) => {
@@ -114,7 +126,7 @@ const confirmOrder = async (orderId) => {
         }
 
         // Cập nhật trạng thái của đơn hàng thành "processing"
-        order.status = 'processing';
+        order.status = 'find delivery person';
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong carts và cập nhật trạng thái
@@ -123,7 +135,7 @@ const confirmOrder = async (orderId) => {
             const cartItem = user.carts.id(orderId);  // Lấy item trong carts có ID của order
             console.log('itemmmmmmmmmm:', cartItem);
             if (cartItem) {
-                cartItem.status = 'processing'; // Cập nhật trạng thái trong carts
+                cartItem.status = 'find delivery person'; // Cập nhật trạng thái trong carts
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
             
@@ -190,6 +202,7 @@ const deleteOrder = async (orderId) => {
         throw new Error('Error deleting order');
     }
 };
+
 
 module.exports = { addOrder, getOrderDetail, getOrdersByShop, 
     confirmOrder, cancelOrder, deleteOrder };

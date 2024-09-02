@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const CoordinatesSchema = new Schema({
+    latitude: { type: Number, required: false },  // Vĩ độ
+    longitude: { type: Number, required: false }  // Kinh độ
+});
+
 const ShopOwnerSchema = new Schema({
     name: { type: String, required: true },
     password: { type: String, required: true },
@@ -13,10 +18,8 @@ const ShopOwnerSchema = new Schema({
             shopCategory_name: { type: String, required: true }
         },
     ],
-    
     address: { type: String, required: true },  // Địa chỉ của shop
-    latitude: { type: Number, required: true },  // Tọa độ vĩ độ của shop
-    longitude: { type: Number, required: true }, // Tọa độ kinh độ của shop
+    coordinates: { type: CoordinatesSchema, required: true },  // Tọa độ của shop (vĩ độ và kinh độ)
     distance: { type: Number, default: 0 },      // Quãng đường từ shop đến địa chỉ nhận hàng
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }

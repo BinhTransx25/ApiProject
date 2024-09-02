@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const OrderSchema = require('../order/ModelOrder').schema;
+const UserAddressSchema = require('../address/User/ModelAddressUser').schema;
 
 const UserSchema = new Schema({
     name: { type: String, required: true },
@@ -11,7 +12,7 @@ const UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     verified: { type: Boolean, default: false },
     carts: { type: [OrderSchema], default: [] }, // Mảng các đơn hàng
-    address: { type: Array, default: [] },
+    address: { type: [UserAddressSchema], default: [] }, // Mảng các địa chỉ đã lưu 
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });

@@ -1,10 +1,34 @@
 const UserAddress = require('../User/ModelAddressUser');
+const ModelUser = require('../../users/ModelUser');
 
 // Thêm địa chỉ mới cho user
-const addUserAddress = async (userId, recipientName, address, latitude, longitude, email, phone) => {
+const addUserAddress = async (userId, recipientName, address, latitude, longitude, phone) => {
+    
+    if (!userId || !recipientName || !address  || !phone) {
+        const errorMessage = 'Missing required fields in request body';
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+    }
+     // Tạo biến coordinates từ latitude và longitude
+     const coordinates = {
+        latitude: latitude,
+        longitude: longitude
+    };
+
     try {
-        let newAddress = new UserAddress({ userId, recipientName, address, latitude, longitude, email, phone });
+        let user = await ModelUser.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        let newAddress = new UserAddress({ userId, recipientName, address, coordinates, phone });
         await newAddress.save();
+
+        // Thêm địa chỉ mới vào danh sách address của người dùng
+        user.address.push(newAddress);
+        await user.save();
+
+
         return newAddress;
     } catch (error) {
         console.log('Error in addUserAddress:', error);
@@ -38,9 +62,9 @@ const getUserAddressById = async (id) => {
 };
 
 // Sửa địa chỉ của user
-const updateUserAddress = async (id, recipientName, address, latitude, longitude, email, phone) => {
+const updateUserAddress = async (id, recipientName, address, latitude, longitude,email, phone) => {
     try {
-        let updatedAddress = await UserAddress.findByIdAndUpdate(id, { recipientName, address, latitude, longitude, email, phone }, { new: true });
+        let updatedAddress = await UserAddress.findByIdAndUpdate(id, { recipientName, address, latitude, longitude, phone }, { new: true });
         if (!updatedAddress) {
             throw new Error('Address not found');
         }

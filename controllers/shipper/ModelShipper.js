@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const OrderSchema = require('../order/ModelOrder');
 
 const ShipperSchema = new Schema({
   name: { type: String, required: true },

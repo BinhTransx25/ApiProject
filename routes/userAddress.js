@@ -3,9 +3,9 @@ const router = express.Router();
 const ControllerUserAddress = require('../controllers/address/User/ControllerAddressUser');
 
 router.post('/add', async (req, res) => {
-    const { userId, recipientName, address, latitude, longitude, email, phone } = req.body;
+    const { userId, recipientName, address, latitude, longitude,  phone } = req.body;
     try {
-        let result = await ControllerUserAddress.addUserAddress(userId, recipientName, address, latitude, longitude, email, phone);
+        let result = await ControllerUserAddress.addUserAddress(userId, recipientName, address, latitude, longitude, phone);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });

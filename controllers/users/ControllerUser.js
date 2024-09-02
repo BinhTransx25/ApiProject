@@ -25,10 +25,13 @@ const register = async (name, email, password, phone, role, shopCategory_ids, ad
                     shopCategory_name: categoryInDB.name
                 });
             }
-            // const shopCategoryInDB = await ModelShopCategory.findById(shopCategory_id);
-            // if (!shopCategoryInDB) {
-            //     throw new Error('ShopCategory not found');
-            // }
+
+            // Tạo biến coordinates từ latitude và longitude
+            const coordinates = {
+                latitude: latitude,
+                longitude: longitude
+            };
+
             let shopOwner = new ModelShopOwner({
                 name,
                 email,
@@ -37,8 +40,7 @@ const register = async (name, email, password, phone, role, shopCategory_ids, ad
                 role,
                 shopCategory: shopCategories, // Thêm thông tin danh mục cửa hàng cho shop owner
                 address,
-                latitude,
-                longitude
+                coordinates // Sử dụng coordinates thay vì latitude và longitude riêng biệt
             });
             await shopOwner.save(); // Lưu shop owner vào cơ sở dữ liệu
         } else {
@@ -92,8 +94,7 @@ const login = async (identifier, password) => {
                 role: 'shopOwner',
                 shopCategory: shopOwner.shopCategory, // Bao gồm thông tin danh mục cửa hàng
                 address: shopOwner.address,
-                latitude: shopOwner.latitude,
-                longitude: shopOwner.longitude,
+                coordinates: shopOwner.coordinates,  // Trả về coordinates thay vì latitude và longitude riêng biệt
                 token
             };
         }

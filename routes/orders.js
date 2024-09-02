@@ -7,10 +7,10 @@ const ControllerOrder = require('../controllers/order/ControllerOrder');
  * Yêu cầu: userId, order, shippingAddressId, paymentMethod, shopOwnerId trong request body.
  */
 router.post('/add-order', async (req, res) => {
-    const { userId, order, shippingAddressId, paymentMethod, shopOwner } = req.body;
+    const { userId, order, shippingAddressId, paymentMethod, shopOwner, shipper } = req.body;
     try {
-        const updatedCarts = await ControllerOrder.addOrder(userId, order, shippingAddressId, paymentMethod, shopOwner);
-        res.status(200).json(updatedCarts);
+        const addOrder = await ControllerOrder.addOrder(userId, order, shippingAddressId, paymentMethod, shopOwner, shipper);
+        res.status(200).json(addOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

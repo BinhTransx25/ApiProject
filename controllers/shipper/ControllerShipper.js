@@ -1,4 +1,5 @@
 const Shipper = require('../shipper/ModelShipper');
+const ModelUser = require('../users/ModelUser');
 
 // Thêm shipper mới
 const addShipper = async (name, phone, email, address) => {
@@ -94,6 +95,56 @@ const cancelShipper = async (id) => {
     }
 };
 
+
+/**
+ * Xác nhận đơn hàng bởi shipper.
+ * @param {String} orderId - ID của đơn hàng.
+ * @param {String} shipperId - ID của shipper.
+ * @returns {Object} - Đơn hàng đã được cập nhật với thông tin shipper.
+ */
+const confirmOrderByShipper = async (orderId, shipperId) => {
+    console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId);
+
+    try {
+        // Tìm đơn hàng theo ID
+        const order = await ModelOrder.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+
+        // Kiểm tra xem đơn hàng đã có shipper chưa
+        if (!order.shipperId) {
+            // Nếu chưa có shipper, gán shipperId và cập nhật trạng thái thành "processing"
+            order.shipperId = shipperId;
+            order.status = 'processing';
+        } else if (order.shipperId.toString() === shipperId && order.status === 'processing') {
+            // Nếu đơn hàng đã ở trạng thái "processing" và shipper xác nhận lần nữa, cập nhật trạng thái thành "completed"
+            order.status = 'completed';
+        } else {
+            throw new Error('Order has already been processed or completed by another shipper');
+        }
+
+        await order.save();
+
+        // Tìm User có chứa đơn hàng này trong carts và cập nhật trạng thái
+        const user = await ModelUser.findOne({ 'carts._id': orderId });
+        if (user) {
+            const cartItem = user.carts.id(orderId);  // Lấy item trong carts có ID của order
+            console.log('itemmmmmmmmmm:', cartItem);
+            if (cartItem) {
+                cartItem.status = order.status; // Cập nhật trạng thái trong carts dựa trên trạng thái của order
+                await user.save(); // Lưu lại user với trạng thái đã cập nhật
+            }
+        }
+
+        return order; // Trả về đơn hàng đã cập nhật
+    } catch (error) {
+        console.error('Error confirming order by shipper:', error);
+        throw new Error('Error confirming order by shipper');
+    }
+};
+
+
 module.exports = {
     addShipper,
     getAllShippers,
@@ -102,5 +153,6 @@ module.exports = {
     deleteShipper,
     updateShipperLocation,
     confirmShipper,
-    cancelShipper
+    cancelShipper,
+    confirmOrderByShipper
 };
