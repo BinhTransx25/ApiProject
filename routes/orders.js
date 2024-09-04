@@ -10,7 +10,7 @@ router.post('/add-order', async (req, res) => {
     const { userId, order, shippingAddressId, paymentMethod, shopOwner, shipper } = req.body;
     try {
         const addOrder = await ControllerOrder.addOrder(userId, order, shippingAddressId, paymentMethod, shopOwner, shipper);
-        res.status(200).json(addOrder);
+        res.status(200).json({ status: true, data: addOrder });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

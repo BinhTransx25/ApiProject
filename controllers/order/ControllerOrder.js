@@ -16,7 +16,7 @@ const ModelShipper = require('../shipper/ModelShipper');
 const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId) => {
     console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId });
 
-    if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId || !shipperId) {
+    if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId ) {
         const errorMessage = 'Missing required fields in request body';
         console.error(errorMessage);
         throw new Error(errorMessage);
@@ -38,7 +38,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             throw new Error('Shop owner not found');
         }
 
-        let shipper = await ModelShipper.findById(shipperId)
+        let shipper = shipperId ? await ModelShipper.findById(shipperId) : {};
         if(!shipper){
             throw new Error('shipper not found');
 
