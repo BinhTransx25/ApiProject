@@ -2,6 +2,7 @@ const ModelUser = require('./ModelUser');
 const ModelShopOwner = require('../shopowner/ModelShopOwner');
 const ModelShopCategory = require('../categories/ShopCategory/ModelShopCategory');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 // Hàm đăng ký người dùng hoặc shop owner
 const register = async (name, email, password, phone, role, shopCategory_ids, address, latitude, longitude) => {
@@ -45,6 +46,8 @@ const register = async (name, email, password, phone, role, shopCategory_ids, ad
             await shopOwner.save(); // Lưu shop owner vào cơ sở dữ liệu
         } else {
             // Nếu không phải shop owner, tạo một người dùng thông thường
+            const salt = await bcrypt.genSalt(10);
+            password = await bcrypt.hash(password, salt);
             user = new ModelUser({ name, email, password, phone, role });
             await user.save(); // Lưu người dùng vào cơ sở dữ liệu
         }
@@ -100,8 +103,12 @@ const login = async (identifier, password) => {
         }
 
         // Kiểm tra mật khẩu người dùng
-        if (user.password.toString() !== password.toString()) {
-            throw new Error('Mật khẩu không đúng');
+        const checkPassword = await bcrypt.compare(password, user.password);
+        // if (user.password.toString() !== password.toString()) {
+        //     throw new Error('Mật khẩu không đúng');
+        // }
+        if (!checkPassword) {
+            throw new Error('Tài khoản hoặc mật khẩu không đúng');
         }
 
         // Tạo token JWT cho người dùng thông thường
@@ -119,4 +126,29 @@ const login = async (identifier, password) => {
     }
 };
 
-module.exports = { register, login };
+const loginWithSocial = async (userInfo) => {
+    try {
+        let userInDB = await ModelUser.findOne({ email: userInfo.email });
+        let user
+        const body = {
+            email: userInfo.email,
+            name: userInfo.name,
+            photo: userInfo.photo,
+            phone:userInfo.phone,
+            password: '123456',
+        }
+        if (!userInDB) {
+            user = new ModelUser(body);
+            await user.save();
+        }
+        else {
+            user = await ModelUser.findByIdAndUpdate(userInDB._id, { ...userInfo, updatedAt: Date.now() });
+        }
+        return user;
+    } catch (error) {
+        console.log('Error during login with social:', error);
+        throw new Error('Lỗi khi đăng nhập bằng tài khoản mạng xã hội');
+    }
+}
+
+module.exports = { register, login, loginWithSocial };
