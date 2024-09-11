@@ -38,4 +38,15 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
+router.post('/login-social', async (req, res, next) => {
+  const { userInfo } = req.body;
+  try {
+    let result = await ControllerUser.loginWithSocial(userInfo);
+    return res.status(200).json({ status: true, data: result });
+  } catch (error) {
+    console.error('Error during login:', error); // Log lỗi cụ thể
+    return res.status(500).json({ status: false, message: error.message });
+  }
+})
+
 module.exports = router;

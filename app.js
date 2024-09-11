@@ -4,6 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
+// kết nối với mongodb(egOs06SnjVLToRgU)
+// Bình: gIzzTqWVtE6x4Urj
+const atlas = 'mongodb+srv://nguyenminhkhuong318:egOs06SnjVLToRgU@cluster0.vd5pl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 
 // gọi các model
 require('./controllers/users/ModelUser');
@@ -41,7 +44,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // kết nối với mongodb
-mongoose.connect('mongodb://localhost:27017/XTH')
+mongoose.connect(atlas)
   .then(() => console.log('Connected to MongoDB...'))
   .catch(err => console.error('Could not connect to MongoDB...', err));
 
