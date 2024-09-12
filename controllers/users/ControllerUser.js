@@ -3,6 +3,7 @@ const ModelShopOwner = require('../shopowner/ModelShopOwner');
 const ModelShopCategory = require('../categories/ShopCategory/ModelShopCategory');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { sendMail } = require('../../helpers/Mailer');
 
 // Hàm đăng ký người dùng hoặc shop owner
 const register = async (name, email, password, phone, role, shopCategory_ids, address, latitude, longitude) => {
@@ -134,7 +135,7 @@ const loginWithSocial = async (userInfo) => {
             email: userInfo.email,
             name: userInfo.name,
             photo: userInfo.photo,
-            phone:userInfo.phone,
+            phone: userInfo.phone,
             password: '123456',
         }
         if (!userInDB) {
@@ -151,4 +152,53 @@ const loginWithSocial = async (userInfo) => {
     }
 }
 
-module.exports = { register, login, loginWithSocial };
+const verifyEmail = async (email) => {
+    try {
+        let userInDB = await ModelUser.findOne({ email });
+        if (!userInDB) {
+            throw new Error('Email không tồn tại');
+        }
+        const verifyCode = Math.floor(1000 + Math.random() * 9000).toString();
+        const data = {
+            email: email,
+            subject: 'Mã khôi phục mật khẩu',
+            content: `Mã xác thực của bạn là: ${verifyCode}`
+        }
+        await sendMail(data);
+        return verifyCode;
+    }
+    catch (error) {
+        console.error('Error during verify email:', error);
+        throw new Error('Lỗi khi xác thực email');
+    }
+}
+
+const resetPassword = async (email, password) => {
+    try {
+        const userInDB = await ModelUser.findOne({ email })
+        if (!userInDB) {
+            throw new Error('Email không tồn tại');
+        }
+        const salt = await bcrypt.genSalt(10)
+        password = await bcrypt.hash(password, salt)
+        await ModelUser.findByIdAndUpdate(userInDB._id, { password })
+        return true
+    } catch (error) {
+        console.log('Error during reset password:', error);
+        throw new Error('Lỗi khi đặt lại mật khẩu');
+    }
+}
+
+const checkUser = async (email) => {
+    try {
+        const userInDB = await ModelUser.findOne({ email });
+        if (!userInDB) {
+            return false
+        }
+        return true
+    } catch (error) {
+
+    }
+}
+
+module.exports = { register, login, loginWithSocial, verifyEmail, resetPassword, checkUser };
