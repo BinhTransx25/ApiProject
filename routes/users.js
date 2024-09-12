@@ -49,4 +49,37 @@ router.post('/login-social', async (req, res, next) => {
   }
 })
 
+router.post('/verify', async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    let result = await ControllerUser.verifyEmail(email);
+    return res.status(200).json({ status: true, data: result });
+  } catch (error) {
+    console.error('Error during verify:', error); // Log lỗi cụ thể
+    return res.status(500).json({ status: false, message: error.message });
+  }
+})
+
+router.post('/reset-password', async (req, res, next) => {
+  const { email, password } = req.body;
+  try {
+    const result = await ControllerUser.resetPassword(email, password);
+    return res.status(200).json({ status: true, data: result });
+  } catch (error) {
+    console.error('Error during reset password:', error); // Log lỗi cụ thể
+    return res.status(500).json({ status: false, message: error.message });
+  }
+})
+
+router.post('/check-user', async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const result = await ControllerUser.checkUser(email);
+    return res.status(200).json({ status: true, data: result });
+  } catch (error) {
+    console.error('Error during check email:', error); // Log lỗi cụ thể
+    return res.status(500).json({ status: false, message: error.message });
+  }
+})
+
 module.exports = router;
