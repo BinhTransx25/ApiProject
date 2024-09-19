@@ -3,6 +3,8 @@ const ModelUser = require('../users/ModelUser');
 const ModelAddress = require('../address/User/ModelAddressUser');
 const ModelShopOwner = require('../shopowner/ModelShopOwner');
 const ModelShipper = require('../shipper/ModelShipper');
+const Notification = require('../notification/ModelNotification');
+const mongoose = require('mongoose');
 
 /**
  * Thêm đơn hàng mới.
@@ -16,7 +18,7 @@ const ModelShipper = require('../shipper/ModelShipper');
 const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId) => {
     console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId });
 
-    if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId ) {
+    if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId) {
         const errorMessage = 'Missing required fields in request body';
         console.error(errorMessage);
         throw new Error(errorMessage);
@@ -39,7 +41,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         }
 
         let shipper = shipperId ? await ModelShipper.findById(shipperId) : {};
-        if(!shipper){
+        if (!shipper) {
             throw new Error('shipper not found');
 
         }
@@ -57,7 +59,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
                 name: shopOwner.name,
                 phone: shopOwner.phone
             },
-            shipper :{
+            shipper: {
                 _id: shipper._id,
                 name: shipper.name,
                 phone: shipper.phone
@@ -85,7 +87,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
 const getOrderDetail = async (orderId) => {
     try {
         const order = await ModelOrder.findById(orderId)
-        
+
         if (!order) throw new Error('Order not found');
         return order;
     } catch (error) {
@@ -101,7 +103,11 @@ const getOrderDetail = async (orderId) => {
  */
 const getOrdersByShop = async (shopId) => {
     try {
-        const orders = await ModelOrder.find({ 'shopOwner._id': shopId });
+        const objectIdShopId = new mongoose.Types.ObjectId(shopId); // Chuyển đổi shopId thành ObjectId
+        const orders = await ModelOrder.find({ 'shopOwner._id': objectIdShopId }); // Truy vấn bằng ObjectId
+        console.log('Orders', orders);
+        console.log('shopId:', shopId);
+        console.log('objectIdShopId:', objectIdShopId);
         return orders;
     } catch (error) {
         console.error('Error when getting orders:', error);
@@ -138,8 +144,8 @@ const confirmOrder = async (orderId) => {
                 cartItem.status = 'find delivery person'; // Cập nhật trạng thái trong carts
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
-            
-            
+
+
         }
 
         return order; // Trả về đơn hàng đã cập nhật
@@ -203,6 +209,38 @@ const deleteOrder = async (orderId) => {
     }
 };
 
+const updateOrderStatus = async (orderId, status) => {
+    try {
+        const order = await ModelOrder.findByIdAndUpdate(orderId, { status }, { new: true });
+        if (!order) {
+            throw new Error('Order not found');
+        }
 
-module.exports = { addOrder, getOrderDetail, getOrdersByShop, 
-    confirmOrder, cancelOrder, deleteOrder };
+        let message = '';
+        if (status === 'delivered') {
+            message = 'Your order has been delivered successfully!';
+        } else if (status === 'shipped') {
+            message = 'Your order has been shipped!';
+        }
+
+        if (message) {
+            const notification = new Notification({
+                message,
+                recipient: order.customer,
+            });
+            await notification.save();
+        }
+
+        return order;
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        throw new Error('Error updating order status');
+    }
+};
+
+
+
+module.exports = {
+    addOrder, getOrderDetail, getOrdersByShop,
+    confirmOrder, cancelOrder, deleteOrder, updateOrderStatus
+};

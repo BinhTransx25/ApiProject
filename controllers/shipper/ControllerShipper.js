@@ -112,13 +112,14 @@ const confirmOrderByShipper = async (orderId, shipperId) => {
             throw new Error('Order not found');
         }
 
+        // sau khi shop đã xác nhận đơn hàng
         // Kiểm tra xem đơn hàng đã có shipper chưa
         if (!order.shipperId) {
-            // Nếu chưa có shipper, gán shipperId và cập nhật trạng thái thành "processing"
+            // Nếu chưa có shipper, gán shipperId và cập nhật trạng thái thành "processing" là nhấn cái đầu tiên 
             order.shipperId = shipperId;
             order.status = 'processing';
         } else if (order.shipperId.toString() === shipperId && order.status === 'processing') {
-            // Nếu đơn hàng đã ở trạng thái "processing" và shipper xác nhận lần nữa, cập nhật trạng thái thành "completed"
+            // Nếu đơn hàng đã ở trạng thái "processing" và shipper xác nhận lần nữa, cập nhật trạng thái thành "completed" là nhấn cái thứ hai 
             order.status = 'completed';
         } else {
             throw new Error('Order has already been processed or completed by another shipper');

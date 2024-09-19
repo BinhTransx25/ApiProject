@@ -20,13 +20,12 @@ router.post('/add-order', async (req, res) => {
  * Route để lấy danh sách đơn hàng theo shopId.
  * Yêu cầu: shopId trong query parameters.
  */
-router.get('/orders-by-shop', async (req, res) => {
+router.get('/orders-by-shop', async function (req, res, next) {
     try {
         const { shopId } = req.query; // Lấy shopId từ query parameters
         if (!shopId) {
             return res.status(400).json({ success: false, message: 'Shop ID is required' });
         }
-        
         const orders = await ControllerOrder.getOrdersByShop(shopId); // Sử dụng hàm mới
         return res.status(200).json({ success: true, orders }); // cái chỗ này quan trọng nha, nhớ là để đặt tên khi trả về response
     } catch (error) {
@@ -40,7 +39,7 @@ router.get('/orders-by-shop', async (req, res) => {
  * Yêu cầu: orderId trong URL parameters.
  */
 router.get('/:id', async (req, res) => {
-    const { id} = req.params;
+    const { id } = req.params;
     try {
         const order = await ControllerOrder.getOrderDetail(id);
         res.status(200).json(order);
