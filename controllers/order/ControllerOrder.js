@@ -40,7 +40,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             throw new Error('Shop owner not found');
         }
 
-        let shipper = shipperId ? await ModelShipper.findById(shipperId) : {};
+        let shipper = await ModelShipper.findById(shipperId);
         if (!shipper) {
             throw new Error('shipper not found');
 

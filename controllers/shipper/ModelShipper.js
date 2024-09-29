@@ -7,7 +7,11 @@ const ShipperSchema = new Schema({
   phone: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   address: { type: String, required: true },
+  rating: { type: String, required: true },
+  role: { type: String, enum: ['shipper'], default: 'shipper' },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+  image: { type: Array, required: true, default: [] },
+  password: { type: String, required: true },
   assignedOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
   currentLocation: {
     type: {

@@ -13,6 +13,7 @@ const ProductSchema = new Schema({
         }
     ],
     description: { type: String, required: true },
+    rating: { type: String, required: false },
     create_at: { type: Date, default: Date.now },
     update_at: { type: Date, default: Date.now },
     shopOwner: { 

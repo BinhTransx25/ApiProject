@@ -4,9 +4,9 @@ const ShipperController = require('../controllers/shipper/ControllerShipper');
 
 // Route thêm shipper mới
 router.post('/add', async (req, res) => {
-    const { name, phone, email, address } = req.body;
+    const { name, phone, email, address, role, rating, image, password } = req.body;
     try {
-        let result = await ShipperController.addShipper(name, phone, email, address);
+        let result = await ShipperController.addShipper(name, phone, email, address, role, rating, image, password);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });

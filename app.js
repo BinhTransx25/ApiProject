@@ -19,6 +19,9 @@ require('./controllers/shopowner/ModelShopOwner')
 require('./controllers/shipper/ModelShipper')
 require('./controllers/cart/CartModel')
 require('./controllers/notification/ModelNotification')
+require('./controllers/Review/ProductReview/ModelProductReview')
+require('./controllers/Review/ShipperReview/ModelShipperReview')
+
 
 
 
@@ -33,6 +36,9 @@ var shipperRouter = require('./routes/shipper');
 var ordersRouter = require('./routes/orders');
 var cartsRouter = require('./routes/carts');
 var notificationRouter = require('./routes/notification');
+var productReviewRouter = require('./routes/productReviews');
+var shipperReviewRouter = require('./routes/shipperReviews');
+
 
 var app = express();
 
@@ -62,6 +68,9 @@ app.use('/orders', ordersRouter);
 app.use('/carts', cartsRouter);
 app.use('/shipper', shipperRouter);
 app.use('/notification', notificationRouter);
+app.use('/productReviews', productReviewRouter);
+app.use('/shipperReviews', shipperReviewRouter);
+
 
 
 

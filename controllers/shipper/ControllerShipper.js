@@ -2,9 +2,21 @@ const Shipper = require('../shipper/ModelShipper');
 const ModelUser = require('../users/ModelUser');
 
 // Thêm shipper mới
-const addShipper = async (name, phone, email, address) => {
+const addShipper = async (name, phone, email, address, role, rating, image, password) => {
     try {
-        const newShipper = new Shipper({ name, phone, email, address });
+        // Kiểm tra email đã tồn tại trong hệ thống hay chưa
+        let user = await ModelUser.findOne({ email });
+        if (user) {
+            throw new Error('Email đã được sử dụng');
+        }
+        // Kiểm tra email đã tồn tại trong hệ thống hay chưa
+        let shopOwner = await ModelUser.findOne({ email });
+        if (shopOwner) {
+            throw new Error('Email đã được sử dụng');
+        }
+
+
+        const newShipper = new Shipper({ name, phone, email, address,role, rating, image, password });
         return await newShipper.save();
     } catch (error) {
         console.error('Lỗi khi thêm shipper:', error);

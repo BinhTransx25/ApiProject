@@ -228,6 +228,8 @@ const remove = async (id) => {
         throw new Error('Remove product error');
     }
 };
+
+
 module.exports = {
     getAllProducts, getProductById, insert, update,
     remove, getAllProducts, getProductsByCategory,
