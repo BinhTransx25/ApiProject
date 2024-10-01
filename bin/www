@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('api2:server');
 var http = require('http');
+var socketIo = require('socket.io'); // Thêm dòng này để sử dụng socket.io
 
 /**
  * Get port from environment and store in Express.
@@ -21,6 +22,44 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+// Tích hợp socket.io với server
+var io = socketIo(server); // Tích hợp socket.io vào HTTP server
+
+// Đoạn code xử lý socket.io
+io.on('connection', (socket) => {
+  console.log('A client connected', socket.id);
+
+  // Khi có một đơn hàng mới được tạo, phát sự kiện cho tài xế
+  socket.on('order_created', (orderData) => {
+    let { orderId, timeLeft } = orderData;
+
+    // Đếm ngược thời gian
+    let countdown = setInterval(() => {
+      timeLeft--;
+      socket.emit('countdown', { orderId, timeLeft });
+
+      // Nếu thời gian đếm ngược hết và đơn hàng chưa được tài xế nhận
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        socket.emit('order_expired', { orderId });
+        console.log(`Order ${orderId} expired`);
+      }
+    }, 1000); // Cập nhật mỗi giây
+  });
+
+  // Xử lý khi tài xế nhận đơn hàng
+  socket.on('accept_order', (orderId) => {
+    console.log(`Shipper accepted order ${orderId}`);
+    // Cập nhật trạng thái đơn hàng trong cơ sở dữ liệu
+    // Chuyển trạng thái đơn hàng thành 'accepted'
+  });
+
+  socket.on('disconnect', () => {
+    console.log('A client disconnected', socket.id);
+  });
+});
+
 
 /**
  * Listen on provided port, on all network interfaces.

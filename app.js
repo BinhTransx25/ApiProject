@@ -69,7 +69,7 @@ app.use('/carts', cartsRouter);
 app.use('/shipper', shipperRouter);
 app.use('/notification', notificationRouter);
 app.use('/productReviews', productReviewRouter);
-app.use('/shipperReviews', shipperReviewRouter);
+app.use('/shipperReview', shipperReviewRouter);
 
 
 

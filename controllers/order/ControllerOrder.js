@@ -231,14 +231,15 @@ const updateOrderStatus = async (orderId, status) => {
             await notification.save();
         }
 
+        // Phát sự kiện cập nhật trạng thái qua socket.io
+        req.io.emit('orderStatusUpdated', { orderId, status });
+
         return order;
     } catch (error) {
         console.error('Error updating order status:', error);
         throw new Error('Error updating order status');
     }
 };
-
-
 
 module.exports = {
     addOrder, getOrderDetail, getOrdersByShop,
