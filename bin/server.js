@@ -86,3 +86,4 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 // Xuất khẩu handler để Vercel có thể sử dụng
+module.exports = server;
