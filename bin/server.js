@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var app = require('../app'); // Đúng đường dẫn tới file app.js
+var app = require('../app'); 
 var debug = require('debug')('api2:server');
 var http = require('http');
 var socketIo = require('socket.io');
@@ -28,7 +28,9 @@ require('./socket')(io);
 /**
  * Listen on provided port, on all network interfaces.
  */
-server.listen(port);
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
 server.on('error', onError);
 server.on('listening', onListening);
 
