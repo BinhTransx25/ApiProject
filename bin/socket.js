@@ -1,9 +1,8 @@
-// socket.js
 module.exports = function (io) {
     io.on('connection', (socket) => {
         console.log('A client connected', socket.id);
 
-        // Khi có đơn hàng mới được tạo, phát sự kiện cho tài xế
+        // Khi có đơn hàng mới được tạo
         socket.on('order_created', (orderData) => {
             let { orderId, timeLeft } = orderData;
 
@@ -20,20 +19,9 @@ module.exports = function (io) {
             }, 1000);
         });
 
-        // Khi tài xế nhận đơn hàng
-        socket.on('accept_order', (orderId) => {
-            console.log(`Shipper accepted order ${orderId}`);
-            // Bạn có thể thêm logic cập nhật trạng thái đơn hàng trong DB ở đây
-        });
-
-        // Xử lý khi client ngắt kết nối
-        socket.on('disconnect', () => {
-            console.log('A client disconnected', socket.id);
-        });
-
         socket.on('accept_order', async (orderId) => {
             try {
-                const updatedOrder = await confirmOrder(orderId, io); // Gọi hàm confirmOrder và truyền socket io
+                const updatedOrder = await confirmOrder(orderId, io);
                 socket.emit('order_accepted', { orderId, status: updatedOrder.status });
                 console.log(`Shipper accepted and confirmed order ${orderId}`);
             } catch (error) {
@@ -52,6 +40,9 @@ module.exports = function (io) {
                 console.error(`Failed to cancel order ${orderId}`, error);
             }
         });
-        
+
+        socket.on('disconnect', () => {
+            console.log('A client disconnected', socket.id);
+        });
     });
 }

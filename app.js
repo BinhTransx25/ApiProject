@@ -82,10 +82,6 @@ app.use('/shipperReview', shipperReviewRouter);
 app.use(function (req, res, next) {
   next(createError(404));
 });
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-app.get('/swagger.json', (req, res) => {
-  res.json(swaggerDocs);
-});
 
 // error handler
 app.use(function (err, req, res, next) {
