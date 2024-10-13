@@ -2,7 +2,7 @@
   "name": "api_coody",
   "version": "0.0.0",
   "private": true,
-  "engines":{"node": "14.x"},
+
   "scripts": {
     "start": "node ./bin/server.js",
     "dev": "nodemon ./bin/server.js"
