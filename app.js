@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 // Bình: gIzzTqWVtE6x4Urj
 const atlas = 'mongodb+srv://nguyenminhkhuong318:egOs06SnjVLToRgU@cluster0.vd5pl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 
-
 // Gọi swagger từ file swagger.js
 const { swaggerUi, swaggerDocs } = require('./bin/swagger');
 
