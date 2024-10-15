@@ -13,7 +13,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:9999', // Thay đổi URL nếu cần
+        url: 'https://apiproject-1dk4.onrender.com/', // Thay đổi URL nếu cần
       },
     ],
   },
