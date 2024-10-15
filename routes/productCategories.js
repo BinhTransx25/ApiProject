@@ -11,7 +11,7 @@ const ControllerProductCategory = require('../controllers/categories/ProductCate
 
 /**
  * @swagger
- * /category-products:
+ * /productCategories:
  *   get:
  *     summary: Lấy tất cả danh mục sản phẩm
  *     tags: [ProductCategories]
