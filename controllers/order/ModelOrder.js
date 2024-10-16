@@ -14,9 +14,9 @@ const OrderSchema = new Schema({
     orderDate: { type: Date, default: Date.now },
     shippingAddress: { type: AddressSchema.schema, required: true },
     paymentMethod: { type: String, required: true },
-    status: { type: String, enum: ['pending', 'processing', 'find delivery person', 'cancelled','completed'], default: 'pending' },
+    status: { type: String, enum: ['Chưa giải quyết', 'Tìm người giao hàng', 'Người dùng đã hủy đơn','Đơn hàng đã được giao hoàn tất','Đang giao hàng','Nhà hàng đã hủy đơn','Shipper đã hủy đơn' ], default: 'Chưa giải quyết' },
     shopOwner: {type: Object, required: true, default: {}},
-    shipper: { type: Object, required: true, default: {}}, // Liên kết với shipper
+    shipper: { type: Object, required: true, default: {}}, 
     image: { type: Array, required: true, default: [] },
 
 });

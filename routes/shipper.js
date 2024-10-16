@@ -4,7 +4,7 @@ const ShipperController = require('../controllers/shipper/ControllerShipper');
 
 /**
  * @swagger
- * /shippers/add:
+ * /shipper/add:
  *   post:
  *     summary: Thêm shipper mới
  *     requestBody:
@@ -35,9 +35,9 @@ const ShipperController = require('../controllers/shipper/ControllerShipper');
  *         description: Shipper đã được thêm
  */
 router.post('/add', async (req, res) => {
-    const { name, phone, email, address, role, rating, image, password } = req.body;
+    const { name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate } = req.body;
     try {
-        let result = await ShipperController.addShipper(name, phone, email, address, role, rating, image, password);
+        let result = await ShipperController.addShipper(name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
@@ -46,7 +46,7 @@ router.post('/add', async (req, res) => {
 
 /**
  * @swagger
- * /shippers:
+ * /shipper:
  *   get:
  *     summary: Lấy tất cả shipper
  *     responses:
@@ -64,7 +64,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /shippers/{id}:
+ * /shipper/{id}:
  *   get:
  *     summary: Lấy thông tin shipper theo ID
  *     parameters:
@@ -91,7 +91,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /shippers/update/{id}:
+ * /shipper/update/{id}:
  *   put:
  *     summary: Cập nhật thông tin shipper
  *     parameters:
@@ -111,19 +111,20 @@ router.get('/:id', async (req, res) => {
  *         description: Shipper đã được cập nhật
  */
 router.put('/update/:id', async (req, res) => {
-    const { id } = req.params;
-    const updateData = req.body;
     try {
-        let result = await ShipperController.updateShipper(id, updateData);
-        return res.status(200).json({ status: true, data: result });
+        const { id } = req.params;
+        const {name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate} = req.body;
+        const shipper = await ShipperController.updateShipper(id, name,  phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate);
+        return res.status(200).json({ status: true, data: shipper });
     } catch (error) {
+        console.log('Update shipper error:', error);
         return res.status(500).json({ status: false, data: error.message });
     }
 });
 
 /**
  * @swagger
- * /shippers/delete/{id}:
+ * /shipper/delete/{id}:
  *   delete:
  *     summary: Xóa shipper theo ID
  *     parameters:
@@ -146,46 +147,10 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /shippers/update-location/{id}:
- *   put:
- *     summary: Cập nhật vị trí hiện tại của shipper
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               coordinates:
- *                 type: array
- *                 items:
- *                   type: number
- *     responses:
- *       200:
- *         description: Vị trí của shipper đã được cập nhật
- */
-router.put('/update-location/:id', async (req, res) => {
-    const { id } = req.params;
-    const { coordinates } = req.body;
-    try {
-        let result = await ShipperController.updateShipperLocation(id, coordinates);
-        return res.status(200).json({ status: true, data: result });
-    } catch (error) {
-        return res.status(500).json({ status: false, data: error.message });
-    }
-});
 
 /**
  * @swagger
- * /shippers/confirm/{id}:
+ * /shipper/active/{id}:
  *   put:
  *     summary: Xác nhận shipper
  *     parameters:
@@ -198,10 +163,10 @@ router.put('/update-location/:id', async (req, res) => {
  *       200:
  *         description: Shipper đã được xác nhận
  */
-router.put('/confirm/:id', async (req, res) => {
+router.put('/active/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        let result = await ShipperController.confirmShipper(id);
+        let result = await ShipperController.changeShipperStatusActive(id);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
@@ -210,7 +175,7 @@ router.put('/confirm/:id', async (req, res) => {
 
 /**
  * @swagger
- * /shippers/cancel/{id}:
+ * /shipper/unActive/{id}:
  *   put:
  *     summary: Hủy shipper
  *     parameters:
@@ -223,19 +188,22 @@ router.put('/confirm/:id', async (req, res) => {
  *       200:
  *         description: Shipper đã bị hủy
  */
-router.put('/cancel/:id', async (req, res) => {
+router.put('/unActive/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        let result = await ShipperController.cancelShipper(id);
+        let result = await ShipperController.changeShipperStatusUnActive(id);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
 
+
+
+
 /**
  * @swagger
- * /shippers/confirm-order-shipper/{orderId}:
+ * /shipper/confirm-order-shipper/{orderId}:
  *   patch:
  *     summary: Shipper xác nhận đơn hàng
  *     parameters:
@@ -256,13 +224,103 @@ router.put('/cancel/:id', async (req, res) => {
  *     responses:
  *       200:
  *         description: Đơn hàng đã được shipper xác nhận
+ *       500:
+ *         description: Lỗi xảy ra trong quá trình xác nhận
+ */
+
+/**
+ * Xác nhận đơn hàng bởi shipper (kiểm tra có shipper hay không).
  */
 router.patch('/confirm-order-shipper/:orderId', async (req, res) => {
+
+    const { orderId } = req.params;
+    const { shipperId } = req.body;
+
+    try {
+        const result = await ShipperController.confirmOrderShipperExists(orderId, shipperId);
+        if (result.message) {
+            return res.status(400).json({ message: result.message });
+        }
+        res.status(200).json(result); // Trả về đơn hàng đã cập nhật
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /shipper/confirm-order-finish/{orderId}:
+ *   patch:
+ *     summary: Xác nhận ID shipper cho đơn hàng
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           description: ID của đơn hàng cần xác nhận
+ *       - in: body
+ *         name: shipperId
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             shipperId:
+ *               type: string
+ *               description: ID của shipper xác nhận đơn hàng
+ *     responses:
+ *       200:
+ *         description: Đơn hàng đã được cập nhật với shipper ID
+ *       400:
+ *         description: Thông báo lỗi nếu ID shipper không hợp lệ hoặc không có trong đơn hàng
+ *       500:
+ *         description: Lỗi server trong quá trình xác nhận đơn hàng
+ */
+router.patch('/confirm-order-finish/:orderId', async (req, res) => {
     const { orderId } = req.params;
     const { shipperId } = req.body;
     try {
-        const updatedOrder = await ControllerOrder.confirmOrderByShipper(orderId, shipperId);
-        res.status(200).json(updatedOrder);
+        const updatedOrder = await ShipperController.confirmOrderByShipperId(orderId, shipperId);
+        res.status(200).json(updatedOrder); 
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+/**
+ * @swagger
+ * /shipper/shipper-cancel-order/{orderId}:
+ *   patch:
+ *     summary: Xác nhận ID shipper cho đơn hàng
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           description: ID của đơn hàng cần xác nhận
+ *       - in: body
+ *         name: shipperId
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             shipperId:
+ *               type: string
+ *               description: ID của shipper xác nhận đơn hàng
+ *     responses:
+ *       200:
+ *         description: Đơn hàng đã được cập nhật với shipper ID
+ *       400:
+ *         description: Thông báo lỗi nếu ID shipper không hợp lệ hoặc không có trong đơn hàng
+ *       500:
+ *         description: Lỗi server trong quá trình xác nhận đơn hàng
+ */
+router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const { shipperId } = req.body;
+    try {
+        const updatedOrder = await ShipperController.cancelOrderByShipperId(orderId, shipperId);
+        res.status(200).json(updatedOrder); 
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

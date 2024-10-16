@@ -24,6 +24,7 @@ require('./controllers/cart/CartModel')
 require('./controllers/notification/ModelNotification')
 require('./controllers/Review/ProductReview/ModelProductReview')
 require('./controllers/Review/ShipperReview/ModelShipperReview')
+require('./controllers/shopowner/ControllerShopOwner')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -37,6 +38,7 @@ var cartsRouter = require('./routes/carts');
 var notificationRouter = require('./routes/notification');
 var productReviewRouter = require('./routes/productReviews');
 var shipperReviewRouter = require('./routes/shipperReviews');
+var shopOwnerRouter = require('./routes/shopowner');
 
 
 var app = express();
@@ -75,7 +77,7 @@ app.use('/shipper', shipperRouter);
 app.use('/notification', notificationRouter);
 app.use('/productReviews', productReviewRouter);
 app.use('/shipperReview', shipperReviewRouter);
-
+app.use('/shopOwner', shopOwnerRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

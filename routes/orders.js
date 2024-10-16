@@ -185,17 +185,52 @@ router.patch('/confirm-order/:orderId', async (req, res) => {
  *       500:
  *         description: Lỗi khi hủy đơn hàng
  */
-router.patch('/cancel/:orderId', async (req, res) => {
+router.patch('/shopOwnerCancel/:orderId', async (req, res) => {
     const { orderId } = req.params;
     const io = req.app.get('io');  // Lấy io từ app (hoặc nơi bạn lưu trữ socket.io)
 
     try {
-        const cancelledOrder = await ControllerOrder.cancelOrder(orderId, io);
+        const cancelledOrder = await ControllerOrder.shopOwnerCancelOrder(orderId, io);
         res.status(200).json(cancelledOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
+/**
+ * @swagger
+ * /orders/cancel/{orderId}:
+ *   patch:
+ *     summary: Hủy đơn hàng
+ *     description: Yêu cầu orderId trong request parameters.
+ *     parameters:
+ *       - name: orderId
+ *         in: path
+ *         required: true
+ *         description: ID của đơn hàng cần hủy
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Đơn hàng đã bị hủy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       500:
+ *         description: Lỗi khi hủy đơn hàng
+ */
+router.patch('/customerCancel/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const io = req.app.get('io');  // Lấy io từ app (hoặc nơi bạn lưu trữ socket.io)
+
+    try {
+        const cancelledOrder = await ControllerOrder.CustomerCancelOrder(orderId, io);
+        res.status(200).json(cancelledOrder);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 /**
  * @swagger

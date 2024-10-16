@@ -11,7 +11,7 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
 
 /**
  * @swagger
- * /reviews/add:
+ * /productReviews/add:
  *   post:
  *     summary: Tạo đánh giá mới cho sản phẩm
  *     tags: [Reviews]
@@ -73,7 +73,7 @@ router.post('/add', async (req, res) => {
 
 /**
  * @swagger
- * /reviews/{id}:
+ * /productReviews/{id}:
  *   delete:
  *     summary: Xóa đánh giá theo ID
  *     tags: [Reviews]
@@ -135,7 +135,7 @@ router.delete('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /reviews/product/{product_id}:
+ * /productReviews/product/{product_id}:
  *   get:
  *     summary: Lấy tất cả đánh giá của một sản phẩm
  *     tags: [Reviews]
@@ -185,7 +185,7 @@ router.get('/product/:product_id', async (req, res) => {
 
 /**
  * @swagger
- * /reviews/user/{user_id}:
+ * /productReviews/user/{user_id}:
  *   get:
  *     summary: Lấy tất cả đánh giá của một người dùng
  *     tags: [Reviews]

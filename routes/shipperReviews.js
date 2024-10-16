@@ -4,7 +4,7 @@ const ControllerShipperReview = require('../controllers/Review/ShipperReview/Con
 
 /**
  * @swagger
- * /shipperReviews/add:
+ * /shipperReview/add:
  *   post:
  *     summary: Thêm đánh giá mới cho shipper
  *     requestBody:
@@ -43,7 +43,7 @@ router.post('/add', async (req, res) => {
 
 /**
  * @swagger
- * /shipperReviews:
+ * /shipperReview:
  *   get:
  *     summary: Lấy tất cả các đánh giá shipper
  *     responses:
@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /shipperReviews/{id}:
+ * /shipperReview/{id}:
  *   get:
  *     summary: Lấy đánh giá shipper theo ID
  *     parameters:
@@ -93,7 +93,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /shipperReviews/{id}:
+ * /shipperReview/{id}:
  *   delete:
  *     summary: Xóa đánh giá shipper theo ID
  *     parameters:

@@ -23,6 +23,10 @@ const ControllerUser = require('../controllers/users/ControllerUser');
  *                 type: string
  *               phone:
  *                 type: string
+ *               image:
+ *                 type: Array
+ *               rating:
+ *                 type: string
  *               role:
  *                 type: string
  *               shopCategory_ids:
@@ -42,9 +46,9 @@ const ControllerUser = require('../controllers/users/ControllerUser');
  *         description: Lỗi khi đăng ký
  */
 router.post('/register', async (req, res, next) => {
-  const { name, email, password, phone, role, shopCategory_ids, address, latitude, longitude } = req.body;
+  const { name, email, password, phone, image, rating, role, shopCategory_ids, address, latitude, longitude } = req.body;
   try {
-    let result = await ControllerUser.register(name, email, password, phone, role, shopCategory_ids, address, latitude, longitude);
+    let result = await ControllerUser.register(name, email, password, phone,image, rating, role, shopCategory_ids, address, latitude, longitude);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during registration:', error);

@@ -4,7 +4,7 @@ const ControllerUserAddress = require('../controllers/address/User/ControllerAdd
 
 /**
  * @swagger
- * /userAddress/add:
+ * /userAddresses/add:
  *   post:
  *     summary: Thêm địa chỉ mới cho người dùng
  *     requestBody:
@@ -42,7 +42,7 @@ router.post('/add', async (req, res) => {
 
 /**
  * @swagger
- * /userAddress/{userId}:
+ * /userAddresses/{userId}:
  *   get:
  *     summary: Lấy danh sách địa chỉ của người dùng
  *     parameters:
@@ -67,7 +67,7 @@ router.get('/:userId', async (req, res) => {
 
 /**
  * @swagger
- * /userAddress/detail/{id}:
+ * /userAddresses/detail/{id}:
  *   get:
  *     summary: Lấy chi tiết địa chỉ
  *     parameters:
@@ -92,7 +92,7 @@ router.get('/detail/:id', async (req, res) => {
 
 /**
  * @swagger
- * /userAddress/update/{id}:
+ * /userAddresses/update/{id}:
  *   put:
  *     summary: Cập nhật địa chỉ
  *     parameters:
@@ -135,7 +135,7 @@ router.put('/update/:id', async (req, res) => {
 
 /**
  * @swagger
- * /userAddress/delete/{id}:
+ * /userAddresses/delete/{id}:
  *   delete:
  *     summary: Xóa địa chỉ
  *     parameters:

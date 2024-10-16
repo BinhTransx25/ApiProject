@@ -14,6 +14,10 @@ const ShipperSchema = new Schema({
   password: { type: String, required: true },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
+  gender: { type: String, enum: ['male', 'female', 'other'], required: true }, // Giới tính
+  birthDate: { type: Date, required: true }, // Ngày sinh
+  vehicleBrand: { type: String, required: true }, // Hãng xe
+  vehiclePlate: { type: String, required: true } // Biển số xe
 });
 
 module.exports = mongoose.models.Shipper || mongoose.model('Shipper', ShipperSchema);

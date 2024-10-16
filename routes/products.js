@@ -397,7 +397,7 @@ router.get('/filter', async function (req, res, next) {
  *                 error:
  *                   type: string
  */
-router.post('/', async (req, res, next) => {
+router.post('/add', async (req, res, next) => {
     try {
         const { name, price, images, categories, description, shopOwner } = req.body;
         const product = await ControllerProduct.insert(name, price, images, description, categories, shopOwner);

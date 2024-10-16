@@ -63,7 +63,7 @@ router.get('/', async (req, res, next) => {
 
 /**
  * @swagger
- * /category-products/categories:
+ * /productCategories/categories:
  *   get:
  *     summary: Lấy tất cả danh mục
  *     tags: [ProductCategories]
@@ -96,7 +96,7 @@ router.get('/categories', async (req, res, next) => {
 
 /**
  * @swagger
- * /category-products/{id}:
+ * /productCategories/{id}:
  *   get:
  *     summary: Lấy thông tin của một danh mục theo ID
  *     tags: [ProductCategories]
@@ -188,7 +188,7 @@ router.get('/shopOwner/:id', async function (req, res, next) {
 
 /**
  * @swagger
- * /category-products:
+ * /productCategories:
  *   post:
  *     summary: Thêm một danh mục sản phẩm mới
  *     tags: [ProductCategories]
@@ -236,7 +236,7 @@ router.post('/', async (req, res, next) => {
 
 /**
  * @swagger
- * /category-products/{id}:
+ * /productCategories/{id}:
  *   put:
  *     summary: Cập nhật danh mục sản phẩm theo ID
  *     tags: [ProductCategories]
@@ -288,7 +288,7 @@ router.put('/:id', async (req, res, next) => {
 
 /**
  * @swagger
- * /category-products/{id}:
+ * /productCategories/{id}:
  *   delete:
  *     summary: Xóa danh mục sản phẩm theo ID
  *     tags: [ProductCategories]

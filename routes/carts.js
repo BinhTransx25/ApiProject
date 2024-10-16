@@ -4,7 +4,7 @@ const cartController = require('../controllers/cart/CartController');
 
 /**
  * @swagger
- * /cart:
+ * /carts/:
  *   post:
  *     summary: Thêm sản phẩm vào giỏ hàng
  *     description: Thêm sản phẩm cho người dùng vào giỏ hàng.
@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /cart/{user}:
+ * /carts/{user}:
  *   get:
  *     summary: Lấy giỏ hàng của người dùng
  *     description: Lấy danh sách sản phẩm trong giỏ hàng của người dùng.

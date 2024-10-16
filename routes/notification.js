@@ -4,7 +4,7 @@ const Notification = require('../controllers/notification/ControllerNotification
 
 /**
  * @swagger
- * /notifications/{userId}:
+ * /notification/{userId}:
  *   get:
  *     summary: Lấy tất cả thông báo của người dùng
  *     description: Yêu cầu userId trong URL parameters để lấy thông báo cho người dùng đó.

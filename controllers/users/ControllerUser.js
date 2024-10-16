@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const { sendMail } = require('../../helpers/Mailer');
 
 // Hàm đăng ký người dùng hoặc shop owner
-const register = async (name, email, password, phone, role, shopCategory_ids, address, latitude, longitude) => {
+const register = async (name, email, password, phone, image, rating, role, shopCategory_ids, address, latitude, longitude,) => {
     try {
         // Kiểm tra email đã tồn tại trong hệ thống hay chưa
         let user = await ModelUser.findOne({ email });
@@ -35,6 +35,8 @@ const register = async (name, email, password, phone, role, shopCategory_ids, ad
                 email,
                 password,
                 phone,
+                image,
+                rating,
                 role,
                 shopCategory: shopCategories, // Thêm thông tin danh mục cửa hàng cho shop owner
                 address,
@@ -111,7 +113,7 @@ const login = async (identifier, password) => {
 
             // Tạo token JWT cho shop owner
             const token = jwt.sign(
-                { _id: shopOwner._id, name: shopOwner.name, email: shopOwner.email, role: 'shopOwner', shopCategory: shopOwner.shopCategory },
+                { _id: shopOwner._id, name: shopOwner.name, email: shopOwner.email,rating: shopOwner.rating, role: 'shopOwner', shopCategory: shopOwner.shopCategory },
                 'secret',
                 { expiresIn: '1h' }
             );
@@ -121,6 +123,7 @@ const login = async (identifier, password) => {
                 _id: shopOwner._id,
                 name: shopOwner.name,
                 email: shopOwner.email,
+                rating: shopOwner.rating,
                 role: 'shopOwner',
                 shopCategory: shopOwner.shopCategory,
                 address: shopOwner.address,

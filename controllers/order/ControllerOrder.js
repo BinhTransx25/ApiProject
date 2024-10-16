@@ -132,8 +132,8 @@ const confirmOrder = async (orderId, io) => {
             throw new Error('Order not found');
         }
 
-        // Cập nhật trạng thái của đơn hàng thành "find delivery person"
-        order.status = 'find delivery person';
+        // Cập nhật trạng thái của đơn hàng thành "Tìm người giao hàng"
+        order.status = 'Tìm người giao hàng';
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
@@ -141,15 +141,15 @@ const confirmOrder = async (orderId, io) => {
         if (user) {
             const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
             if (orderItem) {
-                orderItem.status = 'find delivery person'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Tìm người giao hàng'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
 
         // Phát sự kiện tới tất cả các shipper nếu io tồn tại
         if (io) {
-            io.emit('order_confirmed', { orderId, status: 'find delivery person' });
-            console.log(`Socket emitted for order ${orderId} with status 'find delivery person'`);
+            io.emit('order_confirmed', { orderId, status: 'Tìm người giao hàng' });
+            console.log(`Socket emitted for order ${orderId} with status 'Tìm người giao hàng'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
         }
@@ -167,7 +167,7 @@ const confirmOrder = async (orderId, io) => {
  * @param {String} orderId - ID của đơn hàng.
  * @returns {Object} - Đơn hàng đã bị hủy.
  */
-const cancelOrder = async (orderId, io) => {
+const shopOwnerCancelOrder = async (orderId, io) => {
     console.log('Cancelling order with ID:', orderId); // Log kiểm tra orderId
 
     try {
@@ -177,8 +177,8 @@ const cancelOrder = async (orderId, io) => {
             throw new Error('Order not found');
         }
 
-        // Cập nhật trạng thái của đơn hàng thành "cancelled"
-        order.status = 'cancelled';
+        // Cập nhật trạng thái của đơn hàng thành "Nhà hàng đã hủy đơn"
+        order.status = 'Nhà hàng đã hủy đơn';
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
@@ -186,15 +186,15 @@ const cancelOrder = async (orderId, io) => {
         if (user) {
             const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
             if (orderItem) {
-                orderItem.status = 'cancelled'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Nhà hàng đã hủy đơn'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
 
            // Phát sự kiện cho socket
            if (io) {
-            io.emit('order_cancelled', { orderId, status: 'cancelled' });
-            console.log(`Socket emitted for order ${orderId} with status 'cancelled'`);
+            io.emit('order_cancelled', { orderId, status: 'Nhà hàng đã hủy đơn' });
+            console.log(`Socket emitted for order ${orderId} with status 'Nhà hàng đã hủy đơn'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
         }
@@ -206,6 +206,50 @@ const cancelOrder = async (orderId, io) => {
     }
 };
 
+
+/**
+ * Hủy đơn hàng theo orderId.
+ * @param {String} orderId - ID của đơn hàng.
+ * @returns {Object} - Đơn hàng đã bị hủy.
+ */
+const CustomerCancelOrder = async (orderId, io) => {
+    console.log('Cancelling order with ID:', orderId); // Log kiểm tra orderId
+
+    try {
+        // Tìm đơn hàng theo ID
+        const order = await ModelOrder.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+
+        // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
+        order.status = 'Người dùng đã hủy đơn';
+        await order.save();
+
+        // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
+        const user = await ModelUser.findOne({ 'orders._id': orderId });
+        if (user) {
+            const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
+            if (orderItem) {
+                orderItem.status = 'Người dùng đã hủy đơn'; // Cập nhật trạng thái trong orders
+                await user.save(); // Lưu lại user với trạng thái đã cập nhật
+            }
+        }
+
+           // Phát sự kiện cho socket
+           if (io) {
+            io.emit('order_cancelled', { orderId, status: 'Người dùng đã hủy đơn' });
+            console.log(`Socket emitted for order ${orderId} with status 'Người dùng đã hủy đơn'`);
+        } else {
+            console.warn('Socket.io instance not found, cannot emit event');
+        }
+
+        return order; // Trả về đơn hàng đã cập nhật
+    } catch (error) {
+        console.error('Lỗi khi hủy đơn hàng:', error);
+        throw new Error('Lỗi khi hủy đơn hàng');
+    }
+};
 
 /**
  * Xóa đơn hàng theo orderId.
@@ -259,5 +303,6 @@ const updateOrderStatus = async (orderId, status) => {
 
 module.exports = {
     addOrder, getOrderDetail, getOrdersByShop,
-    confirmOrder, cancelOrder, deleteOrder, updateOrderStatus
+    confirmOrder, shopOwnerCancelOrder, deleteOrder,
+    updateOrderStatus,CustomerCancelOrder
 };
