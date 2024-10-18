@@ -13,7 +13,7 @@ const getAllShopOwners = async () => {
 // Lấy thông tin nhà hàng theo ID
 const getShopOwnerById = async (id) => {
     try {
-        const shipper = await ModelShopOwner.findById(id,'name phone email shopCategory address rating image distance')
+        const shipper = await ModelShopOwner.findById(id, 'name phone email shopCategory address rating images distance')
 
         if (!shipper) {
             throw new Error('Nhà hàng not found');
@@ -35,13 +35,13 @@ const updateShopOwner = async (id, name, phone, email, address, rating, image) =
         if (!shopOwnerInDB) {
             throw new Error('Không Tìm Thấy Cửa Hàng, Hãy thử lại');
         }
-        shopOwnerInDB.name = name || shipperInDB.name ;
-        shopOwnerInDB.phone = phone || shipperInDB.phone ;
-        shopOwnerInDB.email = email || shipperInDB.email ;
-        shopOwnerInDB.address = address || shipperInDB.address ;
-        shopOwnerInDB.image = image || shipperInDB.image ;
-        shopOwnerInDB.password = rating || shipperInDB.password ;
-     
+        shopOwnerInDB.name = name || shipperInDB.name;
+        shopOwnerInDB.phone = phone || shipperInDB.phone;
+        shopOwnerInDB.email = email || shipperInDB.email;
+        shopOwnerInDB.address = address || shipperInDB.address;
+        shopOwnerInDB.image = image || shipperInDB.image;
+        shopOwnerInDB.password = rating || shipperInDB.password;
+
         let result = await shopOwnerInDB.save();
         return result;
     } catch (error) {
