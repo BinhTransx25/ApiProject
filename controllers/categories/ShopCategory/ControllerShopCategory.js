@@ -32,7 +32,7 @@ const getCategoryById = async (id) => {
     }
 };
 // thêm một danh mục shop 
-const insert = async (name) => {
+const insert = async (name, description,) => {
     try {
         // kiểm tra danh mục có tồn tại không
         // select * from categories where _id = category_id
@@ -40,7 +40,7 @@ const insert = async (name) => {
         // tạo sản phẩm mới
         const categories = new ModelShopCategory({
             name: name,
-
+            description
         });
         // lưu sản phẩm
         let result = await categories.save();

@@ -198,9 +198,6 @@ router.put('/unActive/:id', async (req, res) => {
     }
 });
 
-
-
-
 /**
  * @swagger
  * /shipper/confirm-order-shipper/{orderId}:
