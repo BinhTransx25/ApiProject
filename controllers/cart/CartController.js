@@ -52,7 +52,7 @@ const addToCart = async (user, shopOwner, products) => {
             // Thêm giỏ hàng mới vào user.carts
             userInDB.carts.push(newCart);
 
-            // Lưu lại thông tin user và giỏ hàng mới
+            // Lưu lại thông tin user
             await userInDB.save();
 
             return newCart; // Trả về giỏ hàng mới tạo
@@ -72,7 +72,7 @@ const addToCart = async (user, shopOwner, products) => {
 
             cart.updatedAt = Date.now(); // Cập nhật thời gian thay đổi
 
-            // Lưu lại thông tin giỏ hàng đã cập nhật
+            // Lưu lại thông tin user
             await userInDB.save();
 
             return cart; // Trả về giỏ hàng đã cập nhật
@@ -83,6 +83,7 @@ const addToCart = async (user, shopOwner, products) => {
         throw new Error(error.message);
     }
 };
+
 
 
 // Xóa sản phẩm khỏi giỏ hàng
