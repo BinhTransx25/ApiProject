@@ -113,7 +113,7 @@ const login = async (identifier, password) => {
 
             // Tạo token JWT cho shop owner
             const token = jwt.sign(
-                { _id: shopOwner._id, name: shopOwner.name, email: shopOwner.email,rating: shopOwner.rating, role: 'shopOwner', shopCategory: shopOwner.shopCategory },
+                { _id: shopOwner._id, name: shopOwner.name, email: shopOwner.email, rating: shopOwner.rating, role: 'shopOwner', shopCategory: shopOwner.shopCategory },
                 'secret',
                 { expiresIn: '1h' }
             );
@@ -146,7 +146,7 @@ const login = async (identifier, password) => {
         );
 
         // Trả về thông tin người dùng và token
-        return { _id: user._id, name: user.name, email: user.email, role: user.role, token };
+        return { _id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone, token };
     } catch (error) {
         console.error('Lỗi trong quá trình đăng nhập:', error);
         throw new Error('Lỗi khi đăng nhập người dùng');
