@@ -10,10 +10,10 @@ const addUserAddress = async (userId, recipientName, address, latitude, longitud
         throw new Error(errorMessage);
     }
     // Tạo biến coordinates từ latitude và longitude
-    const coordinates = {
-        latitude: latitude,
-        longitude: longitude
-    };
+    // const coordinates = {
+    //     latitude: latitude,
+    //     longitude: longitude
+    // };
 
     try {
         let user = await ModelUser.findById(userId);
@@ -21,7 +21,7 @@ const addUserAddress = async (userId, recipientName, address, latitude, longitud
             throw new Error('User not found');
         }
 
-        let newAddress = new UserAddress({ userId, recipientName, address, coordinates, phone, label });
+        let newAddress = new UserAddress({ userId, recipientName, address, latitude, longitude, phone, label });
         await newAddress.save();
 
         // Thêm địa chỉ mới vào danh sách address của người dùng
