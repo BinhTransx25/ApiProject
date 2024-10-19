@@ -4,7 +4,7 @@ const ModelShopCategory = require('./ModelShopCategory');
 const getAllCategories = async () => {
     try {
         // Sử dụng phương thức find() của ModelCategory để lấy tất cả các danh mục
-        const categories = await ModelShopCategory.find({}, 'name description');
+        const categories = await ModelShopCategory.find({}, 'name description image');
 
         // Trả về danh sách các danh mục đã lấy được
         return categories;
