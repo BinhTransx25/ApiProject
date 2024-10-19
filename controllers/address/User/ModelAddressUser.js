@@ -9,6 +9,7 @@ const UserAddressSchema = new Schema({
     latitude: { type: Number, required: false },  // Vĩ độ
     longitude: { type: Number, required: false },  // Kinh độ
     phone: { type: String, required: true },
+    label: { type: String, required: true },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });
