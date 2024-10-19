@@ -12,7 +12,8 @@ const ProductSchema = new Schema({
         }
     ],
     description: { type: String, required: true },
-    rating: { type: String, required: false },
+    rating: { type: Number, required: false },
+    soldOut: { type: Number, required: false },
     create_at: { type: Date, default: Date.now },
     update_at: { type: Date, default: Date.now },
     shopOwner: { 

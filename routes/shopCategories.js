@@ -67,8 +67,8 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
     try {
-        const { name } = req.body;
-        const shopCategories = await ControllerShopCategory.insert(name);
+        const { name, image } = req.body;
+        const shopCategories = await ControllerShopCategory.insert(name, image);
         return res.status(200).json({ status: true, data: shopCategories });
     } catch (error) {
         console.log('Insert product error:', error);
@@ -96,7 +96,7 @@ router.post('/', async (req, res, next) => {
  *             properties:
  *               name:
  *                 type: string
- *               description:
+ *               image:
  *                 type: string
  *     responses:
  *       200:
@@ -105,8 +105,8 @@ router.post('/', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name, description } = req.body;
-        const shopCategories = await ControllerShopCategory.update(id, name, description);
+        const { name, image } = req.body;
+        const shopCategories = await ControllerShopCategory.update(id, name, image);
         return res.status(200).json({ status: true, data: shopCategories });
     } catch (error) {
         console.log('Update product error:', error);

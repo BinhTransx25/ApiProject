@@ -72,7 +72,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         user.orders.push(newOrder);
         await user.save();
 
-        return user.orders; // Trả về danh sách carts của người dùng
+        return user.orders; // Trả về danh sách đơn hàng của người dùng
     } catch (error) {
         console.error("Error when adding order:", error);
         throw error;
