@@ -62,7 +62,7 @@ const getUserAddressById = async (id) => {
 };
 
 // Sửa địa chỉ của user
-const updateUserAddress = async (id, recipientName, address, latitude, longitude, email, phone, label) => {
+const updateUserAddress = async (id, recipientName, address, latitude, longitude, phone, label) => {
     try {
         let updatedAddress = await UserAddress.findByIdAndUpdate(id, { recipientName, address, latitude, longitude, phone, label }, { new: true });
         if (!updatedAddress) {
