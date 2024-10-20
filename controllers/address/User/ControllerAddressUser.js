@@ -62,9 +62,9 @@ const getUserAddressById = async (id) => {
 };
 
 // Sửa địa chỉ của user
-const updateUserAddress = async (id, recipientName, address, latitude, longitude, email, phone) => {
+const updateUserAddress = async (id, recipientName, address, latitude, longitude, email, phone, label) => {
     try {
-        let updatedAddress = await UserAddress.findByIdAndUpdate(id, { recipientName, address, latitude, longitude, phone }, { new: true });
+        let updatedAddress = await UserAddress.findByIdAndUpdate(id, { recipientName, address, latitude, longitude, phone, label }, { new: true });
         if (!updatedAddress) {
             throw new Error('Address not found');
         }
