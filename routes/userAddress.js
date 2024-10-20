@@ -124,9 +124,9 @@ router.get('/detail/:id', async (req, res) => {
  */
 router.put('/update/:id', async (req, res) => {
     const { id } = req.params;
-    const { recipientName, address, latitude, longitude, phone } = req.body;
+    const { recipientName, address, latitude, longitude, phone, label } = req.body;
     try {
-        let result = await ControllerUserAddress.updateUserAddress(id, recipientName, address, latitude, longitude, phone);
+        let result = await ControllerUserAddress.updateUserAddress(id, recipientName, address, latitude, longitude, phone, label);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
