@@ -34,15 +34,16 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
         if (!cart) {
             console.log("Cart not found, creating new cart...");
             cart = new CartModel({
-                user: { 
-                    _id: userInDB._id, 
-                    name: userInDB.name },
-                shopOwner: { 
-                    _id: shopOwnerInDB._id, 
+                user: {
+                    _id: userInDB._id,
+                    name: userInDB.name
+                },
+                shopOwner: {
+                    _id: shopOwnerInDB._id,
                     name: shopOwnerInDB.name,
                     images: shopOwnerInDB.images,
                     address: shopOwnerInDB.address
-                 },
+                },
                 products: [{
                     _id: productInDB._id,
                     name: productInDB.name,
