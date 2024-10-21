@@ -34,15 +34,16 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
         if (!cart) {
             console.log("Cart not found, creating new cart...");
             cart = new CartModel({
-                user: { 
-                    _id: userInDB._id, 
-                    name: userInDB.name },
-                shopOwner: { 
-                    _id: shopOwnerInDB._id, 
+                user: {
+                    _id: userInDB._id,
+                    name: userInDB.name
+                },
+                shopOwner: {
+                    _id: shopOwnerInDB._id,
                     name: shopOwnerInDB.name,
                     images: shopOwnerInDB.images,
                     address: shopOwnerInDB.address
-                 },
+                },
                 products: [{
                     _id: productInDB._id,
                     name: productInDB.name,
@@ -239,9 +240,9 @@ const deleteFromCart = async (user_id, shopOwner_id, product_id) => {
 
         // Nếu giỏ hàng trống sau khi xóa, xóa luôn giỏ hàng
         if (cart.products.length === 0) {
-            await CartModel.deleteOne({ _id: cart._id });
+            cart = await CartModel.deleteOne({ _id: cart._id });
             console.log("Cart is empty, deleted cart");
-            return { message: 'Cart is empty, deleted' };
+            return cart;
         } else {
             // Lưu lại giỏ hàng sau khi cập nhật
             await cart.save();
