@@ -242,8 +242,7 @@ const deleteFromCart = async (user_id, shopOwner_id, product_id) => {
         if (cart.products.length === 0) {
             await CartModel.deleteOne({ _id: cart._id });
             console.log("Cart is empty, deleted cart");
-            // return { message: 'Cart is empty, deleted' };
-            return null;
+            return { message: 'Cart is empty, deleted' };
         } else {
             // Lưu lại giỏ hàng sau khi cập nhật
             await cart.save();
@@ -302,7 +301,8 @@ const getCartByUserAndShop = async (user, shopOwner) => {
             "shopOwner._id": new ObjectId(shopOwner)
         });
         if (!cart) {
-            throw new Error('Cart not found for this user and shop');
+            // throw new Error('Cart not found for this user and shop');
+            return null;
         }
         return cart;
     } catch (error) {
