@@ -68,7 +68,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
 
         await newOrder.save();
 
-        // Thêm đơn hàng mới vào danh sách carts của người dùng
+        // Thêm đơn hàng mới vào danh sách Order của người dùng
         user.orders.push(newOrder);
         await user.save();
 

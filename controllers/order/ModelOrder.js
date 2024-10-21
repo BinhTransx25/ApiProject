@@ -12,7 +12,7 @@ const OrderItemSchema = new Schema({
 const OrderSchema = new Schema({
     items: [OrderItemSchema],
     orderDate: { type: Date, default: Date.now },
-    shippingAddress: { type: AddressSchema.schema, required: true },
+    shippingAddress: { type: AddressSchema.schema, required: false },
     paymentMethod: { type: String, required: true },
     status: { type: String, enum: ['Chưa giải quyết', 'Tìm người giao hàng', 'Người dùng đã hủy đơn','Đơn hàng đã được giao hoàn tất','Đang giao hàng','Nhà hàng đã hủy đơn','Shipper đã hủy đơn' ], default: 'Chưa giải quyết' },
     shopOwner: {type: Object, required: true, default: {}},

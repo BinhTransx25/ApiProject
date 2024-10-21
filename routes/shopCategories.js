@@ -49,6 +49,67 @@ router.get('/:id', async (req, res, next) => {
 
 /**
  * @swagger
+ * /categories/{categoryId}/shops:
+ *   get:
+ *     summary: Get all shops by category
+ *     tags: [Shop]
+ *     description: Retrieve a list of shops that belong to the given category ID.
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the category
+ *     responses:
+ *       200:
+ *         description: A list of shops under the category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     description: Shop ID
+ *                   name:
+ *                     type: string
+ *                     description: Shop name
+ *                   address:
+ *                     type: string
+ *                     description: Shop address
+ *                   totalItem:
+ *                     type: number
+ *                     description: Total items in shop
+ *                   totalPrice:
+ *                     type: number
+ *                     description: Total price of items
+ *       400:
+ *         description: Error retrieving shops by category
+ */
+
+router.get('/shop/:categoryId', async (req, res) => {
+    try {
+        // Lấy categoryId từ params
+        const { categoryId } = req.params;
+        // Gọi hàm getShopOwnerByCategoryId từ controller
+        const result = await ControllerShopCategory.getShopOwnerByCategoryId(categoryId);
+        res.status(200).json({status: true, data: result});
+    } catch (error) {
+        console.log('Error in getting shops by category:', error.message);
+
+        // Trả về lỗi
+        res.status(400).json({
+            status: false,
+            message: error.message
+        });
+    }
+});
+
+/**
+ * @swagger
  * /shopCategories:
  *   post:
  *     summary: Thêm danh mục mới

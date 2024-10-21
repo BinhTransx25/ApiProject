@@ -4,7 +4,7 @@ const cartController = require('../controllers/cart/CartController');
 
 /**
  * @swagger
- * /carts/:
+ * /carts/add:
  *   post:
  *     summary: Thêm sản phẩm vào giỏ hàng
  *     description: Thêm sản phẩm cho người dùng vào giỏ hàng.
@@ -21,16 +21,9 @@ const cartController = require('../controllers/cart/CartController');
  *               shopOwner:
  *                 type: string
  *                 description: ID của shop
- *               product:
- *                 type: object
- *                 description: Thông tin sản phẩm cần thêm vào giỏ hàng
- *                 properties:
- *                   productId:
- *                     type: string
- *                     description: ID của sản phẩm
- *                   quantity:
- *                     type: integer
- *                     description: Số lượng sản phẩm
+ *               products:
+ *                 type: string
+ *                 description: ID của sản phẩm cần thêm vào giỏ hàng
  *     responses:
  *       200:
  *         description: Sản phẩm đã được thêm vào giỏ hàng thành công
@@ -58,19 +51,32 @@ router.post('/add', async (req, res) => {
 
 /**
  * @swagger
- * /carts/{user}:
- *   get:
- *     summary: Lấy tất cả giỏ hàng của người dùng
- *     description: Lấy danh sách giỏ hàng của người dùng.
- *     parameters:
- *       - name: user
- *         in: path
- *         required: true
- *         description: ID của người dùng cần lấy giỏ hàng
- *         type: string
+ * /carts/update:
+ *   put:
+ *     summary: Cập nhật số lượng sản phẩm trong giỏ hàng
+ *     description: Cập nhật số lượng sản phẩm đã có trong giỏ hàng của người dùng.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 type: string
+ *                 description: ID của người dùng
+ *               shopOwner:
+ *                 type: string
+ *                 description: ID của shop
+ *               productId:
+ *                 type: string
+ *                 description: ID của sản phẩm
+ *               quantity:
+ *                 type: integer
+ *                 description: Số lượng sản phẩm cần cập nhật
  *     responses:
  *       200:
- *         description: Giỏ hàng đã được lấy thành công
+ *         description: Đã cập nhật số lượng sản phẩm thành công
  *         content:
  *           application/json:
  *             schema:
@@ -79,22 +85,130 @@ router.post('/add', async (req, res) => {
  *                 status:
  *                   type: boolean
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
+ *                   type: object
  *       500:
- *         description: Lỗi khi lấy giỏ hàng
+ *         description: Lỗi khi cập nhật sản phẩm trong giỏ hàng
  */
-router.get('/:user', async (req, res) => {
+router.put('/update', async (req, res) => {
     try {
-        const { user } = req.params;
-        const result = await cartController.getCartsByUser(user);
+        const { user, shopOwner, product, quantity } = req.body;
+        const result = await cartController.updateQuantityProduct(user, shopOwner, product, quantity);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message });
     }
 });
 
+/**
+ * @swagger
+ * /carts/delete:
+ *   delete:
+ *     summary: Xóa sản phẩm khỏi giỏ hàng
+ *     description: Xóa một sản phẩm khỏi giỏ hàng của người dùng.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 type: string
+ *                 description: ID của người dùng
+ *               shopOwner:
+ *                 type: string
+ *                 description: ID của shop
+ *               productId:
+ *                 type: string
+ *                 description: ID của sản phẩm cần xóa khỏi giỏ hàng
+ *     responses:
+ *       200:
+ *         description: Sản phẩm đã được xóa khỏi giỏ hàng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Lỗi khi xóa sản phẩm khỏi giỏ hàng
+ */
+router.put('/delete', async (req, res) => {
+    try {
+        const { user, shopOwner, product } = req.body;
+        const result = await cartController.deleteFromCart(user, shopOwner, product);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /carts/{user_id}:
+ *   get:
+ *     summary: Lấy danh sách giỏ hàng (đơn nháp) của người dùng
+ *     tags: [Carts]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         description: ID của người dùng
+ *         schema:
+ *           type: string
+ *           example: "64a8d1b5f9babc234567890"
+ *     responses:
+ *       200:
+ *         description: Danh sách giỏ hàng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   shopName:
+ *                     type: string
+ *                     example: "Nhà Hàng 123"
+ *                   shopImage:
+ *                     type: string
+ *                     example: "https://example.com/images/shop123.png"
+ *                   shopAddress:
+ *                     type: string
+ *                     example: "123 Đường ABC, Quận 1, TP.HCM"
+ *                   totalItem:
+ *                     type: integer
+ *                     example: 3
+ *                   totalPrice:
+ *                     type: number
+ *                     format: float
+ *                     example: 250000.0
+ *       400:
+ *         description: Lỗi khi không tìm thấy người dùng hoặc không có giỏ hàng
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "User not found"
+ */
+router.get('/:user', async (req, res) => {
+    const { user } = req.params;
+    try {
+        const carts = await cartController.getCarts(user);
+        res.status(200).json(carts);
+    } catch (error) {
+        res.status(400).json({ status: false, message: error.message });
+    }
+});
 /**
  * @swagger
  * /carts/{user}/{shopOwner}:

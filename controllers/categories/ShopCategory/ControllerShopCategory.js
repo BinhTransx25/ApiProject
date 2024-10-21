@@ -1,4 +1,5 @@
 const ModelShopCategory = require('./ModelShopCategory');
+const ModelShopOwner = require('../../shopowner/ModelShopOwner');
 
 // lấy tất cả danh mục Shop 
 const getAllCategories = async () => {
@@ -29,6 +30,28 @@ const getCategoryById = async (id) => {
     } catch (error) {
         console.log('Get category by id error:', error);
         throw new Error('Get category by id error');
+    }
+};
+// Hàm lấy các shop theo category_id
+const getShopOwnerByCategoryId = async (categoryId) => {
+    try {
+
+        // Tìm tất cả shop có shopCategory_id trùng với categoryId
+        const shops = await ModelShopOwner
+        .find(
+            {'shopCategory.shopCategory_id': categoryId,})
+            .select('name address phone rating images distance');  // Chỉ chọn những field cần thiết
+
+        // Nếu không có shop nào thuộc danh mục đó
+        if (!shops || shops.length === 0) {
+            throw new Error('No shops found for this category');
+        }
+
+        // Trả về thông tin của danh mục và danh sách các shop
+        return shops;
+    } catch (error) {
+        console.log('Get shops by category id error:', error);
+        throw new Error('Get shops by category id error');
     }
 };
 // thêm một danh mục shop 1
@@ -97,4 +120,4 @@ const remove = async (id) => {
     }
 };
 
-module.exports = {  insert, update, remove, getAllCategories, getCategoryById }
+module.exports = {  insert, update, remove, getAllCategories, getCategoryById, getShopOwnerByCategoryId }
