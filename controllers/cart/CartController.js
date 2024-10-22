@@ -277,6 +277,7 @@ const getCarts = async (user_id) => {
 
         // Trả về danh sách các giỏ hàng với thông tin cần thiết
         const cartList = carts.map(cart => ({
+            shopId: cart.shopOwner._id,
             shopName: cart.shopOwner.name,
             shopImage: cart.shopOwner.images,
             shopAddress: cart.shopOwner.address,
