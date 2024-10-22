@@ -204,7 +204,7 @@ router.get('/:user', async (req, res) => {
     const { user } = req.params;
     try {
         const carts = await cartController.getCarts(user);
-        res.status(200).json(carts);
+        return res.status(200).json({ status: true, data: carts });
     } catch (error) {
         res.status(400).json({ status: false, message: error.message });
     }
