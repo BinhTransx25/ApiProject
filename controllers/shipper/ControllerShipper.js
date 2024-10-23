@@ -51,8 +51,6 @@ const getShipperById = async (id) => {
     }
 };
 
-
-
 // Cập nhật thông tin shipper
 const updateShipper = async (id, name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate) => {
     try {
@@ -139,10 +137,20 @@ const confirmOrderShipperExists = async (orderId, shipperId) => {
             throw new Error('Order not found');
         }
 
+        // Tìm thông tin shipper theo ID
+        const shipper = await ModelShipper.findById(shipperId);
+        if (!shipper) {
+            throw new Error('Shipper not found');
+        }
+
         // Kiểm tra xem đơn hàng đã có shipper chưa
         if (!order.shipper) {
-            // Nếu chưa có shipper, gán shipperId và cập nhật trạng thái thành "Đang giao hàng"
-            order.shipper = shipperId;
+            // Nếu chưa có shipper, gán object shipper vào đơn hàng và cập nhật trạng thái
+            order.shipper = {
+                _id: shipper._id,
+                name: shipper.name,
+                phone: shipper.phone
+            };
             order.status = 'Đang giao hàng';
             await order.save();
             return order; // Trả về đơn hàng đã cập nhật
@@ -155,6 +163,7 @@ const confirmOrderShipperExists = async (orderId, shipperId) => {
         throw new Error('Error checking order for shipper');
     }
 };
+
 
 /**
  * Xác nhận đơn hàng bởi shipper (kiểm tra ID của shipper).

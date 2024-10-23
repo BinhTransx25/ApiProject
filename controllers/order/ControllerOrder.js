@@ -19,44 +19,28 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
     console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId });
 
     if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId) {
-        const errorMessage = 'Missing required fields in request body';
-        console.error(errorMessage);
-        throw new Error(errorMessage);
+        throw new Error('Missing required fields in request body');
     }
 
     try {
-        let user = await ModelUser.findById(userId);
-        if (!user) {
-            throw new Error('User not found');
-        }
+        // Tìm người dùng, địa chỉ, và shop owner
+        const user = await ModelUser.findById(userId);
+        if (!user) throw new Error('User not found');
 
-        let address = await ModelAddress.findById(shippingAddressId);
-        if (!address) {
-            throw new Error('Address not found');
-        }
+        const address = await ModelAddress.findById(shippingAddressId);
+        if (!address) throw new Error('Address not found');
 
-        let shopOwner = await ModelShopOwner.findById(shopOwnerId);
-        if (!shopOwner) {
-            throw new Error('Shop owner not found');
-        }
+        const shopOwner = await ModelShopOwner.findById(shopOwnerId);
+        if (!shopOwner) throw new Error('Shop owner not found');
 
-        // Khởi tạo đối tượng shipper trống ban đầu
-        let shipper = {};
-
-        // Chỉ tìm shipper nếu `shipperId` không rỗng
+        // Xử lý thông tin shipper nếu có shipperId
+        let shipper;
         if (shipperId) {
             shipper = await ModelShipper.findById(shipperId);
-            if (!shipper) {
-                throw new Error('Shipper not found');
-            }
-            // Nếu tìm được shipper, thêm thông tin vào đơn hàng
-            shipper = {
-                _id: shipper._id,
-                name: shipper.name,
-                phone: shipper.phone
-            };
+            if (!shipper) throw new Error('Shipper not found');
         }
 
+        // Tạo đơn hàng mới
         const newOrder = new ModelOrder({
             items: order.map(item => ({
                 product_id: item.product_id,
@@ -70,14 +54,14 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             shopOwner: {
                 _id: shopOwner._id,
                 name: shopOwner.name,
-                phone: shopOwner.phone
+                phone: shopOwner.phone,
             },
-            shipper: shipperId ? shipper : null // Chỉ thêm shipper nếu `shipperId` có giá trị
+            shipper: shipper ? { _id: shipper._id, name: shipper.name, phone: shipper.phone } : null, // Thêm shipper nếu có
         });
 
         await newOrder.save();
 
-        // Thêm đơn hàng mới vào danh sách Order của người dùng
+        // Thêm đơn hàng mới vào danh sách của người dùng
         user.orders.push(newOrder);
         await user.save();
 
@@ -87,6 +71,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         throw error;
     }
 };
+
 
 /**
  * Lấy chi tiết đơn hàng theo orderId.
