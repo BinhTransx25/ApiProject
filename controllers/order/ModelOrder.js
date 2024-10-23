@@ -26,7 +26,7 @@ const OrderSchema = new Schema({
         }
     },
     shopOwner: { type: Object, required: true, default: {} },
-    shipper: { type: Object, required: true, default: {} }, 
+    shipper: { type: Object, required: false, default: {} }, 
     image: { type: Array, required: true, default: [] },
     voucher:{type: Object, require:false,default:{}}
 });

@@ -40,11 +40,23 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             throw new Error('Shop owner not found');
         }
 
-        let shipper = await ModelShipper.findById(shipperId);
-        if (!shipper) {
-            throw new Error('shipper not found');
+        // Khởi tạo đối tượng shipper trống ban đầu
+        let shipper = {};
 
+        // Chỉ tìm shipper nếu `shipperId` không rỗng
+        if (shipperId) {
+            shipper = await ModelShipper.findById(shipperId);
+            if (!shipper) {
+                throw new Error('Shipper not found');
+            }
+            // Nếu tìm được shipper, thêm thông tin vào đơn hàng
+            shipper = {
+                _id: shipper._id,
+                name: shipper.name,
+                phone: shipper.phone
+            };
         }
+
         const newOrder = new ModelOrder({
             items: order.map(item => ({
                 product_id: item.product_id,
@@ -60,11 +72,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
                 name: shopOwner.name,
                 phone: shopOwner.phone
             },
-            shipper: {
-                _id: shipper._id,
-                name: shipper.name,
-                phone: shipper.phone
-            }
+            shipper: shipperId ? shipper : null // Chỉ thêm shipper nếu `shipperId` có giá trị
         });
 
         await newOrder.save();
