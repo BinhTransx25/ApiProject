@@ -121,7 +121,7 @@ const getOrdersByShop = async (shopId) => {
  * @param {String} shipperId - ID của shipper.
  * @returns {Object} - Đơn hàng đã được xác nhận.
  */
-// Hàm confirmOrder với socket.io
+// Hàm confirmOrder với socket.io, Cho shopOwner bấm
 const confirmOrder = async (orderId, io) => {
     console.log('Confirming order with ID:', orderId); // Log kiểm tra orderId
 
@@ -167,6 +167,7 @@ const confirmOrder = async (orderId, io) => {
  * @param {String} orderId - ID của đơn hàng.
  * @returns {Object} - Đơn hàng đã bị hủy.
  */
+// Cho ShopOwner Bấm
 const shopOwnerCancelOrder = async (orderId, io) => {
     console.log('Cancelling order with ID:', orderId); // Log kiểm tra orderId
 
@@ -212,6 +213,7 @@ const shopOwnerCancelOrder = async (orderId, io) => {
  * @param {String} orderId - ID của đơn hàng.
  * @returns {Object} - Đơn hàng đã bị hủy.
  */
+// Người Dùng Bấm 
 const CustomerCancelOrder = async (orderId, io) => {
     console.log('Cancelling order with ID:', orderId); // Log kiểm tra orderId
 
@@ -268,7 +270,7 @@ const deleteOrder = async (orderId) => {
         throw new Error('Error deleting order');
     }
 };
-
+// Chưa biết dùng cho cái gì 
 const updateOrderStatus = async (orderId, status) => {
     try {
         const order = await ModelOrder.findByIdAndUpdate(orderId, { status }, { new: true });
@@ -277,10 +279,8 @@ const updateOrderStatus = async (orderId, status) => {
         }
 
         let message = '';
-        if (status === 'delivered') {
-            message = 'Your order has been delivered successfully!';
-        } else if (status === 'shipped') {
-            message = 'Your order has been shipped!';
+        if (status === 'Đơn hàng đã được giao hoàn tất') {
+            message = 'Đơn Hàng Của Bạn Đã được Giao Thành Công!';
         }
 
         if (message) {
@@ -301,8 +301,40 @@ const updateOrderStatus = async (orderId, status) => {
     }
 };
 
+// Người Dùng Bấm 
+const updateOrderStatusAfterPayment = async (orderId) => {
+    console.log('Order with ID:', orderId); // Log kiểm tra orderId
+
+    try {
+        // Tìm đơn hàng theo ID
+        const order = await ModelOrder.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+
+        // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
+        order.status = 'Chưa giải quyết';
+        await order.save();
+
+        // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
+        const user = await ModelUser.findOne({ 'orders._id': orderId });
+        if (user) {
+            const orderItem = user.orders.id(orderId); 
+            if (orderItem) {
+                orderItem.status = 'Chưa giải quyết'; // Cập nhật trạng thái trong orders
+                await user.save(); // Lưu lại user với trạng thái đã cập nhật
+            }
+        }
+
+        return order; 
+    } catch (error) {
+        console.error('Lỗi khi hủy đơn hàng:', error);
+        throw new Error('Lỗi khi hủy đơn hàng');
+    }
+};
 module.exports = {
     addOrder, getOrderDetail, getOrdersByShop,
     confirmOrder, shopOwnerCancelOrder, deleteOrder,
-    updateOrderStatus,CustomerCancelOrder
+    updateOrderStatus,CustomerCancelOrder,
+    updateOrderStatusAfterPayment
 };

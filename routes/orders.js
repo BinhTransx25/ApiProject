@@ -270,4 +270,74 @@ router.delete('/:orderId', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /orders/update-status/{orderId}:
+ *   put:
+ *     summary: Cập nhật trạng thái đơn hàng sau khi thanh toán
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         description: ID của đơn hàng
+ *         schema:
+ *           type: string
+ *       - in: body
+ *         name: paymentSuccess
+ *         required: true
+ *         description: Trạng thái thanh toán (true nếu thành công, false nếu thất bại)
+ *         schema:
+ *           type: object
+ *           properties:
+ *             paymentSuccess:
+ *               type: boolean
+ *               example: true
+ *     responses:
+ *       200:
+ *         description: Trạng thái đơn hàng được cập nhật thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Order {orderId} status updated successfully.
+ *       400:
+ *         description: Đầu vào không hợp lệ (paymentSuccess phải là boolean)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Invalid input, paymentSuccess must be boolean
+ *       500:
+ *         description: Lỗi server khi cập nhật đơn hàng
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Error updating order status
+ */
+
+// Thanh toán chuyển khoản thành công sẽ nhả về 1 response
+// Lấy Status của response đó
+// Thành công thì gọi hàm này để sửa trạng thái 
+router.put('/Success-Payment/:orderId', async (req, res) => {
+    try { 
+        const { orderId } = req.params;
+        const result=  await ControllerOrder.updateOrderStatusAfterPayment(orderId );
+        res.status(200).json({success:true, data: result });
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        res.status(500).json({ error: 'Error updating order status' });
+    }
+});
+
+
 module.exports = router;
