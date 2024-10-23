@@ -43,9 +43,9 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         // Tạo đơn hàng mới
         const newOrder = new ModelOrder({
             items: order.map(item => ({
-                product_id: item.product_id,
+                product_id: item._id,
                 name: item.name,
-                description: item.description,
+                note: item.note,
                 price: item.price,
                 quantity: item.quantity,
             })),

@@ -5,7 +5,8 @@ const AddressSchema = require('../address/User/ModelAddressUser');
 const OrderItemSchema = new Schema({
     product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
     name: { type: String, required: true },
-    description: { type: String, required: false },
+    // description: { type: String, required: false },
+    note: { type: String, required: false },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
 });
