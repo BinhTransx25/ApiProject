@@ -1,6 +1,6 @@
 const ModelProductReview = require('../ProductReview/ModelProductReview'); // Giả sử đường dẫn model ở đây
 const ModelOrder = require('../../order/ModelOrder'); // Model đơn hàng để kiểm tra đơn hàng hợp lệ
-
+const ModelProduct = require('../../products/ModelProduct');
 // Tạo đánh giá mới
 const create = async (order_id, product_id, user_id, rating, comment, image ) => {
     if (!order_id || !product_id || !user_id  ) {
@@ -19,7 +19,7 @@ const create = async (order_id, product_id, user_id, rating, comment, image ) =>
 
         console.log('Dữ liệu nhận được:', orderInDB);
 
-        const productExists = orderInDB.items.some(item => item._id.toString() === product_id.toString());
+        const productExists = orderInDB.items.some(item => item.product_id.toString() === product_id.toString());
         
         console.log('Đặt hàng các mục:', orderInDB.items);
         console.log('ID sản phẩm:', product_id);
@@ -84,9 +84,36 @@ const getAllByUser = async (user_id) => {
     }
 };
 
+// Lấy tất cả đánh giá của sản phẩm theo shopOwnerId
+const getReviewProductByShopId = async (shopOwnerId) => {
+    try {
+        // Lấy ra đc 1 cái list tất cả sản phẩm của cửa hàng theo shopOwnerId
+        const products = await ModelProduct.find({ 'shopOwner.shopOwner_id': shopOwnerId });
+        console.log('list',products);
+        
+        // Nếu không có sản phẩm nào, trả về mảng rỗng
+        if (products.length === 0) {
+            return [];
+        }
+
+        // Lọc cái list đó, chỉ còn lại 1 cái list product_id
+        const productIds = products.map(product => product._id);
+        console.log('list productIds:',productIds);
+        
+        // Dò cái list product_id đó vào cái bảng ProductReview, Thằng nào có là lấy ra 
+        const reviews = await ModelProductReview.find({ product_id: { $in: productIds } })
+        console.log('list reviews',reviews);
+        
+        return reviews;
+    } catch (error) {
+        console.log('Get reviews by shop owner ID error:', error);
+        throw new Error('Get reviews by shop owner ID error');
+    }
+};
 module.exports = {
     create,
     remove,
     getAllByProduct,
-    getAllByUser
+    getAllByUser,
+    getReviewProductByShopId
 };

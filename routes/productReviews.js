@@ -233,4 +233,56 @@ router.get('/user/:user_id', async (req, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /productReviews/shop/{shopOwnerId}:
+ *   get:
+ *     summary: Lấy tất cả đánh giá của sản phẩm theo shopOwnerId
+ *     tags: [Reviews]
+ *     parameters:
+ *       - name: shopOwnerId
+ *         in: path
+ *         description: ID của chủ cửa hàng
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Danh sách đánh giá của sản phẩm theo shopOwnerId
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Lỗi khi lấy đánh giá
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 error:
+ *                   type: string
+ */
+
+router.get('/shop/:shopOwnerId', async (req, res) => {
+    try {
+        const { shopOwnerId } = req.params;
+        const reviews = await ControllerProductReview.getReviewProductByShopId(shopOwnerId);
+        return res.status(200).json({ status: true, data: reviews });
+    } catch (error) {
+        console.log('Get reviews by shop owner ID error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
 module.exports = router;

@@ -47,6 +47,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         }
         const newOrder = new ModelOrder({
             items: order.map(item => ({
+                product_id: item.product_id,
                 name: item.name,
                 description: item.description,
                 price: item.price,
