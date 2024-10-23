@@ -54,7 +54,10 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             shopOwner: {
                 _id: shopOwner._id,
                 name: shopOwner.name,
-                phone: shopOwner.phone,
+                // phone: shopOwner.phone,
+                address: shopOwner.address,
+                images: shopOwner.images,
+                rating: shopOwner.rating,
             },
             shipper: shipper ? { _id: shipper._id, name: shipper.name, phone: shipper.phone } : null, // Thêm shipper nếu có
         });
