@@ -21,7 +21,7 @@ require('./controllers/address/User/ModelAddressUser');
 require('./controllers/shopowner/ModelShopOwner')
 require('./controllers/shipper/ModelShipper')
 require('./controllers/cart/CartModel')
-require('./controllers/notification/ModelNotification')
+require('./controllers/vouchers/ModelVouher')
 require('./controllers/Review/ProductReview/ModelProductReview')
 require('./controllers/Review/ShipperReview/ModelShipperReview')
 require('./controllers/shopowner/ControllerShopOwner')
@@ -35,7 +35,7 @@ var userAddressRouter = require('./routes/userAddress');
 var shipperRouter = require('./routes/shipper');
 var ordersRouter = require('./routes/orders');
 var cartsRouter = require('./routes/carts');
-var notificationRouter = require('./routes/notification');
+var voucherRouter = require('./routes/voucher');
 var productReviewRouter = require('./routes/productReviews');
 var shipperReviewRouter = require('./routes/shipperReviews');
 var shopOwnerRouter = require('./routes/shopowner');
@@ -74,7 +74,7 @@ app.use('/userAddresses', userAddressRouter);
 app.use('/orders', ordersRouter);
 app.use('/carts', cartsRouter);
 app.use('/shipper', shipperRouter);
-app.use('/notification', notificationRouter);
+app.use('/voucher', voucherRouter);
 app.use('/productReviews', productReviewRouter);
 app.use('/shipperReview', shipperReviewRouter);
 app.use('/shopOwner', shopOwnerRouter);

@@ -9,11 +9,7 @@ const addUserAddress = async (userId, recipientName, address, latitude, longitud
         console.error(errorMessage);
         throw new Error(errorMessage);
     }
-    // Tạo biến coordinates từ latitude và longitude
-    // const coordinates = {
-    //     latitude: latitude,
-    //     longitude: longitude
-    // };
+ 
 
     try {
         let user = await ModelUser.findById(userId);

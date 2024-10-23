@@ -28,6 +28,7 @@ const OrderSchema = new Schema({
     shopOwner: { type: Object, required: true, default: {} },
     shipper: { type: Object, required: true, default: {} }, 
     image: { type: Array, required: true, default: [] },
+    voucher:{type: Object, require:false,default:{}}
 });
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);

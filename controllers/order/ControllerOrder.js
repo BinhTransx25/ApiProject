@@ -3,7 +3,7 @@ const ModelUser = require('../users/ModelUser');
 const ModelAddress = require('../address/User/ModelAddressUser');
 const ModelShopOwner = require('../shopowner/ModelShopOwner');
 const ModelShipper = require('../shipper/ModelShipper');
-const Notification = require('../notification/ModelNotification');
+const Notification = require('../vouchers/ModelVouher');
 const mongoose = require('mongoose');
 
 /**
@@ -193,8 +193,8 @@ const shopOwnerCancelOrder = async (orderId, io) => {
             }
         }
 
-           // Phát sự kiện cho socket
-           if (io) {
+        // Phát sự kiện cho socket
+        if (io) {
             io.emit('order_cancelled', { orderId, status: 'Nhà hàng đã hủy đơn' });
             console.log(`Socket emitted for order ${orderId} with status 'Nhà hàng đã hủy đơn'`);
         } else {
@@ -239,8 +239,8 @@ const CustomerCancelOrder = async (orderId, io) => {
             }
         }
 
-           // Phát sự kiện cho socket
-           if (io) {
+        // Phát sự kiện cho socket
+        if (io) {
             io.emit('order_cancelled', { orderId, status: 'Người dùng đã hủy đơn' });
             console.log(`Socket emitted for order ${orderId} with status 'Người dùng đã hủy đơn'`);
         } else {
@@ -320,14 +320,14 @@ const updateOrderStatusAfterPayment = async (orderId) => {
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
         const user = await ModelUser.findOne({ 'orders._id': orderId });
         if (user) {
-            const orderItem = user.orders.id(orderId); 
+            const orderItem = user.orders.id(orderId);
             if (orderItem) {
                 orderItem.status = 'Chưa giải quyết'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
 
-        return order; 
+        return order;
     } catch (error) {
         console.error('Lỗi khi hủy đơn hàng:', error);
         throw new Error('Lỗi khi hủy đơn hàng');
@@ -336,6 +336,6 @@ const updateOrderStatusAfterPayment = async (orderId) => {
 module.exports = {
     addOrder, getOrderDetail, getOrdersByShop,
     confirmOrder, shopOwnerCancelOrder, deleteOrder,
-    updateOrderStatus,CustomerCancelOrder,
+    updateOrderStatus, CustomerCancelOrder,
     updateOrderStatusAfterPayment
 };
