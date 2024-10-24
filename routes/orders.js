@@ -104,7 +104,7 @@ router.get('/orders-by-user/:userId', async function (req, res, next) {
             return res.status(400).json({ success: false, message: 'Shop ID is required' });
         }
         const orders = await ControllerOrder.getOrdersByUser(userId); // Sử dụng hàm mới
-        return res.status(200).json({ success: true, orders }); // cái chỗ này quan trọng nha, nhớ là để đặt tên khi trả về response
+        return res.status(200).json({ status: true, data: orders }); // cái chỗ này quan trọng nha, nhớ là để đặt tên khi trả về response
     } catch (error) {
         console.error('Get orders error:', error);
         return res.status(500).json({ success: false, error: error.message });
