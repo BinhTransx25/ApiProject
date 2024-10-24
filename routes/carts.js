@@ -340,4 +340,14 @@ router.delete('/:user/:shopOwner', async (req, res) => {
     }
 });
 
+router.delete('/:user/', async (req, res) => {
+    try {
+        const { user } = req.params;
+        const result = await cartController.deleteCartUser(user);
+        return res.status(200).json({ status: true, message: result.message });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+});
+
 module.exports = router;
