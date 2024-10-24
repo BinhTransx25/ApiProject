@@ -97,6 +97,19 @@ router.get('/orders-by-shop', async function (req, res, next) {
     }
 });
 
+router.get('/orders-by-user', async function (req, res, next) {
+    try {
+        const { userId } = req.query; // Lấy shopId từ query parameters
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'Shop ID is required' });
+        }
+        const orders = await ControllerOrder.getOrdersByUser(userId); // Sử dụng hàm mới
+        return res.status(200).json({ success: true, orders }); // cái chỗ này quan trọng nha, nhớ là để đặt tên khi trả về response
+    } catch (error) {
+        console.error('Get orders error:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+});
 /**
  * @swagger
  * /orders/{id}:
@@ -329,10 +342,10 @@ router.delete('/:orderId', async (req, res) => {
 // Lấy Status của response đó
 // Thành công thì gọi hàm này để sửa trạng thái 
 router.put('/Success-Payment/:orderId', async (req, res) => {
-    try { 
+    try {
         const { orderId } = req.params;
-        const result=  await ControllerOrder.updateOrderStatusAfterPayment(orderId );
-        res.status(200).json({success:true, data: result });
+        const result = await ControllerOrder.updateOrderStatusAfterPayment(orderId);
+        res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).json({ error: 'Error updating order status' });

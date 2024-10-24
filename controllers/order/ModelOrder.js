@@ -26,6 +26,7 @@ const OrderSchema = new Schema({
             return this.paymentMethod === 'PayOS' || this.paymentMethod === 'ZaloPay' ? 'Chờ thanh toán' : 'Chưa giải quyết';
         }
     },
+    user: { type: Object, required: true, default: {} },
     shopOwner: { type: Object, required: true, default: {} },
     shipper: { type: Object, required: false, default: {} },
     image: { type: Array, required: true, default: [] },

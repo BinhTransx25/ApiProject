@@ -51,6 +51,11 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             })),
             shippingAddress: address,
             paymentMethod,
+            user: {
+                _id: user._id,
+                name: user.name,
+                phone: user.phone,
+            },
             shopOwner: {
                 _id: shopOwner._id,
                 name: shopOwner.name,
@@ -105,6 +110,20 @@ const getOrdersByShop = async (shopId) => {
         console.log('Orders', orders);
         console.log('shopId:', shopId);
         console.log('objectIdShopId:', objectIdShopId);
+        return orders;
+    } catch (error) {
+        console.error('Error when getting orders:', error);
+        throw new Error('Error when getting orders');
+    }
+};
+
+const getOrdersByUser = async (userId) => {
+    try {
+        const objectIdUserId = new mongoose.Types.ObjectId(userId); // Chuyển đổi shopId thành ObjectId
+        const orders = await ModelOrder.find({ 'user._id': objectIdUserId }); // Truy vấn bằng ObjectId
+        console.log('Orders', orders);
+        console.log('userId:', userId);
+        console.log('objectIdUserId:', objectIdUserId);
         return orders;
     } catch (error) {
         console.error('Error when getting orders:', error);
@@ -333,5 +352,6 @@ module.exports = {
     addOrder, getOrderDetail, getOrdersByShop,
     confirmOrder, shopOwnerCancelOrder, deleteOrder,
     updateOrderStatus, CustomerCancelOrder,
-    updateOrderStatusAfterPayment
+    updateOrderStatusAfterPayment,
+    getOrdersByUser
 };

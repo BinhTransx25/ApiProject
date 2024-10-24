@@ -353,6 +353,18 @@ const deleteCart = async (user, shopOwner) => {
         throw new Error(error.message);
     }
 };
+
+const deleteCartUser = async (user) => {
+    try {
+        await CartModel.deleteOne({
+            "user._id": new ObjectId(user),
+        });
+        return { message: 'Cart deleted successfully' };
+    } catch (error) {
+        console.log('Error in deleteCart:', error);
+        throw new Error(error.message);
+    }
+};
 module.exports = {
     addToCart,
     removeProductFromCart,
@@ -360,5 +372,6 @@ module.exports = {
     getCarts,
     getCartByUserAndShop,
     updateQuantityProduct,
-    deleteFromCart
+    deleteFromCart,
+    deleteCartUser
 };
