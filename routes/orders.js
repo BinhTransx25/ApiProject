@@ -43,9 +43,9 @@ const ControllerOrder = require('../controllers/order/ControllerOrder');
  *         description: Lỗi khi thêm đơn hàng
  */
 router.post('/add-order', async (req, res) => {
-    const { userId, order, shippingAddressId, paymentMethod, shopOwner, shipper } = req.body;
+    const { userId, order, shippingAddressId, paymentMethod, shopOwner, totalPrice, shipper } = req.body;
     try {
-        const addOrder = await ControllerOrder.addOrder(userId, order, shippingAddressId, paymentMethod, shopOwner, shipper);
+        const addOrder = await ControllerOrder.addOrder(userId, order, shippingAddressId, paymentMethod, shopOwner, totalPrice, shipper);
         res.status(200).json({ status: true, data: addOrder });
     } catch (error) {
         res.status(500).json({ error: error.message });
