@@ -97,9 +97,9 @@ router.get('/orders-by-shop', async function (req, res, next) {
     }
 });
 
-router.get('/orders-by-user', async function (req, res, next) {
+router.get('/orders-by-user/:userId', async function (req, res, next) {
     try {
-        const { userId } = req.query; // Lấy shopId từ query parameters
+        const { userId } = req.params; // Lấy shopId từ query parameters
         if (!userId) {
             return res.status(400).json({ success: false, message: 'Shop ID is required' });
         }
