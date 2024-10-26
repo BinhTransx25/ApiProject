@@ -251,52 +251,6 @@ router.get('/:user/:shopOwner', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /carts/{user}/{shopOwner}/{productId}:
- *   delete:
- *     summary: Xóa sản phẩm khỏi giỏ hàng
- *     description: Xóa một sản phẩm ra khỏi giỏ hàng của người dùng.
- *     parameters:
- *       - name: user
- *         in: path
- *         required: true
- *         description: ID của người dùng
- *         type: string
- *       - name: shopOwner
- *         in: path
- *         required: true
- *         description: ID của shop
- *         type: string
- *       - name: productId
- *         in: path
- *         required: true
- *         description: ID của sản phẩm
- *         type: string
- *     responses:
- *       200:
- *         description: Sản phẩm đã được xóa khỏi giỏ hàng thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: boolean
- *                 data:
- *                   type: object
- *       500:
- *         description: Lỗi khi xóa sản phẩm khỏi giỏ hàng
- */
-router.delete('/:user/:shopOwner/:productId', async (req, res) => {
-    try {
-        const { user, shopOwner, productId } = req.params;
-        const result = await cartController.removeProductFromCart(user, shopOwner, productId);
-        return res.status(200).json({ status: true, data: result });
-    } catch (error) {
-        return res.status(500).json({ status: false, message: error.message });
-    }
-});
 
 /**
  * @swagger
@@ -330,10 +284,10 @@ router.delete('/:user/:shopOwner/:productId', async (req, res) => {
  *       500:
  *         description: Lỗi khi xóa giỏ hàng
  */
-router.delete('/:user/:shopOwner', async (req, res) => {
+router.delete('/delete/:user/:shopOwner', async (req, res) => {
     try {
         const { user, shopOwner } = req.params;
-        const result = await cartController.deleteCart(user, shopOwner);
+        const result = await cartController.deleteCartWhenPayment(user, shopOwner);
         return res.status(200).json({ status: true, message: result.message });
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message });

@@ -15,6 +15,7 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *   post:
  *     summary: Tạo đánh giá mới cho sản phẩm
  *     tags: [Reviews]
+ *     description: Tạo đánh giá cho sản phẩm trong một đơn hàng. Nếu sản phẩm có số lượng lớn hơn 1, một đánh giá đại diện sẽ được áp dụng cho tất cả các sản phẩm cùng loại trong đơn hàng.
  *     requestBody:
  *       required: true
  *       content:
@@ -48,6 +49,7 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *                   type: boolean
  *                 data:
  *                   type: object
+ *                   description: Danh sách các đánh giá đã được tạo.
  *       500:
  *         description: Lỗi khi tạo đánh giá
  *         content:
@@ -70,6 +72,7 @@ router.post('/add', async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 });
+
 
 /**
  * @swagger

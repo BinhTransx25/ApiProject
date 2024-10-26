@@ -120,4 +120,33 @@ const remove = async (id) => {
     }
 };
 
-module.exports = {  insert, update, remove, getAllCategories, getCategoryById, getShopOwnerByCategoryId }
+// Hàm lấy các shop theo từ khóa hoặc tên danh mục
+const getShopOwnerByShopCategory = async (keyword, query) => {
+    try {
+        // Tìm các shop có tên danh mục trùng với keyword hoặc query
+        const shops = await ModelShopOwner
+            .find({
+                'shopCategory.shopCategory_name': { 
+                    $regex: keyword || query,  // Tìm theo từ khóa hoặc query
+                    $options: 'i'  // Không phân biệt hoa thường
+                }
+            })
+            .select('name address phone rating images distance');  // Chỉ chọn những field cần thiết
+
+        // Nếu không có shop nào phù hợp
+        if (!shops || shops.length === 0) {
+            throw new Error('No shops found for this keyword or query');
+        }
+
+        // Trả về danh sách các shop
+        return shops;
+    } catch (error) {
+        console.log('Error in getting shops by keyword or query:', error);
+        throw new Error('Get shops by keyword or query error');
+    }
+};
+
+
+module.exports = {  insert, update, remove,
+     getAllCategories, getCategoryById, getShopOwnerByCategoryId,
+     getShopOwnerByShopCategory }

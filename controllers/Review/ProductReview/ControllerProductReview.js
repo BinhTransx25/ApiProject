@@ -2,50 +2,51 @@ const ModelProductReview = require('../ProductReview/ModelProductReview'); // Gi
 const ModelOrder = require('../../order/ModelOrder'); // Model đơn hàng để kiểm tra đơn hàng hợp lệ
 const ModelProduct = require('../../products/ModelProduct');
 // Tạo đánh giá mới
-const create = async (order_id, product_id, user_id, rating, comment, image ) => {
-    if (!order_id || !product_id || !user_id  ) {
+const create = async (order_id, product_id, user_id, rating, comment, image) => {
+    if (!order_id || !product_id || !user_id) {
         const errorMessage = 'Missing required fields in request body';
         console.error(errorMessage);
         throw new Error(errorMessage);
     }
     try {
-    
         // Kiểm tra xem đơn hàng có tồn tại không
-        let orderInDB = await ModelOrder.findById(order_id); // Không cần chuyển đổi
-        
+        let orderInDB = await ModelOrder.findById(order_id);
         if (!orderInDB) {
             throw new Error('Đơn hàng không tồn tại');
         }
 
-        console.log('Dữ liệu nhận được:', orderInDB);
-
-        const productExists = orderInDB.items.some(item => item.product_id.toString() === product_id.toString());
-        
-        console.log('Đặt hàng các mục:', orderInDB.items);
-        console.log('ID sản phẩm:', product_id);
-        
-        if (!productExists) {
+        // Tìm sản phẩm trong danh sách items của đơn hàng và lấy số lượng
+        const productInOrder = orderInDB.items.find(item => item.product_id.toString() === product_id.toString());
+        if (!productInOrder) {
             throw new Error('Đơn hàng không chứa sản phẩm');
         }
 
-        // Tạo giá trị
-        const newReview = new ModelProductReview({
-            rating,
-            comment,
-            image,
-            order_id,
-            product_id,
-            user_id
-        });
-        
-        const savedReview = await newReview.save();
-        return savedReview;
+        // Số lượng sản phẩm cùng loại
+        const quantity = productInOrder.quantity;
+
+        // Nếu số lượng > 1, tạo một đánh giá đại diện cho tất cả
+        const reviews = [];
+        for (let i = 0; i < quantity; i++) {
+            const newReview = new ModelProductReview({
+                rating,
+                comment,
+                image,
+                order_id,
+                product_id,
+                user_id
+            });
+            reviews.push(newReview);
+        }
+
+        // Lưu tất cả đánh giá
+        const savedReviews = await ModelProductReview.insertMany(reviews);
+        return savedReviews;
+
     } catch (error) {
         console.log('Lỗi khi tạo đánh giá sản phẩm:', error);
         throw new Error('Lỗi khi tạo đánh giá sản phẩm');
     }
 };
-
 
 // Xóa đánh giá sản phẩm theo id
 const remove = async (id) => {

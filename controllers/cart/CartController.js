@@ -4,6 +4,7 @@ const ModelShopOwner = require("../shopowner/ModelShopOwner");
 const CartModel = require("./CartModel");
 const ObjectId = require('mongoose').Types.ObjectId;
 
+// Thêm 1 sản phẩm vào giỏ hàng 
 const addToCart = async (user_id, shopOwner_id, products_id) => {
     try {
         console.log("--- Start addToCart ---");
@@ -99,7 +100,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
         return { status: false, message: error.message };
     }
 };
-
+// Cập nhật số lượng trực tiếp
 const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity) => {
     try {
         console.log("--- Start updateQuantityProduct ---");
@@ -171,8 +172,7 @@ const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity
         return { status: false, message: error.message };
     }
 };
-
-
+// Trừ 1 sản phẩm trong giỏ hàng 
 const deleteFromCart = async (user_id, shopOwner_id, product_id) => {
     try {
         console.log("--- Start deleteFromCart ---");
@@ -293,7 +293,6 @@ const getCarts = async (user_id) => {
     }
 };
 
-
 // Lấy chi tiết giỏ hàng của người dùng và shop
 const getCartByUserAndShop = async (user, shopOwner) => {
     try {
@@ -310,38 +309,9 @@ const getCartByUserAndShop = async (user, shopOwner) => {
         throw new Error(`Error in getCartByUserAndShop: ${error.message}`);
     }
 };
-// Xóa sản phẩm khỏi giỏ hàng chưa test 
-const removeProductFromCart = async (user, shopOwner, productId) => {
-    try {
-        const cart = await CartModel.findOne({
-            "user._id": new ObjectId(user),
-            "shopOwner._id": new ObjectId(shopOwner)
-        });
 
-        if (!cart) {
-            throw new Error('Cart not found');
-        }
-
-        // Xóa sản phẩm khỏi giỏ
-        cart.products = cart.products.filter(product => product._id.toString() !== productId);
-
-        // Nếu giỏ hàng rỗng thì xóa giỏ hàng
-        if (cart.products.length === 0) {
-            await CartModel.deleteOne({ _id: cart._id });
-            return { message: 'Cart deleted because it was empty' };
-        }
-
-        cart.updatedAt = Date.now();
-        await cart.save();
-        return cart;
-    } catch (error) {
-        console.log('Error in removeProductFromCart:', error);
-        throw new Error(error.message);
-    }
-};
-
-// Xóa giỏ hàng chưa test
-const deleteCart = async (user, shopOwner) => {
+// Xóa giỏ hàng đó khi đã được thanh toán 
+const deleteCartWhenPayment = async (user, shopOwner) => {
     try {
         await CartModel.deleteOne({
             "user._id": new ObjectId(user),
@@ -367,8 +337,7 @@ const deleteCartUser = async (user) => {
 };
 module.exports = {
     addToCart,
-    removeProductFromCart,
-    deleteCart,
+    deleteCartWhenPayment,
     getCarts,
     getCartByUserAndShop,
     updateQuantityProduct,

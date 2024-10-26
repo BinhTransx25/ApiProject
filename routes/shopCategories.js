@@ -201,4 +201,77 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
+/**
+ * @swagger
+ * /shops/search:
+ *   get:
+ *     summary: Get all shops by keyword or query
+ *     tags: [Shop]
+ *     description: Retrieve a list of shops that match the given keyword or query in the category name.
+ *     parameters:
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Keyword to search in the category name
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Query to search in the category name
+ *     responses:
+ *       200:
+ *         description: A list of shops matching the keyword or query
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     description: Shop ID
+ *                   name:
+ *                     type: string
+ *                     description: Shop name
+ *                   address:
+ *                     type: string
+ *                     description: Shop address
+ *                   phone:
+ *                     type: string
+ *                     description: Shop phone
+ *                   rating:
+ *                     type: number
+ *                     description: Shop rating
+ *                   images:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       description: Shop images
+ *       400:
+ *         description: Error retrieving shops by keyword or query
+ */
+
+router.get('/shops/search', async (req, res) => {
+    try {
+        // Lấy keyword và query từ query string
+        const { keyword, query } = req.query;
+
+        // Gọi hàm getShopOwnerByKeywordOrQuery từ controller
+        const result = await ControllerShopCategory.getShopOwnerByShopCategory(keyword, query);
+        res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        console.log('Error in getting shops by keyword or query:', error.message);
+
+        // Trả về lỗi
+        res.status(400).json({
+            status: false,
+            message: error.message
+        });
+    }
+});
+
 module.exports = router;
