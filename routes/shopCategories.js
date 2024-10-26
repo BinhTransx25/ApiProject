@@ -258,19 +258,16 @@ router.delete('/:id', async (req, res, next) => {
 router.get('/shops/search', async (req, res) => {
     try {
         // Lấy keyword và query từ query string
-        const { keyword, query } = req.query;
+        const { keyword } = req.query;
 
         // Gọi hàm getShopOwnerByKeywordOrQuery từ controller
-        const result = await ControllerShopCategory.getShopOwnerByShopCategory(keyword, query);
+        const result = await ControllerShopCategory.getShopOwnerByShopCategory(keyword);
         res.status(200).json({ status: true, data: result });
     } catch (error) {
-        console.log('Error in getting shops by keyword or query:', error.message);
+        console.log('Error in getting shops by keyword :', error.message);
 
         // Trả về lỗi
-        res.status(400).json({
-            status: false,
-            message: error.message
-        });
+        res.status(400).json({status: false,message: error.message});
     }
 });
 

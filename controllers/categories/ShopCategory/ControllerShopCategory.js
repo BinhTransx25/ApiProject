@@ -120,18 +120,20 @@ const remove = async (id) => {
     }
 };
 
-// Hàm lấy các shop theo từ khóa hoặc tên danh mục
-const getShopOwnerByShopCategory = async (keyword, query) => {
+// Hàm lấy các shop theo từ khóa hoặc tên danh mục và tên shop
+const getShopOwnerByShopCategory = async (keyword) => {
     try {
-        // Tìm các shop có tên danh mục trùng với keyword hoặc query
+        // Tạo điều kiện tìm kiếm theo cả shopCategory_name và name
+        const searchCriteria = {
+            $or: [
+                { 'shopCategory.shopCategory_name': { $regex: keyword, $options: 'i' } },
+                { name: { $regex: keyword , $options: 'i' } }
+            ]
+        };
+
+        // Tìm các shop có shopCategory_name hoặc name trùng với keyword hoặc query
         const shops = await ModelShopOwner
-            .find({
-                'shopCategory.shopCategory_name': { 
-                    $regex: keyword || query,  // Tìm theo từ khóa hoặc query
-                    $options: 'i'  // Không phân biệt hoa thường
-                }
-            })
-            .select('name address phone rating images distance');  // Chỉ chọn những field cần thiết
+            .find(searchCriteria)
 
         // Nếu không có shop nào phù hợp
         if (!shops || shops.length === 0) {
@@ -145,6 +147,7 @@ const getShopOwnerByShopCategory = async (keyword, query) => {
         throw new Error('Get shops by keyword or query error');
     }
 };
+
 
 
 module.exports = {  insert, update, remove,
