@@ -15,7 +15,7 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *   post:
  *     summary: Tạo đánh giá mới cho sản phẩm
  *     tags: [Reviews]
- *     description: Tạo đánh giá cho sản phẩm trong một đơn hàng. Nếu sản phẩm có số lượng lớn hơn 1, một đánh giá đại diện sẽ được áp dụng cho tất cả các sản phẩm cùng loại trong đơn hàng.
+ *     description: Tạo đánh giá cho tất cả các sản phẩm trong một đơn hàng. Mỗi đánh giá sẽ được thêm vào và countReview của shop sẽ tự động tăng.
  *     requestBody:
  *       required: true
  *       content:
@@ -24,8 +24,6 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *             type: object
  *             properties:
  *               order_id:
- *                 type: string
- *               product_id:
  *                 type: string
  *               user_id:
  *                 type: string
@@ -48,7 +46,7 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *                 status:
  *                   type: boolean
  *                 data:
- *                   type: object
+ *                   type: array
  *                   description: Danh sách các đánh giá đã được tạo.
  *       500:
  *         description: Lỗi khi tạo đánh giá
@@ -63,9 +61,10 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *                   type: string
  */
 router.post('/add', async (req, res) => {
-    const { order_id, product_id, user_id, rating, comment, image } = req.body;
+    const { order_id, user_id, rating, comment, image } = req.body;
     try {
-        let result = await ControllerProductReview.create(order_id, product_id, user_id, rating, comment, image);
+        // Gọi hàm tạo đánh giá mới và tăng countReview cho shop
+        let result = await ControllerProductReview.create(order_id, user_id, rating, comment, image);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         console.log('Tạo đánh giá sản phẩm lỗi:', error);

@@ -15,7 +15,7 @@ const ShopOwnerSchema = new Schema({
         },
     ],
     rating: { type: Number, required: true },
-    countReview: { type: Number, required: false },
+    countReview: { type: Number, required: false, default:0 },
     images: { type: Array, required: true, default: [] },
     address: { type: String, required: true },  // Địa chỉ của shop
     distance: { type: Number, default: 0 },      // Quãng đường từ shop đến địa chỉ nhận hàng
