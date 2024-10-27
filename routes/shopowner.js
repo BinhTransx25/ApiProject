@@ -165,5 +165,15 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
+router.get('/search', async (req, res) => {
+    const { keyword } = req.params;
+    try {
+        let result = await ShopOwnerController.searchShopOwner(keyword);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
 module.exports = router;
 
