@@ -165,7 +165,7 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
-router.get('/search', async (req, res) => {
+router.get('/timkiem', async (req, res) => {
     const { keyword } = req.query;
     try {
         let result = await ShopOwnerController.searchShopOwner(keyword);
