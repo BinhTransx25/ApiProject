@@ -232,9 +232,9 @@ router.patch('/confirm-order-shipper/:orderId', async (req, res) => {
 
     const { orderId } = req.params;
     const { shipperId } = req.body;
-
+    const io = req.app.get('io');
     try {
-        const result = await ShipperController.confirmOrderShipperExists(orderId, shipperId);
+        const result = await ShipperController.confirmOrderShipperExists(orderId, shipperId,io);
         if (result.message) {
             return res.status(400).json({ message: result.message });
         }
@@ -276,8 +276,9 @@ router.patch('/confirm-order-shipper/:orderId', async (req, res) => {
 router.patch('/confirm-order-finish/:orderId', async (req, res) => {
     const { orderId } = req.params;
     const { shipperId } = req.body;
+    const io = req.app.get('io');
     try {
-        const updatedOrder = await ShipperController.confirmOrderByShipperId(orderId, shipperId);
+        const updatedOrder = await ShipperController.confirmOrderByShipperId(orderId, shipperId,io);
         res.status(200).json(updatedOrder); 
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -315,8 +316,9 @@ router.patch('/confirm-order-finish/:orderId', async (req, res) => {
 router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
     const { orderId } = req.params;
     const { shipperId } = req.body;
+    const io = req.app.get('io');
     try {
-        const updatedOrder = await ShipperController.cancelOrderByShipperId(orderId, shipperId);
+        const updatedOrder = await ShipperController.cancelOrderByShipperId(orderId, shipperId,io);
         res.status(200).json(updatedOrder); 
     } catch (error) {
         res.status(500).json({ error: error.message });

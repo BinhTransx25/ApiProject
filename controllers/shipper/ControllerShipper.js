@@ -18,7 +18,7 @@ const addShipper = async (name, phone, email, address, role, rating, image, pass
         }
 
 
-        const newShipper = new Shipper({ name, phone, email, address,role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate });
+        const newShipper = new Shipper({ name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate });
         return await newShipper.save();
     } catch (error) {
         console.error('Lỗi khi thêm shipper:', error);
@@ -39,7 +39,7 @@ const getAllShippers = async () => {
 // Lấy thông tin shipper theo ID
 const getShipperById = async (id) => {
     try {
-        const shipper = await ModelShipper.findById(id,'name phone email address rating image gender birthDate vehicleBrand vehiclePlate')
+        const shipper = await ModelShipper.findById(id, 'name phone email address rating image gender birthDate vehicleBrand vehiclePlate')
 
         if (!shipper) {
             throw new Error('Shipper not found');
@@ -59,16 +59,16 @@ const updateShipper = async (id, name, phone, email, address, image, password, g
         if (!shipperInDB) {
             throw new Error('Không Tìm Thấy Shipper, Hãy thử lại');
         }
-        shipperInDB.name = name || shipperInDB.name ;
-        shipperInDB.phone = phone || shipperInDB.phone ;
-        shipperInDB.email = email || shipperInDB.email ;
-        shipperInDB.address = address || shipperInDB.address ;
-        shipperInDB.image = image || shipperInDB.image ;
-        shipperInDB.password = password || shipperInDB.password ;
-        shipperInDB.gender = gender || shipperInDB.gender ;
-        shipperInDB.birthDate = birthDate || shipperInDB.birthDate ;
-        shipperInDB.vehicleBrand = vehicleBrand || shipperInDB.vehicleBrand ;
-        shipperInDB.vehiclePlate = vehiclePlate || shipperInDB.vehiclePlate ;
+        shipperInDB.name = name || shipperInDB.name;
+        shipperInDB.phone = phone || shipperInDB.phone;
+        shipperInDB.email = email || shipperInDB.email;
+        shipperInDB.address = address || shipperInDB.address;
+        shipperInDB.image = image || shipperInDB.image;
+        shipperInDB.password = password || shipperInDB.password;
+        shipperInDB.gender = gender || shipperInDB.gender;
+        shipperInDB.birthDate = birthDate || shipperInDB.birthDate;
+        shipperInDB.vehicleBrand = vehicleBrand || shipperInDB.vehicleBrand;
+        shipperInDB.vehiclePlate = vehiclePlate || shipperInDB.vehiclePlate;
 
         let result = await shipperInDB.save();
         return result;
@@ -123,7 +123,7 @@ const changeShipperStatusUnActive = async (id) => {
  * @param {String} shipperId - ID của shipper.
  * @returns {Object} - Đơn hàng đã được cập nhật hoặc thông báo.
  */
-const confirmOrderShipperExists = async (orderId, shipperId) => {
+const confirmOrderShipperExists = async (orderId, shipperId, io) => {
     console.log('Checking order with ID:', orderId, 'for shipper with ID:', shipperId);
     try {
         // Kiểm tra xem shipperId có được cung cấp không
@@ -153,6 +153,14 @@ const confirmOrderShipperExists = async (orderId, shipperId) => {
             };
             order.status = 'Đang giao hàng';
             await order.save();
+
+            // Phát sự kiện cho socket
+            if (io) {
+                io.emit('order_assigned', { orderId, shipperId, status: order.status });
+                console.log(`Socket emitted for order ${orderId} assigned to shipper ${shipperId}`);
+            }
+
+
             return order; // Trả về đơn hàng đã cập nhật
         } else {
             // Nếu đã có shipper
@@ -171,7 +179,7 @@ const confirmOrderShipperExists = async (orderId, shipperId) => {
  * @param {String} shipperId - ID của shipper.
  * @returns {Object} - Đơn hàng đã được cập nhật hoặc thông báo.
  */
-const confirmOrderByShipperId = async (orderId, shipperId) => {
+const confirmOrderByShipperId = async (orderId, shipperId, io) => {
     console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId);
     try {
         // Tìm đơn hàng theo ID
@@ -184,6 +192,12 @@ const confirmOrderByShipperId = async (orderId, shipperId) => {
             // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
             order.status = 'Đơn hàng đã được giao hoàn tất';
             await order.save();
+
+            // Phát sự kiện cho socket
+            if (io) {
+                io.emit('order_completed', { orderId, status: order.status });
+                console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
+            }
             return order; // Trả về đơn hàng đã cập nhật
         } else {
             throw new Error('ID của shipper không đúng hoặc đơn hàng chưa có shipper');
@@ -200,7 +214,7 @@ const confirmOrderByShipperId = async (orderId, shipperId) => {
  * @param {String} shipperId - ID của shipper.
  * @returns {Object} - Đơn hàng đã được cập nhật hoặc thông báo.
  */
-const cancelOrderByShipperId = async (orderId, shipperId) => {
+const cancelOrderByShipperId = async (orderId, shipperId, io) => {
     console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId);
     try {
         // Tìm đơn hàng theo ID
@@ -213,6 +227,12 @@ const cancelOrderByShipperId = async (orderId, shipperId) => {
             // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
             order.status = 'Shipper đã hủy đơn';
             await order.save();
+            // Phát sự kiện cho socket
+            if (io) {
+                io.emit('order_cancelled', { orderId, status: order.status });
+                console.log(`Socket emitted for order ${orderId} cancelled by shipper ${shipperId}`);
+            }
+
             return order; // Trả về đơn hàng đã cập nhật
         } else {
             throw new Error('ID của shipper không đúng hoặc đơn hàng chưa có shipper');

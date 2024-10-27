@@ -2,47 +2,110 @@ module.exports = function (io) {
     io.on('connection', (socket) => {
         console.log('A client connected', socket.id);
 
-        // Khi có đơn hàng mới được tạo
-        socket.on('order_created', (orderData) => {
-            let { orderId, timeLeft } = orderData;
-
-            // Đếm ngược thời gian
-            let countdown = setInterval(() => {
-                timeLeft--;
-                socket.emit('countdown', { orderId, timeLeft });
-
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    socket.emit('order_expired', { orderId });
-                    console.log(`Order ${orderId} expired`);
-                }
-            }, 1000);
-        });
-
-        socket.on('accept_order', async (orderId) => {
+        // Khi shipper hoặc user tham gia vào một room (phòng chat cho đơn hàng)
+        socket.on('join_room', async ({ roomId, userId, shipperId }) => {
             try {
-                const updatedOrder = await confirmOrder(orderId, io);
-                socket.emit('order_accepted', { orderId, status: updatedOrder.status });
-                console.log(`Shipper accepted and confirmed order ${orderId}`);
+                const order = await Order.findById(roomId); // Giả sử bạn có một model Order
+                if (order && order.status === 'confirmed' && (order.userId === userId || order.shipperId === shipperId)) {
+                    socket.join(roomId);
+                    socket.emit('join_room_success', { roomId });
+                    console.log(`Client ${socket.id} joined room ${roomId}`);
+                } else {
+                    socket.emit('join_room_failed', { message: 'Order chưa được xác nhận hoặc bạn không có quyền tham gia phòng này.' });
+                    console.log(`Client ${socket.id} failed to join room ${roomId}`);
+                }
             } catch (error) {
-                socket.emit('accept_order_failed', { orderId, error: error.message });
-                console.error(`Failed to accept and confirm order ${orderId}`, error);
+                socket.emit('join_room_failed', { message: error.message });
+                console.error(`Failed to join room ${roomId}`, error);
             }
         });
 
+        // Nhận tin nhắn từ client và phát lại cho các client khác trong cùng room
+        socket.on('send_message', (data) => {
+            const { roomId, senderId, message, timestamp } = data;
+            io.to(roomId).emit('receive_message', { senderId, message, timestamp });
+            console.log(`Message from ${senderId} in room ${roomId}: ${message}`);
+        });
+
+
+        // Khi có đơn hàng mới được tạo và bắn socket tới shopOwner
+        socket.on('order_created', (orderData) => {
+            const shopOwnerId = orderData.shopOwnerId; // Lấy ID của cửa hàng từ orderData
+
+            // Gửi thông báo đến room của cửa hàng tương ứng
+            io.to(shopOwnerId).emit('new_order_created', orderData);
+            console.log(`New order created for shop ${shopOwnerId}: ${orderData.orderId}`);
+        });
+
+        // ShopOwner Xác nhận đơn hàng
+        socket.on('confirm_order', async (orderId) => {
+            try {
+                const order = await confirmOrder(orderId, io); // Gọi hàm confirmOrder từ controller
+                socket.emit('order_confirmed', { orderId, status: order.status });
+            } catch (error) {
+                socket.emit('error', { message: error.message });
+                console.error('Error confirming order:', error);
+            }
+        });
+
+        // ShopOwner Hủy đơn hàng
         socket.on('cancel_order', async (orderId) => {
             try {
-                const cancelledOrder = await cancelOrder(orderId);
-                socket.emit('order_cancelled', { orderId, status: cancelledOrder.status });
-                console.log(`Order ${orderId} has been cancelled`);
+                const order = await shopOwnerCancelOrder(orderId, io); // Gọi hàm shopOwnerCancelOrder từ controller
+                socket.emit('order_cancelled', { orderId, status: order.status });
             } catch (error) {
-                socket.emit('cancel_order_failed', { orderId, error: error.message });
-                console.error(`Failed to cancel order ${orderId}`, error);
+                socket.emit('error', { message: error.message });
+                console.error('Error cancelling order:', error);
             }
         });
 
+        // Hủy đơn hàng (Customer)
+        socket.on('customer_cancel_order', async (orderId) => {
+            try {
+                const order = await CustomerCancelOrder(orderId, io); // Gọi hàm CustomerCancelOrder từ controller
+                socket.emit('order_cancelled', { orderId, status: order.status });
+            } catch (error) {
+                socket.emit('error', { message: error.message });
+                console.error('Error cancelling order by customer:', error);
+            }
+        });
+
+        // Xác nhận đơn hàng có shipper
+        socket.on('confirm_order_shipper_exists', async ({ orderId, shipperId }) => {
+            try {
+                const order = await confirmOrderShipperExists(orderId, shipperId);
+                socket.emit('order_confirmed', { orderId, status: order.status });
+            } catch (error) {
+                socket.emit('error', { message: error.message });
+                console.error('Error confirming order for shipper:', error);
+            }
+        });
+
+        // Xác nhận đơn hàng theo shipper ID
+        socket.on('confirm_order_by_shipper_id', async ({ orderId, shipperId }) => {
+            try {
+                const order = await confirmOrderByShipperId(orderId, shipperId);
+                socket.emit('order_confirmed', { orderId, status: order.status });
+            } catch (error) {
+                socket.emit('error', { message: error.message });
+                console.error('Error confirming order by shipper ID:', error);
+            }
+        });
+
+        // Hủy đơn hàng theo shipper ID
+        socket.on('cancel_order_by_shipper_id', async ({ orderId, shipperId }) => {
+            try {
+                const order = await cancelOrderByShipperId(orderId, shipperId);
+                socket.emit('order_cancelled', { orderId, status: order.status });
+            } catch (error) {
+                socket.emit('error', { message: error.message });
+                console.error('Error cancelling order by shipper ID:', error);
+            }
+        });
+
+        // Khi client ngắt kết nối
         socket.on('disconnect', () => {
             console.log('A client disconnected', socket.id);
         });
     });
-}
+};
