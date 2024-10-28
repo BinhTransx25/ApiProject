@@ -165,7 +165,7 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
-router.get('/timkiem', async (req, res) => {
+router.post('/search', async (req, res) => {
     const { keyword } = req.query;
     try {
         let result = await ShopOwnerController.searchShopOwner(keyword);
@@ -174,6 +174,8 @@ router.get('/timkiem', async (req, res) => {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
+
+
 
 module.exports = router;
 
