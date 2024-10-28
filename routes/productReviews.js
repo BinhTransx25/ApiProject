@@ -4,13 +4,6 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
 
 /**
  * @swagger
- * tags:
- *   name: Reviews
- *   description: Các route liên quan đến đánh giá sản phẩm
- */
-
-/**
- * @swagger
  * /productReviews/add:
  *   post:
  *     summary: Tạo đánh giá mới cho sản phẩm
@@ -63,12 +56,12 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
 router.post('/add', async (req, res) => {
     const { order_id, user_id, rating, comment, image } = req.body;
     try {
-        // Gọi hàm tạo đánh giá mới và tăng countReview cho shop
-        let result = await ControllerProductReview.create(order_id, user_id, rating, comment, image);
-        return res.status(200).json({ status: true, data: result });
+        // Gọi hàm tạo đánh giá mới và xử lý dữ liệu
+        const result = await ControllerProductReview.create(order_id, user_id, rating, comment, image);
+        return res.status(201).json({ status: true, data: result });
     } catch (error) {
         console.log('Tạo đánh giá sản phẩm lỗi:', error);
-        return res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ status: false, message: error.message });
     }
 });
 

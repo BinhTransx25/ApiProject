@@ -4,40 +4,51 @@ const ModelProduct = require('../../products/ModelProduct');
 const ModelShopOwner = require('../../shopowner/ModelShopOwner')
 
 // Tạo đánh giá mới
+// Tạo đánh giá mới cho sản phẩm
 const create = async (order_id, user_id, rating, comment, image) => {
     if (!order_id || !user_id) {
         const errorMessage = 'Thiếu các trường bắt buộc trong request body';
         console.error(errorMessage);
         throw new Error(errorMessage);
     }
+
     try {
-        // Tìm đơn hàng và kiểm tra sự tồn tại
-        let orderInDB = await ModelOrder.findById(order_id);
-        if (!orderInDB) {
-            throw new Error('Đơn hàng không tồn tại');
+        // Lấy thông tin order để biết được các sản phẩm trong order
+        const order = await ModelOrder.findById(order_id)
+        if (!order) {
+            throw new Error('Order không tồn tại');
         }
 
         // Lấy shopOwnerId từ đơn hàng
-        const shopOwnerId = orderInDB.shopOwner._id;
+        const shopOwnerId = order.shopOwner._id;
 
-        // Tạo đánh giá cho tất cả các sản phẩm trong đơn hàng
-        const reviews = orderInDB.items.map(item => ({
-            rating,
-            comment,
-            image,
-            order_id,
-            product_id: item.product_id,
-            user_id
-        }));
+        // Tạo mảng chứa các review được tạo thành công
+        const reviews = [];
 
-        // Lưu tất cả đánh giá
-        const savedReviews = await ModelProductReview.insertMany(reviews);
+        // Duyệt qua các sản phẩm trong order và tạo review cho từng sản phẩm
+        for (let item of order.items) {
+            const product_id = item._id;
 
-        // Tăng countReview cho shopOwner
+            // Kiểm tra xem đã có review cho sản phẩm này và order này chưa
+            const existingReview = await ModelProductReview.findOne({ product_id, order_id, user_id });
+            if (!existingReview) {
+                // Tạo review cho sản phẩm này
+                const review = await ModelProductReview.create({
+                    rating,
+                    comment,
+                    image,
+                    order_id,
+                    product_id,
+                    user_id
+                });
+                reviews.push(review);
+            }
+        }
+
+        // Tăng countReview cho shop owner
         await ModelShopOwner.findByIdAndUpdate(shopOwnerId, { $inc: { countReview: 1 } });
 
-        return savedReviews;
-
+        return reviews;
     } catch (error) {
         console.log('Lỗi khi tạo đánh giá sản phẩm:', error);
         throw new Error('Lỗi khi tạo đánh giá sản phẩm');
@@ -108,6 +119,7 @@ const getReviewProductByShopId = async (shopOwnerId) => {
         throw new Error('Get reviews by shop owner ID error');
     }
 };
+
 module.exports = {
     create,
     remove,
