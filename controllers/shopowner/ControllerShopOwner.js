@@ -66,8 +66,8 @@ const searchShopOwner = async (keyword) => {
         const shops = await ModelShopOwner.find({ name: { $regex: keyword, $options: 'i' } });
         const categories = await ModelShopCategory.find({ name: { $regex: keyword, $options: 'i' } });
         const suggetions = [
-            ...shops.map(shop => ({ ...shop, type: 'shop' })),
-            ...categories.map(category => ({ ...category, type: 'category' }))
+            ...shops.map(shop => ({ ...shop.toObject(), type: 'shop' })),
+            ...categories.map(category => ({ ...category.toObject(), type: 'category' }))
         ]
         return suggetions;
     } catch (error) {
