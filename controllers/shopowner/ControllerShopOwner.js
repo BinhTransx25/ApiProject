@@ -63,10 +63,13 @@ const deleteShopOwner = async (id) => {
 
 const searchShopOwner = async (keyword) => {
     try {
-        const shop = await ModelShopOwner.find({ name: { $regex: keyword, $options: 'i' } });
+        const shops = await ModelShopOwner.find({ name: { $regex: keyword, $options: 'i' } });
         const categories = await ModelShopCategory.find({ name: { $regex: keyword, $options: 'i' } });
-        const shopOwner = shop.concat(categories);
-        return shopOwner;
+        const suggetions = [
+            ...shops.map(shop => ({ ...shop, type: 'shop' })),
+            ...categories.map(category => ({ ...category, type: 'category' }))
+        ]
+        return suggetions;
     } catch (error) {
         console.error('Lỗi khi tìm kiếm cửa hàng:', error);
         throw new Error('Lỗi khi tìm kiếm cửa hàng');
