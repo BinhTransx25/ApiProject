@@ -2,6 +2,7 @@ module.exports = function (io) {
     io.on('connection', (socket) => {
         console.log('A client connected', socket.id);
 
+        /** 
         // Khi shipper hoặc user tham gia vào một room (phòng chat cho đơn hàng)
         socket.on('join_room', async ({ roomId, userId, shipperId }) => {
             try {
@@ -26,8 +27,19 @@ module.exports = function (io) {
             io.to(roomId).emit('receive_message', { senderId, message, timestamp });
             console.log(`Message from ${senderId} in room ${roomId}: ${message}`);
         });
+        */
+        // Khi shipper hoặc user tham gia vào một room (phòng chat cho đơn hàng)
+        socket.on("join_room", async (roomID) => {
+            socket.join(roomID);
+            //console.log(`Client ${socket.id} joined room ${roomID}`);
+        });
 
-
+        // Nhận tin nhắn từ client và phát lại cho các client khác trong cùng room
+        socket.on("send_message", ({ roomID, data }) => {
+            //console.log('Room ID received:', roomID); 
+            io.to(roomID).emit("receive_message", data);
+            //console.log(`Message from ${data.name}: ${data.text}`);
+        });
         // Khi có đơn hàng mới được tạo và bắn socket tới shopOwner
         socket.on('order_created', (orderData) => {
             const shopOwnerId = orderData.shopOwnerId; // Lấy ID của cửa hàng từ orderData
