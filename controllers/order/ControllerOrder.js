@@ -15,7 +15,7 @@ const mongoose = require('mongoose');
  * @param {String} shopOwnerId - ID của chủ cửa hàng.
  * @returns {Array} - Danh sách carts đã được cập nhật của người dùng.
  */
-const addOrder = async (io, userId, order, shippingAddressId, paymentMethod, shopOwnerId, totalPrice, shipperId) => {
+const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId, totalPrice, shipperId, io) => {
     console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId });
 
     if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId) {
