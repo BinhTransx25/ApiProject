@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const FavoriteController = require('../controllers/favorites/FavoriteController');
 
-
 /**
  * @swagger
  * /favorites/add:
@@ -19,7 +18,7 @@ const FavoriteController = require('../controllers/favorites/FavoriteController'
  *               userId:
  *                 type: string
  *                 description: ID của user
- *               shopId:
+ *               shopOwnerId:
  *                 type: string
  *                 description: ID của cửa hàng
  *     responses:
@@ -34,24 +33,47 @@ const FavoriteController = require('../controllers/favorites/FavoriteController'
  *                   type: boolean
  *                 data:
  *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                         image:
+ *                           type: string
+ *                     shopOwner:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         rating:
+ *                           type: number
+ *                         images:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                         address:
+ *                           type: string
  *       500:
  *         description: Lỗi khi thêm vào danh sách yêu thích
  */
-// Thêm cửa hàng vào danh sách yêu thích
 router.post('/add', async (req, res) => {
-    const { userId, shopId } = req.body;
+    const { userId, shopOwnerId } = req.body;
     try {
-        const result = await FavoriteController.addFavorite(userId, shopId);
+        const result = await FavoriteController.addFavorite(userId, shopOwnerId);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message });
     }
 });
 
-
 /**
  * @swagger
- * /favorites/{userId}:
+ * /favorites/user/{userId}:
  *   get:
  *     summary: Lấy danh sách yêu thích của user
  *     tags: [Favorite]
@@ -79,8 +101,7 @@ router.post('/add', async (req, res) => {
  *       500:
  *         description: Lỗi khi lấy danh sách yêu thích
  */
-// Lấy danh sách yêu thích của user
-router.get('/:userId', async (req, res) => {
+router.get('/user/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
         const favorites = await FavoriteController.getFavoritesByUser(userId);
@@ -89,9 +110,50 @@ router.get('/:userId', async (req, res) => {
         return res.status(500).json({ status: false, message: error.message });
     }
 });
+
 /**
  * @swagger
- * /favorites:
+ * /favorites/shop/{shopOwnerId}:
+ *   get:
+ *     summary: Lấy danh sách yêu thích theo shop
+ *     tags: [Favorite]
+ *     parameters:
+ *       - in: path
+ *         name: shopOwnerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của shop
+ *     responses:
+ *       200:
+ *         description: Danh sách các cửa hàng yêu thích theo shop
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Lỗi khi lấy danh sách yêu thích
+ */
+router.get('/shop/:shopOwnerId', async (req, res) => {
+    const { shopOwnerId } = req.params;
+    try {
+        const favorites = await FavoriteController.getFavoritesByShopId(shopOwnerId);
+        return res.status(200).json({ status: true, data: favorites });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /favorites/delete:
  *   delete:
  *     summary: Xóa cửa hàng khỏi danh sách yêu thích của user
  *     tags: [Favorite]
@@ -105,7 +167,7 @@ router.get('/:userId', async (req, res) => {
  *               userId:
  *                 type: string
  *                 description: ID của user
- *               shopId:
+ *               shopOwnerId:
  *                 type: string
  *                 description: ID của cửa hàng
  *     responses:
@@ -125,11 +187,10 @@ router.get('/:userId', async (req, res) => {
  *       500:
  *         description: Lỗi khi xóa khỏi danh sách yêu thích
  */
-// Xóa cửa hàng khỏi danh sách yêu thích của user
 router.delete('/delete', async (req, res) => {
-    const { userId, shopId } = req.body;
+    const { userId, shopOwnerId } = req.body;
     try {
-        const result = await FavoriteController.removeFavorite(userId, shopId);
+        const result = await FavoriteController.removeFavorite(userId, shopOwnerId);
         return res.status(200).json({ status: true, message: 'Đã xóa khỏi danh sách yêu thích', data: result });
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message });
