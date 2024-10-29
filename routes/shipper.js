@@ -325,4 +325,46 @@ router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /shipper/{id}/revenue:
+ *   get:
+ *     summary: Lấy doanh thu của shipper theo ID và ngày
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Thông tin doanh thu của shipper
+ *       400:
+ *         description: Thiếu shipperId hoặc ngày
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/:id/revenue', async (req, res) => {
+    const { id } = req.params;
+    const { date } = req.query;
+
+    if (!date) {
+        return res.status(400).json({ status: false, data: 'Ngày là bắt buộc.' });
+    }
+
+    try {
+        let result = await ShipperController.getRevenueByShipper(id, date);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
 module.exports = router;

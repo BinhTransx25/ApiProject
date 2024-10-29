@@ -243,6 +243,48 @@ const cancelOrderByShipperId = async (orderId, shipperId, io) => {
     }
 };
 
+// Lấy doanh thu của shipper theo ID và ngày
+const getRevenueByShipper = async (shipperId, date) => {
+    try {
+        // Lấy các order của shipper trong ngày
+        const orders = await Order.find({
+            'shipper._id': shipperId,
+            orderDate: {
+                $gte: new Date(new Date(date).setHours(0, 0, 0, 0)),
+                $lt: new Date(new Date(date).setHours(23, 59, 59, 999))
+            }
+        });
+
+        // Tính toán các giá trị tổng hợp
+        const totalOrders = orders.length;
+        let cashTotal = 0;
+        let appTotal = 0;
+
+        orders.forEach(order => {
+            if (order.paymentMethod === 'Tiền mặt') {
+                cashTotal += order.totalPrice;
+            } else {
+                appTotal += order.totalPrice;
+            }
+        });
+
+        const totalRevenue = cashTotal + appTotal;
+
+        // Trả về kết quả
+        return {
+            date: date,
+            totalOrders: totalOrders,
+            totalRevenue: totalRevenue,
+            cashTotal: cashTotal,
+            appTotal: appTotal,
+            orders: orders // Danh sách đơn hàng
+        };
+    } catch (error) {
+        console.error('Lỗi khi lấy doanh thu của shipper:', error);
+        throw new Error('Lỗi khi lấy doanh thu của shipper');
+    }
+};
+
 module.exports = {
     addShipper,
     getAllShippers,
@@ -253,5 +295,6 @@ module.exports = {
     changeShipperStatusUnActive,
     confirmOrderShipperExists,
     confirmOrderByShipperId,
-    cancelOrderByShipperId
+    cancelOrderByShipperId,
+    getRevenueByShipper
 };
