@@ -26,8 +26,6 @@ const getShopOwnerById = async (id) => {
     }
 };
 
-
-
 // Cập nhật thông tin nhà hàng
 const updateShopOwner = async (id, name, phone, email, address, rating, image) => {
     try {
@@ -76,12 +74,45 @@ const searchShopOwner = async (keyword) => {
     }
 };
 
+// Hàm thay đổi trạng thái yêu thích
+const toggleFavorite = async (shopOwnerId) => {
+    try {
+        const shop = await ModelShopOwner.findById(shopOwnerId);
+        if (!shop) {
+            throw new Error('Shop not found');
+        }
 
+        // Đổi trạng thái favorite
+        shop.favorite = !shop.favorite;
+        await shop.save();
+
+        return {
+            message: `Favorite status changed to ${shop.favorite}`,
+            shop
+        };
+    } catch (error) {
+        console.error('Lỗi khi thay đổi trạng thái yêu thích:', error);
+        throw new Error('Lỗi khi thay đổi trạng thái yêu thích');
+    }
+};
+
+// Hàm lấy danh sách cửa hàng yêu thích
+const getFavoriteShops = async () => {
+    try {
+        const favoriteShops = await ModelShopOwner.find({ favorite: true });
+        return favoriteShops;
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách cửa hàng yêu thích:', error);
+        throw new Error('Lỗi khi lấy danh sách cửa hàng yêu thích');
+    }
+};
 
 module.exports = {
     getAllShopOwners,
     getShopOwnerById,
     updateShopOwner,
     deleteShopOwner,
-    searchShopOwner
+    searchShopOwner,
+    toggleFavorite,
+    getFavoriteShops
 };

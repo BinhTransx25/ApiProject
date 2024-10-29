@@ -25,6 +25,9 @@ require('./controllers/vouchers/ModelVouher')
 require('./controllers/Review/ProductReview/ModelProductReview')
 require('./controllers/Review/ShipperReview/ModelShipperReview')
 require('./controllers/shopowner/ControllerShopOwner')
+require('./controllers/favorites/FavoriteModel')
+
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -39,7 +42,7 @@ var voucherRouter = require('./routes/voucher');
 var productReviewRouter = require('./routes/productReviews');
 var shipperReviewRouter = require('./routes/shipperReviews');
 var shopOwnerRouter = require('./routes/shopowner');
-
+var favoriteRouter = require('./routes/favorites')
 
 var app = express();
 
@@ -78,6 +81,7 @@ app.use('/voucher', voucherRouter);
 app.use('/productReviews', productReviewRouter);
 app.use('/shipperReview', shipperReviewRouter);
 app.use('/shopOwner', shopOwnerRouter);
+app.use('/favorites', favoriteRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

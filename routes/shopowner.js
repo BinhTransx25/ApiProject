@@ -165,10 +165,118 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /shopOwner/search:
+ *   post:
+ *     summary: Tìm kiếm cửa hàng và danh mục theo từ khóa
+ *     tags: [ShopOwner]
+ *     parameters:
+ *       - in: query
+ *         name: keyword
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Từ khóa tìm kiếm cho tên cửa hàng hoặc danh mục
+ *     responses:
+ *       200:
+ *         description: Kết quả tìm kiếm cho cửa hàng và danh mục
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                         example: "shop" # Hoặc "category"
+ *       400:
+ *         description: Thiếu từ khóa tìm kiếm
+ *       500:
+ *         description: Lỗi khi tìm kiếm cửa hàng hoặc danh mục
+ */
 router.post('/search', async (req, res) => {
     const { keyword } = req.query;
     try {
         let result = await ShopOwnerController.searchShopOwner(keyword);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /shopOwner/favorite/{shopOwnerId}:
+ *   put:
+ *     summary: Thay đổi trạng thái yêu thích của cửa hàng
+ *     tags: [ShopOwner]
+ *     parameters:
+ *       - in: path
+ *         name: shopOwnerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của cửa hàng
+ *     responses:
+ *       200:
+ *         description: Thay đổi trạng thái yêu thích thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 shop:
+ *                   $ref: '#/components/schemas/ShopOwner'
+ *       404:
+ *         description: Không tìm thấy cửa hàng
+ *       500:
+ *         description: Lỗi khi thay đổi trạng thái yêu thích
+ */
+router.put('/favorite/:shopOwnerId', async (req, res) => {
+    try {
+        const { shopOwnerId } = req.params;
+        const result = await ShopOwnerController.toggleFavorite(shopOwnerId);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /shopOwner/favorites:
+ *   get:
+ *     summary: Lấy danh sách cửa hàng yêu thích
+ *     tags: [ShopOwner]
+ *     responses:
+ *       200:
+ *         description: Danh sách các cửa hàng yêu thích
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ShopOwner'
+ *       500:
+ *         description: Lỗi khi lấy danh sách cửa hàng yêu thích
+ */
+router.get('/favorites', async (req, res) => {
+    try {
+        const result = await ShopOwnerController.getFavoriteShops();
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });

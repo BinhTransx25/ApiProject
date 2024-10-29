@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-
 const ShopOwnerSchema = new Schema({
     name: { type: String, required: true },
     password: { type: String, required: true },
@@ -15,12 +14,13 @@ const ShopOwnerSchema = new Schema({
         },
     ],
     rating: { type: Number, required: true },
-    countReview: { type: Number, required: false, default:0 },
+    countReview: { type: Number, required: false, default: 0 },
     images: { type: Array, required: true, default: [] },
-    address: { type: String, required: true },  // Địa chỉ của shop
-    distance: { type: Number, default: 0 },      // Quãng đường từ shop đến địa chỉ nhận hàng
-    latitude: { type: Number, required: false },  // Vĩ độ
-    longitude: { type: Number, required: false },  // Kinh độ
+    address: { type: String, required: true },
+    distance: { type: Number, default: 0 },
+    latitude: { type: Number, required: false },
+    longitude: { type: Number, required: false },
+    favorite: { type: Boolean, default: false }, 
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });
