@@ -82,7 +82,7 @@ const getAllByProduct = async (product_id) => {
         // Tìm tất cả các đánh giá có chứa sản phẩm với ID phù hợp trong cột `product`
         const reviews = await ModelProductReview.find({
             'product._id': product_id
-        }).select('rating comment image user'); // Chỉ lấy các trường cần thiết
+        }).select('rating comment image user created_at'); // Chỉ lấy các trường cần thiết
 
         return reviews;
     } catch (error) {
