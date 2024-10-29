@@ -1,9 +1,10 @@
 const ModelShipper = require('../shipper/ModelShipper');
 const Shipper = require('../shipper/ModelShipper');
 const ModelUser = require('../users/ModelUser');
-const ModelOrder = require('../order/ModelOrder')
+const ModelOrder = require('../order/ModelOrder');
+const ObjectId = require('mongoose').Types.ObjectId;
 
-// Thêm shipper mới
+// thêm shipper mới
 const addShipper = async (name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate) => {
     try {
         // Kiểm tra email đã tồn tại trong hệ thống hay chưa
@@ -246,14 +247,24 @@ const cancelOrderByShipperId = async (orderId, shipperId, io) => {
 // Lấy doanh thu của shipper theo ID và ngày
 const getRevenueByShipper = async (shipperId, date) => {
     try {
+        // Chuyển `shipperId` thành ObjectId nếu cần thiết
+        const shipperObjectId = new ObjectId(shipperId);
+
+        // Xác định start và end của ngày
+        const startOfDay = new Date(new Date(date).setUTCHours(0, 0, 0, 0));
+        const endOfDay = new Date(new Date(date).setUTCHours(23, 59, 59, 999));
+
+        console.log("Shipper ID:", shipperObjectId);
+        console.log("Start of Day:", startOfDay);
+        console.log("End of Day:", endOfDay);
+
         // Lấy các order của shipper trong ngày
-        const orders = await Order.find({
-            'shipper._id': shipperId,
-            orderDate: {
-                $gte: new Date(new Date(date).setHours(0, 0, 0, 0)),
-                $lt: new Date(new Date(date).setHours(23, 59, 59, 999))
-            }
+        const orders = await ModelOrder.find({
+            'shipper._id': shipperObjectId,
+            orderDate: { $gte: startOfDay, $lte: endOfDay }
         });
+
+        console.log("Orders found:", orders);
 
         // Tính toán các giá trị tổng hợp
         const totalOrders = orders.length;
