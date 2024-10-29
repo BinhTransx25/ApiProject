@@ -132,8 +132,6 @@ router.post('/add', async (req, res) => {
     }
 });
 
-
-
 /**
  * @swagger
  * /productReviews/{id}:
@@ -205,7 +203,7 @@ router.delete('/:id', async (req, res) => {
  *     parameters:
  *       - name: product_id
  *         in: path
- *         description: ID của sản phẩm
+ *         description: ID của sản phẩm cần lấy đánh giá
  *         required: true
  *         schema:
  *           type: string
@@ -223,6 +221,37 @@ router.delete('/:id', async (req, res) => {
  *                   type: array
  *                   items:
  *                     type: object
+ *                     properties:
+ *                       rating:
+ *                         type: integer
+ *                       comment:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           phone:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           image:
+ *                             type: string
+ *       404:
+ *         description: Không tìm thấy đánh giá cho sản phẩm này
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
  *       500:
  *         description: Lỗi khi lấy đánh giá
  *         content:
@@ -235,16 +264,24 @@ router.delete('/:id', async (req, res) => {
  *                 error:
  *                   type: string
  */
+
 router.get('/product/:product_id', async (req, res) => {
     try {
         const { product_id } = req.params;
         const reviews = await ControllerProductReview.getAllByProduct(product_id);
+
+        // Kiểm tra xem có đánh giá nào không
+        if (reviews.length === 0) {
+            return res.status(404).json({ status: false, message: "No reviews found for this product." });
+        }
+
         return res.status(200).json({ status: true, data: reviews });
     } catch (error) {
         console.log('Get product reviews error:', error);
         return res.status(500).json({ status: false, error: error.message });
     }
 });
+
 
 /**
  * @swagger
@@ -296,7 +333,6 @@ router.get('/user/:user_id', async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
  * /productReviews/shop/{shopOwnerId}:
@@ -324,6 +360,50 @@ router.get('/user/:user_id', async (req, res) => {
  *                   type: array
  *                   items:
  *                     type: object
+ *                     properties:
+ *                       rating:
+ *                         type: integer
+ *                       comment:
+ *                         type: string
+ *                       image:
+ *                         type: string
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           phone:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           image:
+ *                             type: string
+ *                       product:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             _id:
+ *                               type: string
+ *                             name:
+ *                               type: string
+ *                             quantity:
+ *                               type: integer
+ *                             price:
+ *                               type: number
+ *       404:
+ *         description: Không tìm thấy đánh giá cho sản phẩm của chủ cửa hàng này
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
  *       500:
  *         description: Lỗi khi lấy đánh giá
  *         content:
@@ -341,11 +421,18 @@ router.get('/shop/:shopOwnerId', async (req, res) => {
     try {
         const { shopOwnerId } = req.params;
         const reviews = await ControllerProductReview.getReviewProductByShopId(shopOwnerId);
+
+        // Kiểm tra xem có đánh giá nào không
+        if (reviews.length === 0) {
+            return res.status(404).json({ status: false, message: "No reviews found for products of this shop owner." });
+        }
+
         return res.status(200).json({ status: true, data: reviews });
     } catch (error) {
         console.log('Get reviews by shop owner ID error:', error);
         return res.status(500).json({ status: false, error: error.message });
     }
 });
+
 
 module.exports = router;
