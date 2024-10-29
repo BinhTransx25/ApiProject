@@ -6,9 +6,9 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  * @swagger
  * /productReviews/add:
  *   post:
- *     summary: Tạo đánh giá mới cho sản phẩm
- *     tags: [Reviews]
- *     description: Tạo đánh giá cho tất cả các sản phẩm trong một đơn hàng. Mỗi đánh giá sẽ được thêm vào và countReview của shop sẽ tự động tăng.
+ *     summary: Tạo đánh giá mới cho đơn hàng
+ *     tags: [Product Reviews]
+ *     description: Tạo một đánh giá mới cho đơn hàng, chứa tất cả sản phẩm của đơn hàng trong cột `product`.
  *     requestBody:
  *       required: true
  *       content:
@@ -18,19 +18,29 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *             properties:
  *               order_id:
  *                 type: string
+ *                 description: ID của đơn hàng cần đánh giá
+ *                 example: "612e4b8f8e3b9c001d6a4c5e"
  *               user_id:
  *                 type: string
+ *                 description: ID của người dùng đánh giá
+ *                 example: "612e4b8f8e3b9c001d6a4c5f"
  *               rating:
  *                 type: integer
+ *                 description: Đánh giá theo thang điểm (1-5)
  *                 minimum: 1
  *                 maximum: 5
+ *                 example: 4
  *               comment:
  *                 type: string
+ *                 description: Bình luận của người dùng
+ *                 example: "Sản phẩm tốt, giao hàng nhanh"
  *               image:
  *                 type: string
+ *                 description: URL tới hình ảnh đánh giá nếu có
+ *                 example: "https://example.com/review-image.jpg"
  *     responses:
- *       200:
- *         description: Đánh giá sản phẩm được tạo thành công
+ *       201:
+ *         description: Đánh giá được tạo thành công
  *         content:
  *           application/json:
  *             schema:
@@ -38,9 +48,63 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *               properties:
  *                 status:
  *                   type: boolean
+ *                   example: true
  *                 data:
- *                   type: array
- *                   description: Danh sách các đánh giá đã được tạo.
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "612e4b8f8e3b9c001d6a4c5g"
+ *                     rating:
+ *                       type: integer
+ *                       example: 4
+ *                     comment:
+ *                       type: string
+ *                       example: "Sản phẩm tốt, giao hàng nhanh"
+ *                     image:
+ *                       type: string
+ *                       example: "https://example.com/review-image.jpg"
+ *                     order_id:
+ *                       type: string
+ *                       example: "612e4b8f8e3b9c001d6a4c5e"
+ *                     product:
+ *                       type: array
+ *                       description: Mảng sản phẩm trong đơn hàng
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           product_id:
+ *                             type: string
+ *                             example: "612e4b8f8e3b9c001d6a4c5h"
+ *                           name:
+ *                             type: string
+ *                             example: "Tên sản phẩm"
+ *                           quantity:
+ *                             type: integer
+ *                             example: 2
+ *                           price:
+ *                             type: number
+ *                             format: float
+ *                             example: 50.0
+ *                     user:
+ *                       type: object
+ *                       description: Thông tin người dùng đánh giá
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: "612e4b8f8e3b9c001d6a4c5f"
+ *                         name:
+ *                           type: string
+ *                           example: "John Doe"
+ *                         phone:
+ *                           type: string
+ *                           example: "1234567890"
+ *                         email:
+ *                           type: string
+ *                           example: "johndoe@example.com"
+ *                         image:
+ *                           type: string
+ *                           example: "https://example.com/profile-image.jpg"
  *       500:
  *         description: Lỗi khi tạo đánh giá
  *         content:
@@ -50,9 +114,12 @@ const ControllerProductReview = require('../controllers/Review/ProductReview/Con
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
+ *                   example: "Lỗi khi tạo đánh giá sản phẩm"
  */
+
 router.post('/add', async (req, res) => {
     const { order_id, user_id, rating, comment, image } = req.body;
     try {
@@ -64,6 +131,7 @@ router.post('/add', async (req, res) => {
         return res.status(500).json({ status: false, message: error.message });
     }
 });
+
 
 
 /**

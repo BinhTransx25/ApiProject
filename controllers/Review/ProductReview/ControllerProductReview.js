@@ -2,7 +2,7 @@ const ModelProductReview = require('../ProductReview/ModelProductReview'); // Gi
 const ModelOrder = require('../../order/ModelOrder'); // Model đơn hàng để kiểm tra đơn hàng hợp lệ
 const ModelProduct = require('../../products/ModelProduct');
 const ModelShopOwner = require('../../shopowner/ModelShopOwner')
-
+const ModelUser = require('../../users/ModelUser')
 // Tạo đánh giá mới
 // Tạo đánh giá mới cho sản phẩm
 const create = async (order_id, user_id, rating, comment, image) => {
@@ -14,41 +14,46 @@ const create = async (order_id, user_id, rating, comment, image) => {
 
     try {
         // Lấy thông tin order để biết được các sản phẩm trong order
-        const order = await ModelOrder.findById(order_id)
+        const order = await ModelOrder.findById(order_id);
         if (!order) {
             throw new Error('Order không tồn tại');
         }
 
-        // Lấy shopOwnerId từ đơn hàng
-        const shopOwnerId = order.shopOwner._id;
-
-        // Tạo mảng chứa các review được tạo thành công
-        const reviews = [];
-
-        // Duyệt qua các sản phẩm trong order và tạo review cho từng sản phẩm
-        for (let item of order.items) {
-            const product_id = item._id;
-
-            // Kiểm tra xem đã có review cho sản phẩm này và order này chưa
-            const existingReview = await ModelProductReview.findOne({ product_id, order_id, user_id });
-            if (!existingReview) {
-                // Tạo review cho sản phẩm này
-                const review = await ModelProductReview.create({
-                    rating,
-                    comment,
-                    image,
-                    order_id,
-                    product_id,
-                    user_id
-                });
-                reviews.push(review);
-            }
+        // Lấy thông tin user
+        const user = await ModelUser.findById(user_id);
+        if (!user) {
+            throw new Error('User không tồn tại');
         }
 
+        // Chuẩn bị dữ liệu cho các sản phẩm trong order
+        const products = order.items.map((item) => ({
+            _id: item._id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+        }));
+
+        // Tạo đánh giá cho đơn hàng
+        const review = await ModelProductReview.create({
+            rating,
+            comment,
+            image,
+            order_id,
+            product: products, // Lưu danh sách sản phẩm vào đây
+            user: {
+                _id: user._id,
+                name: user.name,
+                phone: user.phone,
+                email: user.email,
+                image: user.image
+            } // Lưu thông tin người dùng
+        });
+
         // Tăng countReview cho shop owner
+        const shopOwnerId = order.shopOwner._id;
         await ModelShopOwner.findByIdAndUpdate(shopOwnerId, { $inc: { countReview: 1 } });
 
-        return reviews;
+        return review;
     } catch (error) {
         console.log('Lỗi khi tạo đánh giá sản phẩm:', error);
         throw new Error('Lỗi khi tạo đánh giá sản phẩm');
