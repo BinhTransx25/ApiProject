@@ -107,7 +107,7 @@ const getReviewProductByShopId = async (shopOwnerId) => {
     try {
         // Lấy danh sách tất cả sản phẩm theo shopOwnerId
         const products = await ModelProduct.find({ 'shopOwner.shopOwner_id': shopOwnerId });
-        
+
         // Nếu không có sản phẩm nào, trả về mảng rỗng
         if (products.length === 0) {
             return [];
@@ -119,7 +119,7 @@ const getReviewProductByShopId = async (shopOwnerId) => {
         // Dò tất cả các đánh giá có chứa product_id trong cột `product`
         const reviews = await ModelProductReview.find({
             'product._id': { $in: productIds }
-        }).select('rating comment image user product');
+        }).select('rating comment image user product created_at');
 
         return reviews;
     } catch (error) {
