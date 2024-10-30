@@ -10,12 +10,12 @@ const FavoriteSchema = new Schema({
         email: { type: String },
         image: { type: String }
     },
-    
-    shopOwner: { 
-        
-        _id: {type: mongoose.Schema.Types.ObjectId, ref: 'shopOwner', required: true},
+
+    shopOwner: {
+
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'shopOwner', required: true },
         name: { type: String },
-        rating: { type: String },
+        rating: { type: Number },
         address: { type: String },
         images: { type: Array }
     }, // Đổi thành shopOwner
