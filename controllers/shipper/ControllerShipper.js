@@ -273,9 +273,9 @@ const getRevenueByShipper = async (shipperId, date) => {
 
         orders.forEach(order => {
             if (order.paymentMethod === 'Tiền mặt') {
-                cashTotal += order.totalPrice;
+                cashTotal += order.shippingfee;
             } else {
-                appTotal += order.totalPrice;
+                appTotal += order.shippingfee;
             }
         });
 

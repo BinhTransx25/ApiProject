@@ -126,7 +126,7 @@ const getProductsByCategoryAndShopOwner = async (category_id, shopOwner_id, keyw
 };
 
 // Thêm sản phẩm
-const insert = async (name, price, images, description, category_ids, shopOwner_id) => {
+const insert = async (name, price, images, description, category_ids, shopOwner_id, rating, soldOut) => {
     try {
         let categories = [];
         for (const category_id of category_ids) {
@@ -154,7 +154,9 @@ const insert = async (name, price, images, description, category_ids, shopOwner_
             shopOwner: {
                 shopOwner_id: shopOwnerInDB._id,
                 shopOwner_name: shopOwnerInDB.name
-            }
+            },
+            rating,
+            soldOut
         });
 
         let result = await product.save();

@@ -13,7 +13,7 @@ const ProductSchema = new Schema({
     ],
     description: { type: String, required: true },
     rating: { type: Number, required: false },
-    soldOut: { type: Number, required: false },
+    soldOut: { type: Number, required: false, default: 0 },
     create_at: { type: Date, default: Date.now },
     update_at: { type: Date, default: Date.now },
     shopOwner: { 

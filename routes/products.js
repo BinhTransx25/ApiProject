@@ -399,8 +399,8 @@ router.get('/filter', async function (req, res, next) {
  */
 router.post('/add', async (req, res, next) => {
     try {
-        const { name, price, images, categories, description, shopOwner } = req.body;
-        const product = await ControllerProduct.insert(name, price, images, description, categories, shopOwner);
+        const { name, price, images, categories, description, shopOwner, rating, soldOut } = req.body;
+        const product = await ControllerProduct.insert(name, price, images, description, categories, shopOwner, rating, soldOut);
         return res.status(200).json({ status: true, data: product });
     } catch (error) {
         console.log('Insert product error:', error);

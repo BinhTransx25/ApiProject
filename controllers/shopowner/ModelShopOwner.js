@@ -20,7 +20,6 @@ const ShopOwnerSchema = new Schema({
     distance: { type: Number, default: 0 },
     latitude: { type: Number, required: false },
     longitude: { type: Number, required: false },
-    favorite: { type: Boolean, default: false }, 
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });

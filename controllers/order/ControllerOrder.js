@@ -3,7 +3,8 @@ const ModelUser = require('../users/ModelUser');
 const ModelAddress = require('../address/User/ModelAddressUser');
 const ModelShopOwner = require('../shopowner/ModelShopOwner');
 const ModelShipper = require('../shipper/ModelShipper');
-const Notification = require('../vouchers/ModelVouher');
+const ModelVoucher = require('../vouchers/ModelVouher');
+const ModelProduct = require('../products/ModelProduct')
 const mongoose = require('mongoose');
 
 /**
@@ -15,7 +16,7 @@ const mongoose = require('mongoose');
  * @param {String} shopOwnerId - ID của chủ cửa hàng.
  * @returns {Array} - Danh sách carts đã được cập nhật của người dùng.
  */
-const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId, totalPrice, shipperId, io) => {
+const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId, totalPrice, shipperId, io, voucherId, shippingfee) => {
     console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId });
 
     if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId) {
@@ -40,6 +41,12 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             if (!shipper) throw new Error('Shipper not found');
         }
 
+        let voucher;
+        if (voucherId) {
+            voucher = await ModelVoucher.findById(voucherId);
+            if (!voucher) throw new Error('Voucher not found');
+        }
+
         // Tạo đơn hàng mới
         const newOrder = new ModelOrder({
             items: order.map(item => ({
@@ -60,13 +67,24 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             shopOwner: {
                 _id: shopOwner._id,
                 name: shopOwner.name,
-                // phone: shopOwner.phone,
                 address: shopOwner.address,
                 images: shopOwner.images,
                 rating: shopOwner.rating,
             },
             totalPrice,
-            shipper: shipper ? { _id: shipper._id, name: shipper.name, phone: shipper.phone } : null, // Thêm shipper nếu có
+            shipper: shipper ? {
+                _id: shipper._id,
+                name: shipper.name,
+                phone: shipper.phone
+            } : null,
+            voucher: voucher ? {
+                _id: voucher._id,
+                code: voucher.code,
+                discountAmount: voucher.discountAmount,
+                minimumOrderAmount: voucher.minimumOrderAmount,
+                expirationDate: voucher.expirationDate
+            } : null,
+            shippingfee
         });
 
         await newOrder.save();
@@ -75,16 +93,26 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         user.orders.push(newOrder);
         await user.save();
 
+        // Cập nhật `soldOut` cho các sản phẩm trong đơn hàng
+        for (const item of order) {
+            await ModelProduct.findByIdAndUpdate(
+                item._id,
+                { $inc: { soldOut: item.quantity } }, // Tăng `soldOut` theo số lượng đã đặt
+                { new: true }
+            );
+        }
+
         // Gửi thông báo đến cửa hàng liên quan
         io.to(shopOwner._id).emit('new_order_created', { orderId: newOrder._id, order: newOrder });
         console.log(`New order created for shop owner ${shopOwner._id}: ${newOrder._id}`);
 
-        return user.orders; // Trả về danh sách đơn hàng của người dùng
+        return newOrder; // Trả về danh sách đơn hàng của người dùng
     } catch (error) {
         console.error("Error when adding order:", error);
         throw error;
     }
 };
+
 
 
 /**
@@ -183,7 +211,6 @@ const confirmOrder = async (orderId, io) => {
     }
 };
 
-
 /**
  * Hủy đơn hàng theo orderId.
  * @param {String} orderId - ID của đơn hàng.
@@ -228,7 +255,6 @@ const shopOwnerCancelOrder = async (orderId, io) => {
         throw new Error('Error cancelling order');
     }
 };
-
 
 /**
  * Hủy đơn hàng theo orderId.
@@ -354,6 +380,7 @@ const updateOrderStatusAfterPayment = async (orderId) => {
         throw new Error('Lỗi khi hủy đơn hàng');
     }
 };
+
 module.exports = {
     addOrder, getOrderDetail, getOrdersByShop,
     confirmOrder, shopOwnerCancelOrder, deleteOrder,

@@ -3,7 +3,7 @@ const ModelOrder = require('../../order/ModelOrder'); // Model đơn hàng để
 const ModelProduct = require('../../products/ModelProduct');
 const ModelShopOwner = require('../../shopowner/ModelShopOwner')
 const ModelUser = require('../../users/ModelUser')
-// Tạo đánh giá mới
+
 // Tạo đánh giá mới cho sản phẩm
 const create = async (order_id, user_id, rating, comment, image) => {
     if (!order_id || !user_id) {
@@ -13,8 +13,8 @@ const create = async (order_id, user_id, rating, comment, image) => {
     }
 
     try {
-        // Lấy thông tin order để biết được các sản phẩm trong order
-        const order = await ModelOrder.findById(order_id);
+        // Lấy thông tin order để biết các sản phẩm trong order
+        const order = await ModelOrder.findById(order_id).populate('shopOwner');
         if (!order) {
             throw new Error('Order không tồn tại');
         }
@@ -39,19 +39,27 @@ const create = async (order_id, user_id, rating, comment, image) => {
             comment,
             image,
             order_id,
-            product: products, // Lưu danh sách sản phẩm vào đây
+            product: products,
             user: {
                 _id: user._id,
                 name: user.name,
                 phone: user.phone,
                 email: user.email,
                 image: user.image
-            } // Lưu thông tin người dùng
+            }
         });
 
-        // Tăng countReview cho shop owner
+        // Tăng countReview cho ShopOwner
         const shopOwnerId = order.shopOwner._id;
         await ModelShopOwner.findByIdAndUpdate(shopOwnerId, { $inc: { countReview: 1 } });
+
+        // Tính toán rating trung bình mới cho ShopOwner
+        const allRatings = await ModelProductReview.find({ 'product._id': { $in: products.map(p => p._id) } }, 'rating');
+        const totalRating = allRatings.reduce((sum, review) => sum + review.rating, 0);
+        const averageRating = totalRating / allRatings.length;
+
+        // Cập nhật rating trung bình cho ShopOwner
+        await ModelShopOwner.findByIdAndUpdate(shopOwnerId, { rating: averageRating });
 
         return review;
     } catch (error) {
@@ -59,6 +67,7 @@ const create = async (order_id, user_id, rating, comment, image) => {
         throw new Error('Lỗi khi tạo đánh giá sản phẩm');
     }
 };
+
 
 
 // Xóa đánh giá sản phẩm theo id
@@ -102,7 +111,7 @@ const getAllByUser = async (user_id) => {
     }
 };
 
-// ControllerProductReview.js
+//Lấy tất cả đánh giá về sản phẩm của 1 cửa hàng 
 const getReviewProductByShopId = async (shopOwnerId) => {
     try {
         // Lấy danh sách tất cả sản phẩm theo shopOwnerId
