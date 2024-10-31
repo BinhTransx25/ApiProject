@@ -27,13 +27,14 @@ const OrderSchema = new Schema({
             return this.paymentMethod === 'PayOS' || this.paymentMethod === 'ZaloPay' ? 'Chờ thanh toán' : 'Chưa giải quyết';
         }
     },
-    totalPrice:{type: Number, required: false, default: 0},
+    totalPrice: { type: Number, required: false, default: 0 },
     user: { type: Object, required: true, default: {} },
     shopOwner: { type: Object, required: true, default: {} },
     shipper: { type: Object, required: false, default: {} },
     // image: { type: Array, required: true, default: [] },
     voucher: { type: Object, require: false, default: {} },
-    shippingfee:{type: Number, required: false, default: 0},
+    shippingfee: { type: Number, required: false, default: 0 },
+    updatedAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);
