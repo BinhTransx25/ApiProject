@@ -154,7 +154,7 @@ const getOrdersByShop = async (shopId) => {
 const getOrdersByUser = async (userId) => {
     try {
         const objectIdUserId = new mongoose.Types.ObjectId(userId); // Chuyển đổi shopId thành ObjectId
-        const orders = await ModelOrder.find({ 'user._id': objectIdUserId }).sort({updatedAt:-1}); // Truy vấn bằng ObjectId
+        const orders = await ModelOrder.find({ 'user._id': objectIdUserId }).sort({ updatedAt: -1 }); // Truy vấn bằng ObjectId
         console.log('Orders', orders);
         console.log('userId:', userId);
         console.log('objectIdUserId:', objectIdUserId);
@@ -362,6 +362,7 @@ const updateOrderStatusAfterPayment = async (orderId) => {
 
         // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
         order.status = 'Chưa giải quyết';
+        order.updatedAt = Date.now();
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
