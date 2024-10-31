@@ -40,7 +40,7 @@ const getAllShippers = async () => {
 // Lấy thông tin shipper theo ID
 const getShipperById = async (id) => {
     try {
-        const shipper = await ModelShipper.findById(id, 'name phone email address rating image gender birthDate vehicleBrand vehiclePlate')
+        const shipper = await ModelShipper.findById(id, 'name phone email address rating image gender birthDate vehicleBrand vehiclePlate status')
 
         if (!shipper) {
             throw new Error('Shipper not found');
