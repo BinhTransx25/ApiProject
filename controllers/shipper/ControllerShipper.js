@@ -249,70 +249,78 @@ const getRevenueByShipper = async (shipperId, date, filter) => {
         // Chuyển `shipperId` thành ObjectId nếu cần thiết
         const shipperObjectId = new ObjectId(shipperId);
 
-        // Xác định khoảng thời gian dựa trên `filter`
+        // Khai báo biến để lưu trữ khoảng thời gian bắt đầu và kết thúc
         let startDate, endDate;
 
+        // Xác định khoảng thời gian dựa trên giá trị của `filter`
         if (filter === 'day') {
-            // Lấy đầu ngày và cuối ngày
-            startDate = new Date(new Date(date).setUTCHours(0, 0, 0, 0));
-            endDate = new Date(new Date(date).setUTCHours(23, 59, 59, 999));
+            // Nếu filter là 'day', lấy đầu ngày và cuối ngày
+            startDate = new Date(new Date(date).setUTCHours(0, 0, 0, 0)); // Thời điểm bắt đầu ngày
+            endDate = new Date(new Date(date).setUTCHours(23, 59, 59, 999)); // Thời điểm kết thúc ngày
         } else if (filter === 'week') {
-            // Lấy ngày đầu tuần (Chủ nhật) và cuối tuần (Thứ Bảy)
+            // Nếu filter là 'week', lấy ngày đầu tuần (Chủ nhật) và cuối tuần (Thứ Bảy)
             const startOfWeek = new Date(date);
             // Lấy ngày Chủ nhật của tuần đó
             startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getUTCDay());
-            startDate = new Date(startOfWeek.setUTCHours(0, 0, 0, 0));
-        
-            // Lấy ngày Thứ Bảy của tuần đó
+            startDate = new Date(startOfWeek.setUTCHours(0, 0, 0, 0)); // Thời điểm bắt đầu tuần
+            
+            // Tạo một đối tượng Date mới từ startOfWeek để tính ngày Thứ Bảy
             endDate = new Date(startOfWeek); // Tạo một đối tượng Date mới từ startOfWeek
-            endDate.setDate(endDate.getDate() + 6); // Cộng thêm 6 ngày
+            endDate.setDate(endDate.getDate() + 6); // Cộng thêm 6 ngày để có ngày Thứ Bảy
             endDate.setUTCHours(23, 59, 59, 999); // Thiết lập giờ cho endDate
-        }
-         else if (filter === 'month') {
-            // Lấy ngày đầu và cuối tháng
+        } else if (filter === 'month') {
+            // Nếu filter là 'month', lấy ngày đầu và cuối tháng
             const startOfMonth = new Date(date);
+            // Thời điểm bắt đầu tháng
             startDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth(), 1, 0, 0, 0, 0);
+            // Thời điểm kết thúc tháng
             endDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth() + 1, 0, 23, 59, 59, 999);
         } else {
+            // Nếu filter không hợp lệ, ném ra lỗi
             throw new Error("Filter không hợp lệ. Chỉ chấp nhận 'day', 'week', 'month'.");
         }
 
-        // Lấy các order của shipper trong khoảng thời gian xác định
+        // Tìm các đơn hàng của shipper trong khoảng thời gian xác định
         const orders = await ModelOrder.find({
-            'shipper._id': shipperObjectId,
-            orderDate: { $gte: startDate, $lte: endDate }
+            'shipper._id': shipperObjectId, // Lọc theo shipperId
+            orderDate: { $gte: startDate, $lte: endDate } // Lọc theo ngày đặt hàng
         });
 
         // Tính toán các giá trị tổng hợp
-        const totalOrders = orders.length;
-        let cashTotal = 0;
-        let appTotal = 0;
+        const totalOrders = orders.length; // Tổng số đơn hàng
+        let cashTotal = 0; // Tổng doanh thu bằng tiền mặt
+        let appTotal = 0; // Tổng doanh thu qua ứng dụng
 
+        // Duyệt qua từng đơn hàng để tính doanh thu
         orders.forEach(order => {
             if (order.paymentMethod === 'Tiền mặt') {
-                cashTotal += order.shippingfee;
+                cashTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán bằng tiền mặt
             } else {
-                appTotal += order.shippingfee;
+                appTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán qua ứng dụng
             }
         });
 
+        // Tính tổng doanh thu
         const totalRevenue = cashTotal + appTotal;
 
         // Trả về kết quả
         return {
-            startDate: startDate,
-            endDate: endDate,
-            totalOrders: totalOrders,
-            totalRevenue: totalRevenue,
-            cashTotal: cashTotal,
-            appTotal: appTotal,
+            startDate: startDate, // Ngày bắt đầu
+            endDate: endDate, // Ngày kết thúc
+            totalOrders: totalOrders, // Tổng số đơn hàng
+            totalRevenue: totalRevenue, // Tổng doanh thu
+            cashTotal: cashTotal, // Tổng doanh thu bằng tiền mặt
+            appTotal: appTotal, // Tổng doanh thu qua ứng dụng
             orders: orders // Danh sách đơn hàng
         };
     } catch (error) {
+        // Ghi log lỗi nếu có
         console.error('Lỗi khi lấy doanh thu của shipper:', error);
+        // Ném ra lỗi cho hàm gọi
         throw new Error('Lỗi khi lấy doanh thu của shipper');
     }
 };
+
 
 
 module.exports = {
