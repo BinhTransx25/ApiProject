@@ -36,16 +36,16 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
 
         // Xử lý thông tin shipper nếu có shipperId
         let shipper;
-        // if (shipperId) {
-        //     shipper = await ModelShipper.findById(shipperId);
-        //     if (!shipper) throw new Error('Shipper not found');
-        // }
+        if (shipperId) {
+            shipper = await ModelShipper.findById(shipperId);
+            if (!shipper) throw new Error('Shipper not found');
+        }
 
         let voucher;
-        // if (voucherId) {
-        //     voucher = await ModelVoucher.findById(voucherId);
-        //     if (!voucher) throw new Error('Voucher not found');
-        // }
+        if (voucherId) {
+            voucher = await ModelVoucher.findById(voucherId);
+            if (!voucher) throw new Error('Voucher not found');
+        }
 
         // Tạo đơn hàng mới
         const newOrder = new ModelOrder({
