@@ -326,11 +326,14 @@ router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
 });
 
 
+// hàm lấy doanh thu theo shipper_id và lọc theo ngày, tuần, tháng
+// /shipper/{id}/revenue?date={date}&filter={filter}
+
 /**
  * @swagger
  * /shipper/{id}/revenue:
  *   get:
- *     summary: Lấy doanh thu của shipper theo ID và ngày
+ *     summary: Lấy doanh thu của shipper theo ID và khoảng thời gian (ngày, tuần, tháng)
  *     parameters:
  *       - in: path
  *         name: id
@@ -343,28 +346,65 @@ router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
  *         schema:
  *           type: string
  *           format: date
+ *       - in: query
+ *         name: filter
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *         description: Lọc theo khoảng thời gian 'day', 'week', hoặc 'month'
  *     responses:
  *       200:
  *         description: Thông tin doanh thu của shipper
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     date:
+ *                       type: string
+ *                     totalOrders:
+ *                       type: integer
+ *                     totalRevenue:
+ *                       type: number
+ *                     cashTotal:
+ *                       type: number
+ *                     appTotal:
+ *                       type: number
+ *                     orders:
+ *                       type: array
+ *                       items:
+ *                         type: object
  *       400:
- *         description: Thiếu shipperId hoặc ngày
+ *         description: Thiếu shipperId, ngày hoặc bộ lọc không hợp lệ
  *       500:
  *         description: Lỗi server
  */
+
 router.get('/:id/revenue', async (req, res) => {
     const { id } = req.params;
-    const { date } = req.query;
+    const { date, filter } = req.query;
 
-    if (!date) {
-        return res.status(400).json({ status: false, data: 'Ngày là bắt buộc.' });
+    if (!date || !filter) {
+        return res.status(400).json({ status: false, data: 'Ngày và bộ lọc là bắt buộc.' });
+    }
+
+    if (!['day', 'week', 'month'].includes(filter)) {
+        return res.status(400).json({ status: false, data: "Filter không hợp lệ. Chỉ chấp nhận 'day', 'week', 'month'." });
     }
 
     try {
-        let result = await ShipperController.getRevenueByShipper(id, date);
+        const result = await ShipperController.getRevenueByShipper(id, date, filter);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
+
 
 module.exports = router;

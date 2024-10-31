@@ -244,27 +244,44 @@ const cancelOrderByShipperId = async (orderId, shipperId, io) => {
     }
 };
 
-// Lấy doanh thu của shipper theo ID và ngày
-const getRevenueByShipper = async (shipperId, date) => {
+const getRevenueByShipper = async (shipperId, date, filter) => {
     try {
         // Chuyển `shipperId` thành ObjectId nếu cần thiết
         const shipperObjectId = new ObjectId(shipperId);
 
-        // Xác định start và end của ngày
-        const startOfDay = new Date(new Date(date).setUTCHours(0, 0, 0, 0));
-        const endOfDay = new Date(new Date(date).setUTCHours(23, 59, 59, 999));
+        // Xác định khoảng thời gian dựa trên `filter`
+        let startDate, endDate;
 
-        console.log("Shipper ID:", shipperObjectId);
-        console.log("Start of Day:", startOfDay);
-        console.log("End of Day:", endOfDay);
+        if (filter === 'day') {
+            // Lấy đầu ngày và cuối ngày
+            startDate = new Date(new Date(date).setUTCHours(0, 0, 0, 0));
+            endDate = new Date(new Date(date).setUTCHours(23, 59, 59, 999));
+        } else if (filter === 'week') {
+            // Lấy ngày đầu tuần (Chủ nhật) và cuối tuần (Thứ Bảy)
+            const startOfWeek = new Date(date);
+            // Lấy ngày Chủ nhật của tuần đó
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getUTCDay());
+            startDate = new Date(startOfWeek.setUTCHours(0, 0, 0, 0));
+        
+            // Lấy ngày Thứ Bảy của tuần đó
+            endDate = new Date(startOfWeek); // Tạo một đối tượng Date mới từ startOfWeek
+            endDate.setDate(endDate.getDate() + 6); // Cộng thêm 6 ngày
+            endDate.setUTCHours(23, 59, 59, 999); // Thiết lập giờ cho endDate
+        }
+         else if (filter === 'month') {
+            // Lấy ngày đầu và cuối tháng
+            const startOfMonth = new Date(date);
+            startDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth(), 1, 0, 0, 0, 0);
+            endDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth() + 1, 0, 23, 59, 59, 999);
+        } else {
+            throw new Error("Filter không hợp lệ. Chỉ chấp nhận 'day', 'week', 'month'.");
+        }
 
-        // Lấy các order của shipper trong ngày
+        // Lấy các order của shipper trong khoảng thời gian xác định
         const orders = await ModelOrder.find({
             'shipper._id': shipperObjectId,
-            orderDate: { $gte: startOfDay, $lte: endOfDay }
+            orderDate: { $gte: startDate, $lte: endDate }
         });
-
-        console.log("Orders found:", orders);
 
         // Tính toán các giá trị tổng hợp
         const totalOrders = orders.length;
@@ -283,7 +300,8 @@ const getRevenueByShipper = async (shipperId, date) => {
 
         // Trả về kết quả
         return {
-            date: date,
+            startDate: startDate,
+            endDate: endDate,
             totalOrders: totalOrders,
             totalRevenue: totalRevenue,
             cashTotal: cashTotal,
@@ -295,6 +313,7 @@ const getRevenueByShipper = async (shipperId, date) => {
         throw new Error('Lỗi khi lấy doanh thu của shipper');
     }
 };
+
 
 module.exports = {
     addShipper,
