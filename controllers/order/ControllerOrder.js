@@ -103,7 +103,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         }
 
         // Gửi thông báo đến cửa hàng liên quan
-        io.to(shopOwner._id).emit('new_order_created', { orderId: newOrder._id, order: newOrder });
+        io.to(String(shopOwner._id)).emit('new_order_created', { orderId: newOrder._id, order: newOrder });
         console.log(`New order created for shop owner ${shopOwner._id}: ${newOrder._id}`);
 
         return newOrder; // Trả về danh sách đơn hàng của người dùng
