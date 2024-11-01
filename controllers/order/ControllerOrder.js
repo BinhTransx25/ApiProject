@@ -198,7 +198,7 @@ const confirmOrder = async (orderId, io) => {
 
         // Phát sự kiện tới tất cả các shipper nếu io tồn tại
         if (io) {
-            io.emit('order_confirmed', { orderId, status: 'Tìm người giao hàng' });
+            io.emit('order_confirmed', { order, status: 'Tìm người giao hàng' });
             console.log(`Socket emitted for order ${orderId} with status 'Tìm người giao hàng'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
