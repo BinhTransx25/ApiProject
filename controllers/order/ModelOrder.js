@@ -35,6 +35,7 @@ const OrderSchema = new Schema({
     voucher: { type: Object, require: false, default: {} },
     shippingfee: { type: Number, required: false, default: 0 },
     updatedAt: { type: Date, default: Date.now },
+    distance: { type: Number, required: false, default: 0 },
 });
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);
