@@ -31,7 +31,7 @@ module.exports = function (io) {
     // Khi shipper hoặc user tham gia vào một room (phòng chat cho đơn hàng)
     socket.on("join_room", async (roomID) => {
       socket.join(roomID);
-      //console.log(`Client ${socket.id} joined room ${roomID}`);
+      console.log(`Client ${socket.id} joined room ${roomID}`);
     });
 
     // Nhận tin nhắn từ client và phát lại cho các client khác trong cùng room
