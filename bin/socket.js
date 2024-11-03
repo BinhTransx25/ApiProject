@@ -62,6 +62,7 @@ module.exports = function (io) {
       try {
         const order = await confirmOrder(orderId, io); // Gọi hàm confirmOrder từ controller
         socket.emit("order_confirmed", { orderId, status: order.status });
+        io.emit("order_status", { orderId, status: order.status });
       } catch (error) {
         socket.emit("error", { message: error.message });
         console.error("Error confirming order:", error);
