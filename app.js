@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
+const cors = require('cors'); // Thêm cors vào đây
 // kết nối với mongodb(egOs06SnjVLToRgU)
 // Bình: gIzzTqWVtE6x4Urj
 const atlas = 'mongodb+srv://nguyenminhkhuong318:egOs06SnjVLToRgU@cluster0.vd5pl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
@@ -45,6 +46,10 @@ var shopOwnerRouter = require('./routes/shopowner');
 var favoriteRouter = require('./routes/favorites')
 
 var app = express();
+
+app.use(cors({
+  origin: ['http://localhost:9999', 'https://api-project-five-nu.vercel.app', 'https://apiproject-q86z.onrender.com'] // Các URL của frontend
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
