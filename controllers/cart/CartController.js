@@ -289,7 +289,8 @@ const getCarts = async (user_id) => {
         return cartList;
     } catch (error) {
         console.log('Error in getCarts:', error);
-        return { status: false, message: error.message };
+        // return { status: false, message: error.message };
+        throw new Error(error.message);
     }
 };
 
