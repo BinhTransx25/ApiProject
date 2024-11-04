@@ -239,7 +239,7 @@ router.patch('/customerCancel/:orderId', async (req, res) => {
 
     try {
         const cancelledOrder = await ControllerOrder.CustomerCancelOrder(orderId, io);
-        res.status(200).json(cancelledOrder);
+        res.status(200).json({status: true, data: cancelledOrder});
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
