@@ -52,7 +52,7 @@ const getProductsByCategory = async (category_id, page, limit) => {
         const products = await ModelProduct
             .find(
                 { 'categories.categoryProduct_id': category_id },
-                'name price categories description images shopOwner')
+                'name price categories description images shopOwner soldOut')
             .skip(skip)
             .limit(limit)
             .sort(sort)
