@@ -62,7 +62,7 @@ module.exports = function (io) {
       try {
         const order = await confirmOrder(orderId, io); // Gọi hàm confirmOrder từ controller
         socket.emit("order_confirmed", { orderId, status: order.status });
-        io.emit("order_status", { orderId, status: order.status });
+        socket.emit("order_status", { orderId, status: order.status });
       } catch (error) {
         socket.emit("error", { message: error.message });
         console.error("Error confirming order:", error);
@@ -74,6 +74,7 @@ module.exports = function (io) {
       try {
         const order = await shopOwnerCancelOrder(orderId, io); // Gọi hàm shopOwnerCancelOrder từ controller
         socket.emit("order_cancelled", { orderId, status: order.status });
+        socket.emit("order_status", { orderId, status: order.status });
       } catch (error) {
         socket.emit("error", { message: error.message });
         console.error("Error cancelling order:", error);
@@ -98,6 +99,7 @@ module.exports = function (io) {
         try {
           const order = await confirmOrderShipperExists(orderId, shipperId);
           socket.emit("order_confirmed", { orderId, status: order.status });
+          socket.emit("order_status", { orderId, status: order.status });
         } catch (error) {
           socket.emit("error", { message: error.message });
           console.error("Error confirming order for shipper:", error);
@@ -110,6 +112,7 @@ module.exports = function (io) {
       try {
         const order = await confirmOrderByShipperId(orderId, shipperId);
         socket.emit("order_confirmed", { orderId, status: order.status });
+        socket.emit("order_status", { orderId, status: order.status });
       } catch (error) {
         socket.emit("error", { message: error.message });
         console.error("Error confirming order by shipper ID:", error);
@@ -121,6 +124,7 @@ module.exports = function (io) {
       try {
         const order = await cancelOrderByShipperId(orderId, shipperId);
         socket.emit("order_cancelled", { orderId, status: order.status });
+        socket.emit("order_status", { orderId, status: order.status });
       } catch (error) {
         socket.emit("error", { message: error.message });
         console.error("Error cancelling order by shipper ID:", error);
