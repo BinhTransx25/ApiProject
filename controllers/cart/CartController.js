@@ -271,9 +271,9 @@ const getCarts = async (user_id) => {
         // Lấy tất cả các giỏ hàng của người dùng
         let carts = await CartModel.find({ "user._id": userObjId });
 
-        if (!carts || carts.length === 0) {
-            throw new Error('No carts found');
-        }
+        // if (!carts || carts.length === 0) {
+        //     throw new Error('No carts found');
+        // }
 
         // Trả về danh sách các giỏ hàng với thông tin cần thiết
         const cartList = carts.map(cart => ({
