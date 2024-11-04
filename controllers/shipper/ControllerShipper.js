@@ -284,7 +284,7 @@ const getRevenueByShipper = async (shipperId, date, filter) => {
         const orders = await ModelOrder.find({
             'shipper._id': shipperObjectId, // Lọc theo shipperId
             orderDate: { $gte: startDate, $lte: endDate } // Lọc theo ngày đặt hàng
-        });
+        }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
         const totalOrders = orders.length; // Tổng số đơn hàng
