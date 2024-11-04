@@ -326,7 +326,7 @@ const deleteCartWhenPayment = async (user, shopOwner) => {
 
 const deleteCartUser = async (user) => {
     try {
-        await CartModel.deleteOne({
+        await CartModel.deleteMany({
             "user._id": new ObjectId(user),
         });
         return { message: 'Cart deleted successfully' };
