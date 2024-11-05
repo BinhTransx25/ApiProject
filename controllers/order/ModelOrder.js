@@ -21,7 +21,7 @@ const OrderSchema = new Schema({
         type: String,
         enum: ['Chưa giải quyết', 'Chờ thanh toán', 'Tìm người giao hàng',
             'Người dùng đã hủy đơn', 'Đơn hàng đã được giao hoàn tất',
-            'Đang giao hàng', 'Nhà hàng đã hủy đơn', 'Shipper đã hủy đơn'],
+            'Đang giao hàng', 'Nhà hàng đã hủy đơn', 'Shipper đã hủy đơn', 'Đã đánh giá đơn hàng'],
         default: function () {
             // Tự động thiết lập trạng thái dựa trên phương thức thanh toán
             return this.paymentMethod === 'PayOS' || this.paymentMethod === 'ZaloPay' ? 'Chờ thanh toán' : 'Chưa giải quyết';
