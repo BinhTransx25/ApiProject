@@ -63,6 +63,7 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
                 _id: user._id,
                 name: user.name,
                 phone: user.phone,
+                image:user.image,
             },
             shopOwner: {
                 _id: shopOwner._id,
@@ -75,7 +76,8 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
             shipper: shipper ? {
                 _id: shipper._id,
                 name: shipper.name,
-                phone: shipper.phone
+                phone: shipper.phone,
+                image: shipper.image,
             } : null,
             voucher: voucher ? {
                 _id: voucher._id,
