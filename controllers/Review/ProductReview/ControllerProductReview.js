@@ -18,7 +18,7 @@ const create = async (order_id, user_id, rating, comment, image) => {
         if (!order) {
             throw new Error('Order không tồn tại');
         }
-
+        
         // Lấy thông tin user
         const user = await ModelUser.findById(user_id);
         if (!user) {
@@ -60,6 +60,10 @@ const create = async (order_id, user_id, rating, comment, image) => {
 
         // Cập nhật rating trung bình cho ShopOwner
         await ModelShopOwner.findByIdAndUpdate(shopOwnerId, { rating: averageRating });
+        
+        // Cập nhật trạng thái của đơn hàng thành "Đã đánh giá đơn hàng"
+        order.status = 'Đã đánh giá đơn hàng';
+        await order.save();
 
         return review;
     } catch (error) {
