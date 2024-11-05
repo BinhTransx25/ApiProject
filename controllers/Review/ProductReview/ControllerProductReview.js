@@ -53,6 +53,11 @@ const create = async (order_id, user_id, rating, comment, image) => {
         const shopOwnerId = order.shopOwner._id;
         await ModelShopOwner.findByIdAndUpdate(shopOwnerId, { $inc: { countReview: 1 } });
 
+        // Cập nhật rating cho sản phẩm
+        for (const product of products) {
+            await ModelProduct.findByIdAndUpdate(product._id, { $inc: { rating: 1 } });
+        }
+
         // Tính toán rating trung bình mới cho ShopOwner
         const allRatings = await ModelProductReview.find({ 'product._id': { $in: products.map(p => p._id) } }, 'rating');
         const totalRating = allRatings.reduce((sum, review) => sum + review.rating, 0);
