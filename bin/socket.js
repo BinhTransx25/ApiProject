@@ -113,7 +113,7 @@ module.exports = function (io) {
     // Xác nhận đơn hàng theo shipper ID
     socket.on("confirm_order_by_shipper_id", async ({ orderId, shipperId }) => {
       try {
-        const order = await confirmOrderByShipperId(orderId, shipperId);
+        const order = await confirmOrderByShipperId(orderId, shipperId,io);
         socket.emit("order_confirmed", { orderId, status: order.status });
         socket.emit("order_status", { orderId, status: order.status });
       } catch (error) {
