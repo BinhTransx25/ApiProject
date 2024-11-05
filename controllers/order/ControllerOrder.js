@@ -77,7 +77,6 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
                 _id: shipper._id,
                 name: shipper.name,
                 phone: shipper.phone,
-                image: shipper.image,
             } : null,
             voucher: voucher ? {
                 _id: voucher._id,

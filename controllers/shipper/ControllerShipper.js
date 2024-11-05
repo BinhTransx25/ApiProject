@@ -150,7 +150,8 @@ const confirmOrderShipperExists = async (orderId, shipperId, io) => {
             order.shipper = {
                 _id: shipper._id,
                 name: shipper.name,
-                phone: shipper.phone
+                phone: shipper.phone,
+                image: shipper.image,
             };
             order.status = 'Đang giao hàng';
             await order.save();
