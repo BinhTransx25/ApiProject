@@ -227,5 +227,26 @@ const checkUser = async (email) => {
 
     }
 }
+// Cập nhật thông tin nhà hàng
+const updateUser = async (id, name, phone, email, password, image) => {
+    try {
 
-module.exports = { register, login, loginWithSocial, verifyEmail, resetPassword, checkUser };
+        const userInDB = await ModelUser.findById(id);
+        if (!userInDB) {
+            throw new Error('Không Tìm Thấy Tài Khoản, Hãy thử lại');
+        }
+        userInDB.name = name || userInDB.name;
+        userInDB.phone = phone || userInDB.phone;
+        userInDB.email = email || userInDB.email;
+        userInDB.address = password || userInDB.password;
+        userInDB.image = image || userInDB.image;
+     
+
+        let result = await userInDB.save();
+        return result;
+    } catch (error) {
+        console.error('Lỗi khi cập nhật thông tin cửa hàng:', error);
+        throw new Error('Lỗi khi cập nhật thông tin cửa hàng');
+    }
+};
+module.exports = { register, login, loginWithSocial, verifyEmail, resetPassword, checkUser,updateUser };

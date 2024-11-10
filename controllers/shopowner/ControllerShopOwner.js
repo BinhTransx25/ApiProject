@@ -34,12 +34,12 @@ const updateShopOwner = async (id, name, phone, email, address, rating, image) =
         if (!shopOwnerInDB) {
             throw new Error('Không Tìm Thấy Cửa Hàng, Hãy thử lại');
         }
-        shopOwnerInDB.name = name || shipperInDB.name;
-        shopOwnerInDB.phone = phone || shipperInDB.phone;
-        shopOwnerInDB.email = email || shipperInDB.email;
-        shopOwnerInDB.address = address || shipperInDB.address;
-        shopOwnerInDB.image = image || shipperInDB.image;
-        shopOwnerInDB.password = rating || shipperInDB.password;
+        shopOwnerInDB.name = name || shopOwnerInDB.name;
+        shopOwnerInDB.phone = phone || shopOwnerInDB.phone;
+        shopOwnerInDB.email = email || shopOwnerInDB.email;
+        shopOwnerInDB.address = address || shopOwnerInDB.address;
+        shopOwnerInDB.image = image || shopOwnerInDB.image;
+        shopOwnerInDB.password = rating || shopOwnerInDB.password;
 
         let result = await shopOwnerInDB.save();
         return result;
