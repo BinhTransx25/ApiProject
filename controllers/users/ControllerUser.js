@@ -146,7 +146,7 @@ const login = async (identifier, password) => {
         );
 
         // Trả về thông tin người dùng và token
-        return { _id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone, token };
+        return { _id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone, token, image: user.image, password: user.password };
     } catch (error) {
         console.error('Lỗi trong quá trình đăng nhập:', error);
         throw new Error('Lỗi khi đăng nhập người dùng');
