@@ -48,7 +48,7 @@ const ControllerUser = require('../controllers/users/ControllerUser');
 router.post('/register', async (req, res, next) => {
   const { name, email, password, phone, image, rating, role, shopCategory_ids, address, latitude, longitude } = req.body;
   try {
-    let result = await ControllerUser.register(name, email, password, phone,image, rating, role, shopCategory_ids, address, latitude, longitude);
+    let result = await ControllerUser.register(name, email, password, phone, image, rating, role, shopCategory_ids, address, latitude, longitude);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during registration:', error);
@@ -218,6 +218,73 @@ router.post('/check-user', async (req, res, next) => {
   } catch (error) {
     console.error('Error during check email:', error);
     return res.status(500).json({ status: false, message: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /update/{id}:
+ *   put:
+ *     summary: Cập nhật thông tin người dùng
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của người dùng
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Tên người dùng
+ *               phone:
+ *                 type: string
+ *                 description: Số điện thoại
+ *               email:
+ *                 type: string
+ *                 description: Email
+ *               password:
+ *                 type: string
+ *                 description: Mật khẩu
+ *               image:
+ *                 type: string
+ *                 description: URL ảnh của người dùng
+ *     responses:
+ *       200:
+ *         description: Thông tin người dùng đã được cập nhật
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       404:
+ *         description: Không tìm thấy người dùng
+ *       500:
+ *         description: Lỗi khi cập nhật thông tin người dùng
+ */
+router.put('/update/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, email, password, image } = req.body;
+    const user = await ControllerUser.updateUser(id, name, phone, email, password, image);
+    return res.status(200).json({ status: true, data: user });
+  } catch (error) {
+    if (error.message === 'Không Tìm Thấy Tài Khoản, Hãy thử lại') {
+      return res.status(404).json({ status: false, message: error.message });
+    }
+    return res.status(500).json({ status: false, message: 'Lỗi khi cập nhật thông tin người dùng' });
   }
 });
 
