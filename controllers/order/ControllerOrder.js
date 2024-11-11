@@ -71,8 +71,6 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
                 address: shopOwner.address,
                 images: shopOwner.images,
                 rating: shopOwner.rating,
-                latitude: shopOwner.latitude,
-                longitude:shopOwner.longitude,
             },
             totalPrice,
             shipper: shipper ? {
