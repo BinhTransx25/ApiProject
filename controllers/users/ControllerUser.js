@@ -153,7 +153,6 @@ const login = async (identifier, password) => {
     }
 };
 
-
 const loginWithSocial = async (userInfo) => {
     try {
         let userInDB = await ModelUser.findOne({ email: userInfo.email });
@@ -249,4 +248,16 @@ const updateUser = async (id, name, phone, email, password, image) => {
         throw new Error('Lỗi khi cập nhật thông tin cửa hàng');
     }
 };
-module.exports = { register, login, loginWithSocial, verifyEmail, resetPassword, checkUser, updateUser };
+
+// Lấy thông tin tất cả các nhà hàng
+const getAllUsers = async () => {
+    try {
+        return await ModelUser.find();
+    } catch (error) {
+        console.error('Lỗi khi lấy thông tin tất cả các cửa hàng:', error);
+        throw new Error('Lỗi khi lấy thông tin tất cả các cửa hàng');
+    }
+};
+module.exports = { register, login,
+     loginWithSocial, verifyEmail, resetPassword,
+      checkUser, updateUser, getAllUsers };

@@ -288,4 +288,13 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
+router.get('/', async (req, res) => {
+  try {
+      let result = await ControllerUser.getAllUsers();
+      return res.status(200).json({ status: true, data: result });
+  } catch (error) {
+      return res.status(500).json({ status: false, data: error.message });
+  }
+});
+
 module.exports = router;
