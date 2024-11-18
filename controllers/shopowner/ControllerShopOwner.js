@@ -14,12 +14,12 @@ const getAllShopOwners = async () => {
 // Lấy thông tin nhà hàng theo ID
 const getShopOwnerById = async (id) => {
     try {
-        const shipper = await ModelShopOwner.findById(id, 'name phone email shopCategory address rating countReview images distance')
+        const shopowner = await ModelShopOwner.findById(id, 'name phone email shopCategory address rating countReview images distance')
 
-        if (!shipper) {
+        if (!shopowner) {
             throw new Error('Nhà hàng not found');
         }
-        return shipper;
+        return shopowner;
     } catch (error) {
         console.error('Lỗi khi lấy thông tin nhà hàng theo ID:', error);
         throw new Error('Lỗi khi lấy thông tin nhà hàng theo ID');
