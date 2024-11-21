@@ -27,7 +27,7 @@ const getShopOwnerById = async (id) => {
 };
 
 // Cập nhật thông tin nhà hàng
-const updateShopOwner = async (id, name, phone, email, address, rating, image) => {
+const updateShopOwner = async (id, name, phone, email, address, rating, images) => {
     try {
 
         const shopOwnerInDB = await ModelShopOwner.findById(id);
@@ -38,7 +38,7 @@ const updateShopOwner = async (id, name, phone, email, address, rating, image) =
         shopOwnerInDB.phone = phone || shopOwnerInDB.phone;
         shopOwnerInDB.email = email || shopOwnerInDB.email;
         shopOwnerInDB.address = address || shopOwnerInDB.address;
-        shopOwnerInDB.image = image || shopOwnerInDB.image;
+        shopOwnerInDB.images = images || shopOwnerInDB.images;
         shopOwnerInDB.password = rating || shopOwnerInDB.password;
 
         let result = await shopOwnerInDB.save();
