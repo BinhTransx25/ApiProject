@@ -54,12 +54,6 @@ module.exports = function (io) {
       );
     });
 
-    // Khi có đơn hàng mới được tạo và bắn socket tới shipper
-    socket.on("order_shipper", (Data) => {
-      io.emit("order_shipper_receive", Data);
-      console.log(Data);
-    });
-
     // ShopOwner Xác nhận đơn hàng
     socket.on("confirm_order", async (orderId) => {
       try {

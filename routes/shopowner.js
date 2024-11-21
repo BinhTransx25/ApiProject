@@ -126,8 +126,8 @@ router.get('/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, phone, email, address, rating, image } = req.body;
-        const shopOwner = await ShopOwnerController.updateShopOwner(id, name, phone, email, address, rating, image);
+        const { name, phone, email, address, rating, images } = req.body;
+        const shopOwner = await ShopOwnerController.updateShopOwner(id, name, phone, email, address, rating, images);
         return res.status(200).json({ status: true, data: shopOwner });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
