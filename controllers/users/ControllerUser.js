@@ -244,8 +244,8 @@ const updateUser = async (id, name, phone, email, password, image) => {
         let result = await userInDB.save();
         return result;
     } catch (error) {
-        console.error('Lỗi khi cập nhật thông tin cửa hàng:', error);
-        throw new Error('Lỗi khi cập nhật thông tin cửa hàng');
+        console.error('Lỗi khi cập nhật thông tin khách hàng:', error);
+        throw new Error('Lỗi khi cập nhật thông tin khách hàng');
     }
 };
 
@@ -258,6 +258,21 @@ const getAllUsers = async () => {
         throw new Error('Lỗi khi lấy thông tin tất cả các cửa hàng');
     }
 };
+
+// Lấy thông tin nhà hàng theo ID
+const getUserById = async (id) => {
+    try {
+        const user = await ModelUser.findById(id, 'name phone email address orders carts image')
+
+        if (!user) {
+            throw new Error('User không tìm thấy');
+        }
+        return user;
+    } catch (error) {
+        console.error('Lỗi khi lấy thông tin người dùng theo ID:', error);
+        throw new Error('Lỗi khi lấy thông tin người dùng theo ID');
+    }
+};
 module.exports = { register, login,
      loginWithSocial, verifyEmail, resetPassword,
-      checkUser, updateUser, getAllUsers };
+      checkUser, updateUser, getAllUsers,getUserById };

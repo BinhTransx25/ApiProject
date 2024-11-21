@@ -297,4 +297,38 @@ router.get('/', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /{id}:
+ *   get:
+ *     summary: Lấy thông tin user theo ID
+ *     tags: [ShopOwner]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của user
+ *     responses:
+ *       200:
+ *         description: Thông tin user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ShopOwner'
+ *       404:
+ *         description: Không tìm thấy user
+ *       500:
+ *         description: Lỗi khi lấy thông tin user
+ */
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+      let result = await ControllerUser.getUserById(id);
+      return res.status(200).json({ status: true, data: result });
+  } catch (error) {
+      return res.status(500).json({ status: false, data: error.message });
+  }
+});
 module.exports = router;
