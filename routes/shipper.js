@@ -324,8 +324,6 @@ router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
-
 // hàm lấy doanh thu theo shipper_id và lọc theo ngày, tuần, tháng
 // /shipper/{id}/revenue?date={date}&filter={filter}
 

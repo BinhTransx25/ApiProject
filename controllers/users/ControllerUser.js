@@ -273,6 +273,16 @@ const getUserById = async (id) => {
         throw new Error('Lỗi khi lấy thông tin người dùng theo ID');
     }
 };
+
+// Xóa User
+const deleteUser = async (id) => {
+    try {
+        return await ModelUser.findByIdAndDelete(id);
+    } catch (error) {
+        console.error('Lỗi khi xóa user:', error);
+        throw new Error('Lỗi khi xóa user');
+    }
+};
 module.exports = { register, login,
      loginWithSocial, verifyEmail, resetPassword,
-      checkUser, updateUser, getAllUsers,getUserById };
+      checkUser, updateUser, getAllUsers,getUserById, deleteUser };

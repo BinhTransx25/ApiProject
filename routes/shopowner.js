@@ -282,8 +282,81 @@ router.get('/favorites', async (req, res) => {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
+/**
+ * @swagger
+ * /shopOwner/{id}/revenue:
+ *   get:
+ *     summary: Lấy doanh thu của shipper theo ID và khoảng thời gian (ngày, tuần, tháng)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: filter
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *         description: Lọc theo khoảng thời gian 'day', 'week', hoặc 'month'
+ *     responses:
+ *       200:
+ *         description: Thông tin doanh thu của shipper
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     date:
+ *                       type: string
+ *                     totalOrders:
+ *                       type: integer
+ *                     totalRevenue:
+ *                       type: number
+ *                     cashTotal:
+ *                       type: number
+ *                     appTotal:
+ *                       type: number
+ *                     orders:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       400:
+ *         description: Thiếu shipperId, ngày hoặc bộ lọc không hợp lệ
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/:id/revenue', async (req, res) => {
+    const { id } = req.params;
+    const { date, filter } = req.query;
 
+    if (!date || !filter) {
+        return res.status(400).json({ status: false, data: 'Ngày và bộ lọc là bắt buộc.' });
+    }
 
+    if (!['day', 'week', 'month'].includes(filter)) {
+        return res.status(400).json({ status: false, data: "Filter không hợp lệ. Chỉ chấp nhận 'day', 'week', 'month'." });
+    }
+
+    try {
+        const result = await ShopOwnerController.getRevenueByShopOwner(id, date, filter);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
 
 module.exports = router;
 

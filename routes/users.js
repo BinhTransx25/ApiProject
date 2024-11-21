@@ -331,4 +331,29 @@ router.get('/:id', async (req, res) => {
       return res.status(500).json({ status: false, data: error.message });
   }
 });
+
+/**
+ * @swagger
+ * /delete/{id}:
+ *   delete:
+ *     summary: Xóa user theo ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User đã bị xóa
+ */
+router.delete('/delete/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+      let result = await ControllerUser.deleteUser(id);
+      return res.status(200).json({ status: true, data: result });
+  } catch (error) {
+      return res.status(500).json({ status: false, data: error.message });
+  }
+});
 module.exports = router;

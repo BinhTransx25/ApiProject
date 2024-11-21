@@ -152,7 +152,29 @@ const getOrdersByShop = async (shopId) => {
         throw new Error('Error when getting orders');
     }
 };
-
+/**
+ * Lấy danh sách đơn hàng theo shopId.
+ * @param {String} shipperId - ID của chủ shipper.
+ * @returns {Array} - Danh sách đơn hàng.
+ */
+const getOrdersByShipper = async (shipperId) => {
+    try {
+        const objectIdShipperId = new mongoose.Types.ObjectId(shipperId); // Chuyển đổi shopId thành ObjectId
+        const orders = await ModelOrder.find({ 'shipper._id': objectIdShipperId }); // Truy vấn bằng ObjectId
+        console.log('Orders', orders);
+        console.log('shipperId:', shipperId);
+        console.log('objectIdShipperId:', objectIdShipperId);
+        return orders;
+    } catch (error) {
+        console.error('Error when getting orders:', error);
+        throw new Error('Error when getting orders');
+    }
+};
+/**
+ * Lấy danh sách đơn hàng theo shopId.
+ * @param {String} userId - ID của chủ shipper.
+ * @returns {Array} - Danh sách đơn hàng.
+ */
 const getOrdersByUser = async (userId) => {
     try {
         const objectIdUserId = new mongoose.Types.ObjectId(userId); // Chuyển đổi shopId thành ObjectId
@@ -389,5 +411,5 @@ module.exports = {
     confirmOrder, shopOwnerCancelOrder, deleteOrder,
     updateOrderStatus, CustomerCancelOrder,
     updateOrderStatusAfterPayment,
-    getOrdersByUser
+    getOrdersByUser, getOrdersByShipper
 };
