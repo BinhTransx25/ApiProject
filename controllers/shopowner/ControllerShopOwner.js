@@ -156,6 +156,7 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
         const totalOrders = orders.length; // Tổng số đơn hàng
         let cashTotal = 0; // Tổng doanh thu bằng tiền mặt
         let appTotal = 0; // Tổng doanh thu qua ứng dụng
+        let shippingfeeTotal = 0;
 
         // Duyệt qua từng đơn hàng để tính doanh thu
         orders.forEach(order => {
@@ -164,6 +165,13 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
             } else {
                 appTotal += order.totalPrice; // Cộng doanh thu từ đơn hàng thanh toán qua ứng dụng
             }
+        });
+
+         // Duyệt qua từng đơn hàng để tính shippingfee
+         orders.forEach(order => {
+            if (order.shippingfee != null) {
+                shippingfeeTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán bằng tiền mặt
+            } 
         });
 
         // Tính tổng doanh thu
@@ -177,6 +185,7 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
             totalRevenue: totalRevenue, // Tổng doanh thu
             cashTotal: cashTotal, // Tổng doanh thu bằng tiền mặt
             appTotal: appTotal, // Tổng doanh thu qua ứng dụng
+            shippingfeeTotal: shippingfeeTotal,
             orders: orders // Danh sách đơn hàng
         };
     } catch (error) {
@@ -187,6 +196,41 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
     }
 };
 
+const changePassword = async (email, oldPassword, newPassword) => {
+    try {
+      // Tìm admin theo email
+      const shopownerInDB = await ModelShopOwner.findOne({ email });
+      if (!shopownerInDB) {
+        throw new Error('Email không tồn tại');
+      }
+  
+      // Kiểm tra mật khẩu cũ
+      if (shopownerInDB.password.startsWith('$2b$')) {
+        // Nếu mật khẩu đã được băm
+        const checkPassword = await bcrypt.compare(oldPassword, shopownerInDB.password);
+        if (!checkPassword) {
+          throw new Error('Tài khoản hoặc mật khẩu không đúng');
+        }
+      } else {
+        // Nếu mật khẩu là plaintext
+        if (shopownerInDB.password !== oldPassword) {
+          throw new Error('Tài khoản hoặc mật khẩu không đúng');
+        }
+      }
+  
+      // Băm mật khẩu mới
+      const salt = await bcrypt.genSalt(10);
+      shopownerInDB.password = await bcrypt.hash(newPassword, salt);
+  
+      // Lưu mật khẩu mới vào cơ sở dữ liệu
+      await shopownerInDB.save();
+  
+      return { message: 'Password changed successfully' };
+    } catch (error) {
+      console.error('Error changing password:', error);
+      throw new Error('Error changing password');
+    }
+  };
 module.exports = {
     getAllShopOwners,
     getShopOwnerById,
@@ -195,5 +239,6 @@ module.exports = {
     searchShopOwner,
     toggleFavorite,
     getFavoriteShops,
-    getRevenueByShopOwner
+    getRevenueByShopOwner,
+    changePassword
 };
