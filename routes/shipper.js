@@ -325,7 +325,7 @@ router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
     }
 });
 // hàm lấy doanh thu theo shipper_id và lọc theo ngày, tuần, tháng
-// /shipper/{id}/revenue?date={date}&filter={filter}
+// /shipper/{shipperId}/revenue?date={date}&filter={filter}
 
 /**
  * @swagger
@@ -384,8 +384,8 @@ router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
  *         description: Lỗi server
  */
 
-router.get('/:id/revenue', async (req, res) => {
-    const { id } = req.params;
+router.get('/:shipperId/revenue', async (req, res) => {
+    const { shipperId } = req.params;
     const { date, filter } = req.query;
 
     if (!date || !filter) {
@@ -397,12 +397,20 @@ router.get('/:id/revenue', async (req, res) => {
     }
 
     try {
-        const result = await ShipperController.getRevenueByShipper(id, date, filter);
+        const result = await ShipperController.getRevenueByShipper(shipperId, date, filter);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
 
-
+router.post('/change-password', async (req, res) => {
+    const {email, oldPassword, newPassword } = req.body;
+    try {
+      const result = await ShipperController.changePassword(email, oldPassword, newPassword);
+      return res.status(200).json({ status: true, message: result.message });
+    } catch (error) {
+      return res.status(500).json({ status: false, message: error.message });
+    }
+  });
 module.exports = router;

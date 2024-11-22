@@ -284,7 +284,7 @@ router.get('/favorites', async (req, res) => {
 });
 /**
  * @swagger
- * /shopOwner/{id}/revenue:
+ * /shopOwner/{shopId}/revenue:
  *   get:
  *     summary: Lấy doanh thu của shipper theo ID và khoảng thời gian (ngày, tuần, tháng)
  *     parameters:
@@ -338,8 +338,8 @@ router.get('/favorites', async (req, res) => {
  *       500:
  *         description: Lỗi server
  */
-router.get('/:id/revenue', async (req, res) => {
-    const { id } = req.params;
+router.get('/:shopId/revenue', async (req, res) => {
+    const { shopId } = req.params;
     const { date, filter } = req.query;
 
     if (!date || !filter) {
@@ -351,12 +351,21 @@ router.get('/:id/revenue', async (req, res) => {
     }
 
     try {
-        const result = await ShopOwnerController.getRevenueByShopOwner(id, date, filter);
+        const result = await ShopOwnerController.getRevenueByShopOwner(shopId, date, filter);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
 
+router.post('/change-password', async (req, res) => {
+    const {email, oldPassword, newPassword } = req.body;
+    try {
+      const result = await ShopOwnerController.changePassword(email, oldPassword, newPassword);
+      return res.status(200).json({ status: true, message: result.message });
+    } catch (error) {
+      return res.status(500).json({ status: false, message: error.message });
+    }
+  });
 module.exports = router;
 
