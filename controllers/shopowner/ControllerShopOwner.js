@@ -2,7 +2,7 @@ const ModelShopCategory = require("../categories/ShopCategory/ModelShopCategory"
 const ModelShopOwner = require("./ModelShopOwner");
 const ModelOrder = require('../order/ModelOrder');
 const ObjectId = require('mongoose').Types.ObjectId;
-
+const bcrypt = require('bcryptjs');
 
 // Lấy thông tin tất cả các nhà hàng
 const getAllShopOwners = async () => {

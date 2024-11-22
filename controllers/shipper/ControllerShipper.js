@@ -3,6 +3,7 @@ const Shipper = require('../shipper/ModelShipper');
 const ModelUser = require('../users/ModelUser');
 const ModelOrder = require('../order/ModelOrder');
 const ObjectId = require('mongoose').Types.ObjectId;
+const bcrypt = require('bcryptjs');
 
 // thêm shipper mới
 const addShipper = async (name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate) => {
