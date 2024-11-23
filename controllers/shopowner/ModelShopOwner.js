@@ -17,6 +17,15 @@ const ShopOwnerSchema = new Schema({
     countReview: { type: Number, required: false, default: 0 },
     images: { type: Array, required: true, default: [] },
     address: { type: String, required: true },
+    openingHours: {
+        open: { type: String, required: false }, // Giờ mở cửa (VD: "08:00")
+        close: { type: String, required: false }, // Giờ đóng cửa (VD: "22:00")
+    },
+    status: { 
+        type: String, 
+        enum: ['Mở cửa', 'Đóng cửa', 'Ngưng hoạt động'], 
+        default: 'Đóng cửa' 
+    },
     distance: { type: Number, default: 0 },
     latitude: { type: Number, required: false },
     longitude: { type: Number, required: false },

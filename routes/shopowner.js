@@ -359,13 +359,58 @@ router.get('/:shopId/revenue', async (req, res) => {
 });
 
 router.post('/change-password', async (req, res) => {
-    const {email, oldPassword, newPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
     try {
-      const result = await ShopOwnerController.changePassword(email, oldPassword, newPassword);
-      return res.status(200).json({ status: true, message: result.message });
+        const result = await ShopOwnerController.changePassword(email, oldPassword, newPassword);
+        return res.status(200).json({ status: true, message: result.message });
     } catch (error) {
-      return res.status(500).json({ status: false, message: error.message });
+        return res.status(500).json({ status: false, message: error.message });
     }
-  });
+});
+
+// Cập nhật shopCategory
+router.put("/shopCategory/:shopOwnerId", async (req, res) => {
+    try {
+        const { shopOwnerId } = req.params;
+        const { shopCategory_ids } = req.body; // Danh sách shopCategory từ client
+
+        // Gọi hàm controller để cập nhật
+        const result = await ShopOwnerController.updateShopCategory(shopOwnerId, shopCategory_ids);
+
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+});
+
+router.put('/open/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        let result = await ShopOwnerController.changeShopOwnerStatusOpen(id);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+router.put('/closed/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        let result = await ShopOwnerController.changeShopOwnerStatusClosed(id);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+router.put('/unactive/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        let result = await ShopOwnerController.changeShopOwnerStatusUnactive(id);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
 module.exports = router;
 

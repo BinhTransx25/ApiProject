@@ -30,7 +30,7 @@ const getShopOwnerById = async (id) => {
 };
 
 // Cập nhật thông tin nhà hàng
-const updateShopOwner = async (id, name, phone, email, address, rating, images) => {
+const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours) => {
     try {
 
         const shopOwnerInDB = await ModelShopOwner.findById(id);
@@ -43,6 +43,7 @@ const updateShopOwner = async (id, name, phone, email, address, rating, images) 
         shopOwnerInDB.address = address || shopOwnerInDB.address;
         shopOwnerInDB.images = images || shopOwnerInDB.images;
         shopOwnerInDB.password = rating || shopOwnerInDB.password;
+        shopOwnerInDB.openingHours = openingHours || shopOwnerInDB.openingHours;
 
         let result = await shopOwnerInDB.save();
         return result;
@@ -129,7 +130,7 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
             // Lấy ngày Chủ nhật của tuần đó
             startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getUTCDay());
             startDate = new Date(startOfWeek.setUTCHours(0, 0, 0, 0)); // Thời điểm bắt đầu tuần
-            
+
             // Tạo một đối tượng Date mới từ startOfWeek để tính ngày Thứ Bảy
             endDate = new Date(startOfWeek); // Tạo một đối tượng Date mới từ startOfWeek
             endDate.setDate(endDate.getDate() + 6); // Cộng thêm 6 ngày để có ngày Thứ Bảy
@@ -167,11 +168,11 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
             }
         });
 
-         // Duyệt qua từng đơn hàng để tính shippingfee
-         orders.forEach(order => {
+        // Duyệt qua từng đơn hàng để tính shippingfee
+        orders.forEach(order => {
             if (order.shippingfee != null) {
                 shippingfeeTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán bằng tiền mặt
-            } 
+            }
         });
 
         // Tính tổng doanh thu
@@ -198,34 +199,110 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
 
 const changePassword = async (email, oldPassword, newPassword) => {
     try {
-      // Tìm admin theo email
-      const shopownerInDB = await ModelShopOwner.findOne({ email });
-      if (!shopownerInDB) {
-        throw new Error('Email không tồn tại');
-      }
-  
-      // Kiểm tra mật khẩu cũ
-      if (shopownerInDB.password) {
-        // Nếu mật khẩu đã được băm
-        const checkPassword = await bcrypt.compare(oldPassword, shopownerInDB.password);
-        if (!checkPassword) {
-          throw new Error('Tài khoản hoặc mật khẩu không đúng');
+        // Tìm admin theo email
+        const shopownerInDB = await ModelShopOwner.findOne({ email });
+        if (!shopownerInDB) {
+            throw new Error('Email không tồn tại');
         }
-      } 
-  
-      // Băm mật khẩu mới
-      const salt = await bcrypt.genSalt(10);
-      shopownerInDB.password = await bcrypt.hash(newPassword, salt);
-  
-      // Lưu mật khẩu mới vào cơ sở dữ liệu
-      await shopownerInDB.save();
-  
-      return { message: 'Password changed successfully' };
+
+        // Kiểm tra mật khẩu cũ
+        if (shopownerInDB.password) {
+            // Nếu mật khẩu đã được băm
+            const checkPassword = await bcrypt.compare(oldPassword, shopownerInDB.password);
+            if (!checkPassword) {
+                throw new Error('Tài khoản hoặc mật khẩu không đúng');
+            }
+        }
+
+        // Băm mật khẩu mới
+        const salt = await bcrypt.genSalt(10);
+        shopownerInDB.password = await bcrypt.hash(newPassword, salt);
+
+        // Lưu mật khẩu mới vào cơ sở dữ liệu
+        await shopownerInDB.save();
+
+        return { message: 'Password changed successfully' };
     } catch (error) {
-      console.error('Error changing password:', error);
-      throw new Error('Error changing password');
+        console.error('Error changing password:', error);
+        throw new Error('Error changing password');
     }
-  };
+};
+
+// Cập nhật shopCategory cho một shop owner
+const updateShopCategory = async (shopOwnerId, shopCategory_ids) => {
+    try {
+        // Tìm cửa hàng theo ID
+        const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerId);
+        if (!shopOwnerInDB) {
+            throw new Error("Không tìm thấy cửa hàng");
+        }
+        let shopCategories = [];
+        for (const shopCategory_id of shopCategory_ids) {
+            const categoryInDB = await ModelShopCategory.findById(shopCategory_id);
+            if (!categoryInDB) {
+                throw new Error('Category not found');
+            }
+            shopCategories.push({
+                shopCategory_id: categoryInDB._id,
+                shopCategory_name: categoryInDB.name
+            });
+        }
+
+        // Cập nhật danh sách shopCategory
+        shopOwnerInDB.shopCategory = shopCategories || shopOwnerInDB.shopCategory;
+
+        // Lưu thay đổi
+        let result = await shopOwnerInDB.save();
+        return result;
+    } catch (error) {
+        console.error("Lỗi khi cập nhật shopCategory:", error);
+        throw new Error("Không thể cập nhật shopCategory");
+    }
+};
+
+// Mở Trạng thái hoạt động của cửa hàng
+const changeShopOwnerStatusOpen = async (id) => {
+    try {
+        return await ModelShopOwner.findByIdAndUpdate(
+            id,
+            { status: 'Mở cửa', updated_at: Date.now() },
+            { new: true }
+        );
+    } catch (error) {
+        console.error('Thay đổi trạng thái thất bại', error);
+        throw new Error('Thay đổi trạng thái thất bại');
+    }
+};
+
+// Tắt Trạng thái hoạt động của cửa hàng
+const changeShopOwnerStatusClosed = async (id) => {
+    try {
+        return await ModelShopOwner.findByIdAndUpdate(
+            id,
+            { status: 'Đóng cửa', updated_at: Date.now() },
+            { new: true }
+        );
+    } catch (error) {
+        console.error('Thay đổi trạng thái thất bại', error);
+        throw new Error('Thay đổi trạng thái thất bại');
+    }
+};
+
+// Khóa Trạng thái hoạt động của cửa hàng
+const changeShopOwnerStatusUnactive = async (id) => {
+    try {
+        return await ModelShopOwner.findByIdAndUpdate(
+            id,
+            { status: 'Ngưng hoạt động', updated_at: Date.now() },
+            { new: true }
+        );
+    } catch (error) {
+        console.error('Thay đổi trạng thái thất bại', error);
+        throw new Error('Thay đổi trạng thái thất bại');
+    }
+};
+
+
 module.exports = {
     getAllShopOwners,
     getShopOwnerById,
@@ -235,5 +312,9 @@ module.exports = {
     toggleFavorite,
     getFavoriteShops,
     getRevenueByShopOwner,
-    changePassword
+    changePassword,
+    updateShopCategory,
+    changeShopOwnerStatusOpen,
+    changeShopOwnerStatusClosed,
+    changeShopOwnerStatusUnactive
 };
