@@ -17,7 +17,7 @@ const getAllShopOwners = async () => {
 // Lấy thông tin nhà hàng theo ID
 const getShopOwnerById = async (id) => {
     try {
-        const shopowner = await ModelShopOwner.findById(id, 'name phone email shopCategory address rating countReview images distance')
+        const shopowner = await ModelShopOwner.findById(id, 'name phone email shopCategory address rating countReview images distance openingHours closeHours status')
 
         if (!shopowner) {
             throw new Error('Nhà hàng not found');
@@ -30,7 +30,7 @@ const getShopOwnerById = async (id) => {
 };
 
 // Cập nhật thông tin nhà hàng
-const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours) => {
+const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours, closeHours) => {
     try {
 
         const shopOwnerInDB = await ModelShopOwner.findById(id);
@@ -44,6 +44,7 @@ const updateShopOwner = async (id, name, phone, email, address, rating, images, 
         shopOwnerInDB.images = images || shopOwnerInDB.images;
         shopOwnerInDB.password = rating || shopOwnerInDB.password;
         shopOwnerInDB.openingHours = openingHours || shopOwnerInDB.openingHours;
+        shopOwnerInDB.closeHours = closeHours || shopOwnerInDB.closeHours;
 
         let result = await shopOwnerInDB.save();
         return result;
