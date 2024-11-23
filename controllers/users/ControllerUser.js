@@ -7,10 +7,15 @@ const bcrypt = require('bcryptjs');
 const { sendMail } = require('../../helpers/Mailer');
 
 // Hàm đăng ký người dùng hoặc shop owner
-const register = async (name, email, password, phone, image, rating, role, shopCategory_ids, address, latitude, longitude,) => {
+const register = async (name, email, password, phone, image, role, shopCategory_ids, address, latitude, longitude,) => {
     try {
         // Kiểm tra email đã tồn tại trong hệ thống hay chưa
         let user = await ModelUser.findOne({ email });
+        // console.log('role', role);
+        console.log(name, email, password, phone, image, role, shopCategory_ids, address, latitude, longitude);
+        
+        
+        
         if (user) {
             throw new Error('Email đã được sử dụng');
         }
@@ -36,7 +41,6 @@ const register = async (name, email, password, phone, image, rating, role, shopC
                 password,
                 phone,
                 image,
-                rating,
                 role,
                 shopCategory: shopCategories, // Thêm thông tin danh mục cửa hàng cho shop owner
                 address,
