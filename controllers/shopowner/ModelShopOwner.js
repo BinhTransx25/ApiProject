@@ -13,7 +13,7 @@ const ShopOwnerSchema = new Schema({
             shopCategory_name: { type: String, required: true }
         },
     ],
-    rating: { type: Number, required: true },
+    rating: { type: Number, required: false, default: 0 },
     countReview: { type: Number, required: false, default: 0 },
     images: { type: Array, required: true, default: [] },
     address: { type: String, required: true },
