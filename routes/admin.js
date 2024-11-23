@@ -46,9 +46,9 @@ const ControllerAdmin = require('../controllers/admin/ControllerAdmin');
  *         description: Lỗi khi đăng ký
  */
 router.post('/register', async (req, res, next) => {
-  const { name, email, password, phone, image, role,   } = req.body;
+  const { name, email, password, phone, image, role } = req.body;
   try {
-    let result = await ControllerUser.register(name, email, password, phone, image, role);
+    let result = await ControllerAdmin.register(name, email, password, phone, image, role);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during registration:', error);
@@ -82,16 +82,13 @@ router.post('/register', async (req, res, next) => {
 router.post('/login', async (req, res, next) => {
   const { identifier, password } = req.body;
   try {
-    let result = await ControllerUser.login(identifier, password);
+    let result = await ControllerAdmin.login(identifier, password);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ status: false, message: error.message });
   }
 });
-
-
-
 
 /**
  * @swagger
@@ -119,7 +116,7 @@ router.post('/login', async (req, res, next) => {
 router.post('/reset-password', async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const result = await ControllerUser.resetPassword(email, password);
+    const result = await ControllerAdmin.resetPassword(email, password);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during reset password:', error);
@@ -196,7 +193,7 @@ router.put('/update/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-      let result = await ControllerUser.getAllAdmin();
+      let result = await ControllerAdmin.getAllAdmin();
       return res.status(200).json({ status: true, data: result });
   } catch (error) {
       return res.status(500).json({ status: false, data: error.message });
@@ -231,7 +228,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-      let result = await ControllerUser.getAdminById(id);
+      let result = await ControllerAdmin.getAdminById(id);
       return res.status(200).json({ status: true, data: result });
   } catch (error) {
       return res.status(500).json({ status: false, data: error.message });

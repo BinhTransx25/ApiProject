@@ -205,18 +205,13 @@ const changePassword = async (email, oldPassword, newPassword) => {
       }
   
       // Kiểm tra mật khẩu cũ
-      if (shopownerInDB.password.startsWith('$2b$')) {
+      if (shopownerInDB.password) {
         // Nếu mật khẩu đã được băm
         const checkPassword = await bcrypt.compare(oldPassword, shopownerInDB.password);
         if (!checkPassword) {
           throw new Error('Tài khoản hoặc mật khẩu không đúng');
         }
-      } else {
-        // Nếu mật khẩu là plaintext
-        if (shopownerInDB.password !== oldPassword) {
-          throw new Error('Tài khoản hoặc mật khẩu không đúng');
-        }
-      }
+      } 
   
       // Băm mật khẩu mới
       const salt = await bcrypt.genSalt(10);

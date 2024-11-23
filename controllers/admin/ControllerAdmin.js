@@ -10,28 +10,32 @@ const { sendMail } = require('../../helpers/Mailer');
 // Hàm đăng ký người dùng hoặc shop owner
 const register = async (name, email, password, phone, image, role) => {
     try {
-        // Kiểm tra email đã tồn tại trong hệ thống hay chưa
-        let user = await ModelUser.findOne({ email });
-        if (user) {
-            throw new Error('Email đã được sử dụng');
-        }
-        let shopowner = await ModelShopOwner.find({ email });
-        if (shopowner) {
-            throw new Error('Email đã được sử dụng');
-        }
-        let shipper = await ModelShipper.find({ email });
-        if (shipper) {
-            throw new Error('Email đã được sử dụng');
-        }
+        
+            // Kiểm tra email đã tồn tại trong hệ thống hay chưa
+            let user = await ModelUser.findOne({ email });
+            if (user) {
+                throw new Error('Email đã được sử dụng');
+            }
+            // Kiểm tra email đã tồn tại trong hệ thống hay chưa
+            let shopOwner = await ModelUser.findOne({ email });
+            if (shopOwner) {
+                throw new Error('Email đã được sử dụng');
+            }
+            let shipper = await ModelShipper.findOne({ email });
+            if (shipper) {
+                throw new Error('Email đã được sử dụng');
+            }
+            // tạo một admin thông thường
+            const salt = await bcrypt.genSalt(10);
+            password = await bcrypt.hash(password, salt);
 
-        // tạo một admin thông thường
-        const salt = await bcrypt.genSalt(10);
-        password = await bcrypt.hash(password, salt);
-        admin = new ModelAdmin({ name, email, password, phone, image, role });
-        await admin.save(); // Lưu người dùng vào cơ sở dữ liệu
+            let admin = new ModelAdmin({ name, email, password, phone, image, role });
+
+            await admin.save(); // Lưu người dùng vào cơ sở dữ liệu
 
 
-        return true; // Trả về true nếu đăng ký thành công
+            return true; // Trả về true nếu đăng ký thành công
+        
     } catch (error) {
         console.error('Lỗi trong quá trình đăng ký:', error);
         throw new Error('Lỗi khi đăng ký người dùng');
@@ -158,15 +162,10 @@ const changePassword = async (email, oldPassword, newPassword) => {
         }
 
         // Kiểm tra mật khẩu cũ
-        if (adminInDB.password.startsWith('$2b$')) {
+        if (adminInDB.password) {
             // Nếu mật khẩu đã được băm
             const checkPassword = await bcrypt.compare(oldPassword, adminInDB.password);
             if (!checkPassword) {
-                throw new Error('Tài khoản hoặc mật khẩu không đúng');
-            }
-        } else {
-            // Nếu mật khẩu là plaintext
-            if (adminInDB.password !== oldPassword) {
                 throw new Error('Tài khoản hoặc mật khẩu không đúng');
             }
         }

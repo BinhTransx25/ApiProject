@@ -33,7 +33,9 @@ const register = async (name, email, password, phone, image, role, shopCategory_
                     shopCategory_name: categoryInDB.name
                 });
             }
-
+            // Nếu không phải shop owner, tạo một người dùng thông thường
+            const salt = await bcrypt.genSalt(10);
+            password = await bcrypt.hash(password, salt);
 
             let shopOwner = new ModelShopOwner({
                 name,
@@ -77,6 +79,7 @@ const login = async (identifier, password) => {
                 $or: [{ email: identifier }, { phone: identifier }]
             });
 
+
             // Nếu không tìm thấy shop owner, kiểm tra xem có phải shipper không
             if (!shopOwner) {
                 let shipper = await ModelShipper.findOne({
@@ -89,8 +92,9 @@ const login = async (identifier, password) => {
                 }
 
                 // Kiểm tra mật khẩu shipper
-                if (shipper.password.toString() !== password.toString()) {
-                    throw new Error('Mật khẩu không đúng');
+                const checkPassword = await bcrypt.compare(password, shipper.password);
+                if (!checkPassword) {
+                    throw new Error('Tài khoản hoặc mật khẩu không đúng');
                 }
                 // Tạo token JWT cho shipper
                 const token = jwt.sign(
@@ -110,9 +114,10 @@ const login = async (identifier, password) => {
                 };
             }
 
-            // Kiểm tra mật khẩu shop owner
-            if (shopOwner.password.toString() !== password.toString()) {
-                throw new Error('Mật khẩu không đúng');
+            // Kiểm tra mật khẩu người dùng
+            const checkPassword = await bcrypt.compare(password, shopOwner.password);
+            if (!checkPassword) {
+                throw new Error('Tài khoản hoặc mật khẩu không đúng');
             }
 
             // Tạo token JWT cho shop owner
@@ -287,6 +292,8 @@ const deleteUser = async (id) => {
         throw new Error('Lỗi khi xóa user');
     }
 };
-module.exports = { register, login,
-     loginWithSocial, verifyEmail, resetPassword,
-      checkUser, updateUser, getAllUsers,getUserById, deleteUser };
+module.exports = {
+    register, login,
+    loginWithSocial, verifyEmail, resetPassword,
+    checkUser, updateUser, getAllUsers, getUserById, deleteUser
+};
