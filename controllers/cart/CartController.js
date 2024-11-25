@@ -43,7 +43,9 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
                     _id: shopOwnerInDB._id,
                     name: shopOwnerInDB.name,
                     images: shopOwnerInDB.images,
-                    address: shopOwnerInDB.address
+                    address: shopOwnerInDB.address,
+                    latitude: shopOwnerInDB.latitude,
+                    longitude: shopOwnerInDB.longitude
                 },
                 products: [{
                     _id: productInDB._id,
