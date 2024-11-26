@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const ControllerUser = require('../controllers/users/ControllerUser');
+const ControllerAdmin = require('../controllers/admin/ControllerAdmin');
 
 /**
  * @swagger
@@ -46,9 +46,9 @@ const ControllerUser = require('../controllers/users/ControllerUser');
  *         description: Lỗi khi đăng ký
  */
 router.post('/register', async (req, res, next) => {
-  const { name, email, password, phone, image, role, shopCategory_ids, address, latitude, longitude } = req.body;
+  const { name, email, password, phone, image, role } = req.body;
   try {
-    let result = await ControllerUser.register(name, email, password, phone, image, role, shopCategory_ids, address, latitude, longitude);
+    let result = await ControllerAdmin.register(name, email, password, phone, image, role);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during registration:', error);
@@ -82,75 +82,10 @@ router.post('/register', async (req, res, next) => {
 router.post('/login', async (req, res, next) => {
   const { identifier, password } = req.body;
   try {
-    let result = await ControllerUser.login(identifier, password);
+    let result = await ControllerAdmin.login(identifier, password);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during login:', error);
-    return res.status(500).json({ status: false, message: error.message });
-  }
-});
-
-
-/**
- * @swagger
- * /users/login-social:
- *   post:
- *     summary: Đăng nhập bằng tài khoản mạng xã hội
- *     description: Đăng nhập người dùng qua tài khoản mạng xã hội.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userInfo:
- *                 type: object
- *     responses:
- *       200:
- *         description: Đăng nhập thành công
- *       500:
- *         description: Lỗi khi đăng nhập
- */
-router.post('/login-social', async (req, res, next) => {
-  const { userInfo } = req.body;
-  try {
-    let result = await ControllerUser.loginWithSocial(userInfo);
-    return res.status(200).json({ status: true, data: result });
-  } catch (error) {
-    console.error('Error during login:', error);
-    return res.status(500).json({ status: false, message: error.message });
-  }
-});
-
-/**
- * @swagger
- * /users/verify:
- *   post:
- *     summary: Xác minh email người dùng
- *     description: Xác minh email của người dùng qua việc gửi yêu cầu xác thực.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: Xác minh thành công
- *       500:
- *         description: Lỗi khi xác minh
- */
-router.post('/verify', async (req, res, next) => {
-  const { email } = req.body;
-  try {
-    let result = await ControllerUser.verifyEmail(email);
-    return res.status(200).json({ status: true, data: result });
-  } catch (error) {
-    console.error('Error during verify:', error);
     return res.status(500).json({ status: false, message: error.message });
   }
 });
@@ -181,42 +116,10 @@ router.post('/verify', async (req, res, next) => {
 router.post('/reset-password', async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const result = await ControllerUser.resetPassword(email, password);
+    const result = await ControllerAdmin.resetPassword(email, password);
     return res.status(200).json({ status: true, data: result });
   } catch (error) {
     console.error('Error during reset password:', error);
-    return res.status(500).json({ status: false, message: error.message });
-  }
-});
-
-/**
- * @swagger
- * /users/check-user:
- *   post:
- *     summary: Kiểm tra thông tin người dùng
- *     description: Kiểm tra xem email có tồn tại trong hệ thống hay không.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: Kiểm tra thành công
- *       500:
- *         description: Lỗi khi kiểm tra
- */
-router.post('/check-user', async (req, res, next) => {
-  const { email } = req.body;
-  try {
-    const result = await ControllerUser.checkUser(email);
-    return res.status(200).json({ status: true, data: result });
-  } catch (error) {
-    console.error('Error during check email:', error);
     return res.status(500).json({ status: false, message: error.message });
   }
 });
@@ -278,8 +181,8 @@ router.put('/update/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name, phone, email, password, image } = req.body;
-    const user = await ControllerUser.updateUser(id, name, phone, email, password, image);
-    return res.status(200).json({ status: true, data: user });
+    const admin = await ControllerAdmin.updateAdmin(id, name, phone, email, password, image);
+    return res.status(200).json({ status: true, data: admin });
   } catch (error) {
     if (error.message === 'Không Tìm Thấy Tài Khoản, Hãy thử lại') {
       return res.status(404).json({ status: false, message: error.message });
@@ -290,10 +193,10 @@ router.put('/update/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    let result = await ControllerUser.getAllUsers();
-    return res.status(200).json({ status: true, data: result });
+      let result = await ControllerAdmin.getAllAdmin();
+      return res.status(200).json({ status: true, data: result });
   } catch (error) {
-    return res.status(500).json({ status: false, data: error.message });
+      return res.status(500).json({ status: false, data: error.message });
   }
 });
 
@@ -325,10 +228,10 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    let result = await ControllerUser.getUserById(id);
-    return res.status(200).json({ status: true, data: result });
+      let result = await ControllerAdmin.getAdminById(id);
+      return res.status(200).json({ status: true, data: result });
   } catch (error) {
-    return res.status(500).json({ status: false, data: error.message });
+      return res.status(500).json({ status: false, data: error.message });
   }
 });
 
@@ -350,10 +253,21 @@ router.get('/:id', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
   const { id } = req.params;
   try {
-      let result = await ControllerUser.deleteUser(id);
+      let result = await ControllerUser.deleteAdmin(id);
       return res.status(200).json({ status: true, data: result });
   } catch (error) {
       return res.status(500).json({ status: false, data: error.message });
   }
 });
+
+router.post('/change-password', async (req, res) => {
+  const {email, oldPassword, newPassword } = req.body;
+  try {
+    const result = await ControllerAdmin.changePassword(email, oldPassword, newPassword);
+    return res.status(200).json({ status: true, message: result.message });
+  } catch (error) {
+    return res.status(500).json({ status: false, message: error.message });
+  }
+});
+
 module.exports = router;

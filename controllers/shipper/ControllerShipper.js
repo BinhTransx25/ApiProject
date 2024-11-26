@@ -3,6 +3,7 @@ const Shipper = require('../shipper/ModelShipper');
 const ModelUser = require('../users/ModelUser');
 const ModelOrder = require('../order/ModelOrder');
 const ObjectId = require('mongoose').Types.ObjectId;
+const bcrypt = require('bcryptjs');
 
 // thêm shipper mới
 const addShipper = async (name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate) => {
@@ -17,7 +18,8 @@ const addShipper = async (name, phone, email, address, role, rating, image, pass
         if (shopOwner) {
             throw new Error('Email đã được sử dụng');
         }
-
+        const salt = await bcrypt.genSalt(10);
+        password = await bcrypt.hash(password, salt);
 
         const newShipper = new Shipper({ name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate });
         return await newShipper.save();
@@ -264,7 +266,7 @@ const getRevenueByShipper = async (shipperId, date, filter) => {
             // Lấy ngày Chủ nhật của tuần đó
             startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getUTCDay());
             startDate = new Date(startOfWeek.setUTCHours(0, 0, 0, 0)); // Thời điểm bắt đầu tuần
-            
+
             // Tạo một đối tượng Date mới từ startOfWeek để tính ngày Thứ Bảy
             endDate = new Date(startOfWeek); // Tạo một đối tượng Date mới từ startOfWeek
             endDate.setDate(endDate.getDate() + 6); // Cộng thêm 6 ngày để có ngày Thứ Bảy
@@ -322,7 +324,36 @@ const getRevenueByShipper = async (shipperId, date, filter) => {
     }
 };
 
+const changePassword = async (email, oldPassword, newPassword) => {
+    try {
+        // Tìm admin theo email
+        const shipperInDB = await ModelShipper.findOne({ email });
+        if (!shipperInDB) {
+            throw new Error('Email không tồn tại');
+        }
 
+        // Kiểm tra mật khẩu cũ
+        if (shipperInDB.password) {
+            // Nếu mật khẩu đã được băm
+            const checkPassword = await bcrypt.compare(oldPassword, shipperInDB.password);
+            if (!checkPassword) {
+                throw new Error('Tài khoản hoặc mật khẩu không đúng');
+            }
+        }
+
+        // Băm mật khẩu mới
+        const salt = await bcrypt.genSalt(10);
+        shipperInDB.password = await bcrypt.hash(newPassword, salt);
+
+        // Lưu mật khẩu mới vào cơ sở dữ liệu
+        await shipperInDB.save();
+
+        return { message: 'Password changed successfully' };
+    } catch (error) {
+        console.error('Error changing password:', error);
+        throw new Error('Error changing password');
+    }
+};
 
 module.exports = {
     addShipper,
@@ -335,5 +366,6 @@ module.exports = {
     confirmOrderShipperExists,
     confirmOrderByShipperId,
     cancelOrderByShipperId,
-    getRevenueByShipper
+    getRevenueByShipper,
+    changePassword
 };

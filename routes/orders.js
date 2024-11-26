@@ -43,7 +43,7 @@ const ControllerOrder = require('../controllers/order/ControllerOrder');
  *         description: Lỗi khi thêm đơn hàng
  */
 router.post('/add-order', async (req, res) => {
-   
+
     try {
         const { userId, order, shippingAddressId, paymentMethod, shopOwner, totalPrice, shipper, voucher, shippingfee, distance } = req.body;
         const io = req.app.get('io');
@@ -56,7 +56,7 @@ router.post('/add-order', async (req, res) => {
 
 /**
  * @swagger
- * /orders/orders-by-shop:
+ * /orders/orders-by-shop/{shopId}:
  *   get:
  *     summary: Lấy danh sách đơn hàng theo shopId
  *     description: Yêu cầu shopId trong query parameters.
@@ -85,17 +85,66 @@ router.post('/add-order', async (req, res) => {
  *       500:
  *         description: Lỗi khi lấy danh sách đơn hàng
  */
-router.get('/orders-by-shop', async function (req, res, next) {
+router.get('/orders-by-shop/:shopId', async function (req, res, next) {
+   
     try {
-        const { shopId } = req.query; // Lấy shopId từ query parameters
+         const { shopId } = req.params;
+        // Lấy shopId từ query parameters
         if (!shopId) {
             return res.status(400).json({ success: false, message: 'Shop ID is required' });
         }
-        const orders = await ControllerOrder.getOrdersByShop(shopId); // Sử dụng hàm mới
-        return res.status(200).json({ success: true, orders }); // cái chỗ này quan trọng nha, nhớ là để đặt tên khi trả về response
+        const result = await ControllerOrder.getOrdersByShop(shopId); // Sử dụng hàm mới
+        return res.status(200).json({ success: true, data: result }); // cái chỗ này quan trọng nha, nhớ là để đặt tên khi trả về response
     } catch (error) {
         console.error('Get orders error:', error);
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({ success: false, data: error.message });
+    }
+});
+
+/**
+ * @swagger
+ * /orders/orders-by-shipper/{shipperId}:
+ *   get:
+ *     summary: Lấy danh sách đơn hàng theo shipperId
+ *     description: Yêu cầu shopId trong query parameters.
+ *     parameters:
+ *       - name: shipperId
+ *         in: query
+ *         required: true
+ *         description: ID của shipper cần lấy danh sách đơn hàng
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Danh sách đơn hàng đã được lấy thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 orders:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Shop ID là bắt buộc
+ *       500:
+ *         description: Lỗi khi lấy danh sách đơn hàng
+ */
+router.get('/orders-by-shipper/:shipperId', async function (req, res, next) {
+   
+    try {
+         const { shipperId } = req.params;
+        // Lấy shopId từ query parameters
+        if (!shipperId) {
+            return res.status(400).json({ success: false, message: 'Shop ID is required' });
+        }
+        const result = await ControllerOrder.getOrdersByShipper(shipperId); // Sử dụng hàm mới
+        return res.status(200).json({ success: true, data: result }); // cái chỗ này quan trọng nha, nhớ là để đặt tên khi trả về response
+    } catch (error) {
+        console.error('Get orders error:', error);
+        return res.status(500).json({ success: false, data: error.message });
     }
 });
 
@@ -240,7 +289,7 @@ router.patch('/customerCancel/:orderId', async (req, res) => {
 
     try {
         const cancelledOrder = await ControllerOrder.CustomerCancelOrder(orderId, io);
-        res.status(200).json({status: true, data: cancelledOrder});
+        res.status(200).json({ status: true, data: cancelledOrder });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

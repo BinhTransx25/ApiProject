@@ -126,8 +126,8 @@ router.get('/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, phone, email, address, rating, image } = req.body;
-        const shopOwner = await ShopOwnerController.updateShopOwner(id, name, phone, email, address, rating, image);
+        const { name, phone, email, address, rating, images, openingHours, closeHours} = req.body;
+        const shopOwner = await ShopOwnerController.updateShopOwner(id, name, phone, email, address, rating, images, openingHours, closeHours);
         return res.status(200).json({ status: true, data: shopOwner });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
@@ -282,8 +282,135 @@ router.get('/favorites', async (req, res) => {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
+/**
+ * @swagger
+ * /shopOwner/{shopId}/revenue:
+ *   get:
+ *     summary: Lấy doanh thu của shipper theo ID và khoảng thời gian (ngày, tuần, tháng)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: filter
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *         description: Lọc theo khoảng thời gian 'day', 'week', hoặc 'month'
+ *     responses:
+ *       200:
+ *         description: Thông tin doanh thu của shipper
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     date:
+ *                       type: string
+ *                     totalOrders:
+ *                       type: integer
+ *                     totalRevenue:
+ *                       type: number
+ *                     cashTotal:
+ *                       type: number
+ *                     appTotal:
+ *                       type: number
+ *                     orders:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *       400:
+ *         description: Thiếu shipperId, ngày hoặc bộ lọc không hợp lệ
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/:shopId/revenue', async (req, res) => {
+    const { shopId } = req.params;
+    const { date, filter } = req.query;
 
+    if (!date || !filter) {
+        return res.status(400).json({ status: false, data: 'Ngày và bộ lọc là bắt buộc.' });
+    }
 
+    if (!['day', 'week', 'month'].includes(filter)) {
+        return res.status(400).json({ status: false, data: "Filter không hợp lệ. Chỉ chấp nhận 'day', 'week', 'month'." });
+    }
 
+    try {
+        const result = await ShopOwnerController.getRevenueByShopOwner(shopId, date, filter);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+router.post('/change-password', async (req, res) => {
+    const { email, oldPassword, newPassword } = req.body;
+    try {
+        const result = await ShopOwnerController.changePassword(email, oldPassword, newPassword);
+        return res.status(200).json({ status: true, message: result.message });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+});
+
+// Cập nhật shopCategory
+router.put("/shopCategory/:shopOwnerId", async (req, res) => {
+    try {
+        const { shopOwnerId } = req.params;
+        const { shopCategory_ids } = req.body; // Danh sách shopCategory từ client
+
+        // Gọi hàm controller để cập nhật
+        const result = await ShopOwnerController.updateShopCategory(shopOwnerId, shopCategory_ids);
+
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error.message });
+    }
+});
+
+router.put('/open/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        let result = await ShopOwnerController.changeShopOwnerStatusOpen(id);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+router.put('/closed/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        let result = await ShopOwnerController.changeShopOwnerStatusClosed(id);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+router.put('/unactive/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        let result = await ShopOwnerController.changeShopOwnerStatusUnactive(id);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
 module.exports = router;
 
