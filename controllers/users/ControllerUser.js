@@ -206,6 +206,7 @@ const loginWithSocial = async (userInfo) => {
   try {
     let userInDB = await ModelUser.findOne({ email: userInfo.email });
     let user;
+
     const body = {
       email: userInfo.email,
       name: userInfo.name,
@@ -213,16 +214,35 @@ const loginWithSocial = async (userInfo) => {
       phone: userInfo.phone,
       password: "123456",
     };
+
     if (!userInDB) {
-      user = new ModelUser(body);
-      await user.save();
+      // Nếu không tìm thấy trong ModelUser, kiểm tra ModelShipper
+      let shipperInDB = await ModelShipper.findOne({ email: userInfo.email });
+      if (!shipperInDB) {
+        // Nếu không tìm thấy trong ModelShipper, kiểm tra ModelShopOwner
+        let shopOwnerInDB = await ModelShopOwner.findOne({
+          email: userInfo.email,
+        });
+        if (!shopOwnerInDB) {
+          // Nếu không tìm thấy trong cả ba mô hình, báo lỗi
+          throw new Error("Không tìm thấy người dùng trong hệ thống");
+        } else {
+          // Nếu tìm thấy trong ModelShopOwner, trả về thông tin
+          return shopOwnerInDB; // Trả về user từ ModelShopOwner
+        }
+      } else {
+        // Nếu tìm thấy trong ModelShipper, trả về thông tin
+        return shipperInDB; // Trả về user từ ModelShipper
+      }
     } else {
+      // Nếu tìm thấy trong ModelUser, cập nhật thông tin
       user = await ModelUser.findByIdAndUpdate(userInDB._id, {
         ...userInfo,
         updatedAt: Date.now(),
       });
     }
-    return user;
+
+    return user; // Trả về user từ ModelUser
   } catch (error) {
     console.log("Error during login with social:", error);
     throw new Error("Lỗi khi đăng nhập bằng tài khoản mạng xã hội");
@@ -290,11 +310,25 @@ const resetPassword = async (email, password) => {
 const checkUser = async (email) => {
   try {
     const userInDB = await ModelUser.findOne({ email });
-    if (!userInDB) {
-      return false;
+    if (userInDB) {
+      return true;
     }
-    return true;
-  } catch (error) {}
+
+    const shipperInDB = await ModelShipper.findOne({ email });
+    if (shipperInDB) {
+      return true;
+    }
+
+    const shopOwnerInDB = await ShopOwner.findOne({ email });
+    if (shopOwnerInDB) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error(error);
+    return false; // Hoặc xử lý lỗi theo cách bạn muốn
+  }
 };
 // Cập nhật thông tin nhà hàng
 const updateUser = async (id, name, phone, email, password, image) => {
