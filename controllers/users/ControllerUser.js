@@ -191,7 +191,13 @@ const verifyEmail = async (email) => {
     try {
         let userInDB = await ModelUser.findOne({ email });
         if (!userInDB) {
-            throw new Error('Email không tồn tại');
+            userInDB = await ModelShipper.findOne({ email });
+            if (!userInDB) {
+                userInDB = await ModelShopOwner.findOne({ email });
+                if (!userInDB) {
+                    throw new Error('Email không tồn tại');
+                }
+            }
         }
         const verifyCode = Math.floor(1000 + Math.random() * 9000).toString();
         const data = {
