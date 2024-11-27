@@ -175,7 +175,7 @@ router.get('/shopOwner/:id', async function (req, res, next) {
     try {
         const shopOwnerId = req.params.id;
         const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 10;
+        const limit = parseInt(req.query.limit, 20) || 20;
 
         const productCategories = await ControllerProductCategory.getProductsCategoriesByShopID(shopOwnerId, page, limit);
 
@@ -314,7 +314,7 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
-        const result = await ControllerProductCategory.delete(id);
+        const result = await ControllerProductCategory.remove(id);
         return res.status(200).json({ status: true });
     } catch (error) {
         console.log('Delete category product error:', error);
