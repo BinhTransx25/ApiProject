@@ -52,6 +52,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
                     name: productInDB.name,
                     price: productInDB.price,
                     images: productInDB.images,
+                    soldOut: productInDB.soldOut,
                     quantity: 1,
                 }],
                 totalItem: 1,
@@ -84,6 +85,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
                     name: productInDB.name,
                     price: productInDB.price,
                     images: productInDB.images,
+                    soldOut: productInDB.soldOut,
                     quantity: 1,
                 });
             }
