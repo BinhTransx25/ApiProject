@@ -17,7 +17,8 @@ const getAllShopOwners = async () => {
 // Lấy thông tin nhà hàng theo ID
 const getShopOwnerById = async (id) => {
     try {
-        const shopowner = await ModelShopOwner.findById(id, 'name phone email shopCategory address rating countReview images distance openingHours closeHours status')
+        const shopowner = await ModelShopOwner.findById(id)
+
 
         if (!shopowner) {
             throw new Error('Nhà hàng not found');
