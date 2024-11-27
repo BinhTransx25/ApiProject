@@ -516,7 +516,7 @@ router.put('/update/:id', async (req, res, next) => {
 router.delete('/delete/:id', async function (req, res, next) {
     try {
         const productId = req.params.id;
-        await ControllerProduct.deleteProduct(productId);
+        await ControllerProduct.remove(productId);
         return res.status(200).json({ status: true, message: 'Product deleted successfully' });
     } catch (error) {
         console.log('Delete product error:', error);
