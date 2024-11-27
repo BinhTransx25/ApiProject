@@ -100,7 +100,7 @@ const getAllByProduct = async (product_id) => {
         // Tìm tất cả các đánh giá có chứa sản phẩm với ID phù hợp trong cột `product`
         const reviews = await ModelProductReview.find({
             'product._id': product_id
-        }).select('rating comment image user created_at'); // Chỉ lấy các trường cần thiết
+        }).select('rating comment image user created_at').sort({created_at:-1}); // Chỉ lấy các trường cần thiết
 
         return reviews;
     } catch (error) {
@@ -137,7 +137,7 @@ const getReviewProductByShopId = async (shopOwnerId) => {
         // Dò tất cả các đánh giá có chứa product_id trong cột `product`
         const reviews = await ModelProductReview.find({
             'product._id': { $in: productIds }
-        }).select('rating comment image user product created_at');
+        }).select('rating comment image user product created_at').sort({created_at:-1});
 
         return reviews;
     } catch (error) {
