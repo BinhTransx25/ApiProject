@@ -203,72 +203,51 @@ const login = async (identifier, password) => {
 };
 
 const loginWithSocial = async (userInfo) => {
-  // try {
-  //   let userInDB = await ModelUser.findOne({ email: userInfo.email });
-  //   let user;
-
-  //   const body = {
-  //     email: userInfo.email,
-  //     name: userInfo.name,
-  //     photo: userInfo.photo,
-  //     phone: userInfo.phone,
-  //     password: "123456",
-  //   };
-
-  //   if (!userInDB) {
-  //     // Nếu không tìm thấy trong ModelUser, kiểm tra ModelShipper
-  //     let shipperInDB = await ModelShipper.findOne({ email: userInfo.email });
-  //     if (!shipperInDB) {
-  //       // Nếu không tìm thấy trong ModelShipper, kiểm tra ModelShopOwner
-  //       let shopOwnerInDB = await ModelShopOwner.findOne({
-  //         email: userInfo.email,
-  //       });
-  //       if (!shopOwnerInDB) {
-  //         // Nếu không tìm thấy trong cả ba mô hình, báo lỗi
-  //         throw new Error("Không tìm thấy người dùng trong hệ thống");
-  //       } else {
-  //         // Nếu tìm thấy trong ModelShopOwner, trả về thông tin
-  //         return shopOwnerInDB; // Trả về user từ ModelShopOwner
-  //       }
-  //     } else {
-  //       // Nếu tìm thấy trong ModelShipper, trả về thông tin
-  //       return shipperInDB; // Trả về user từ ModelShipper
-  //     }
-  //   } else {
-  //     // Nếu tìm thấy trong ModelUser, cập nhật thông tin
-  //     user = await ModelUser.findByIdAndUpdate(userInDB._id, {
-  //       ...userInfo,
-  //       updatedAt: Date.now(),
-  //     });
-  //   }
-
-  //   return user; // Trả về user từ ModelUser
-  // } catch (error) {
-  //   console.log("Error during login with social:", error);
-  //   throw new Error("Lỗi khi đăng nhập bằng tài khoản mạng xã hội");
-  // }
   try {
     let userInDB = await ModelUser.findOne({ email: userInfo.email });
-    let user
+    let user;
+
     const body = {
-        email: userInfo.email,
-        name: userInfo.name,
-        image: userInfo.photo,
-        phone: userInfo.phone,
-        password: '123456',
-    }
+      email: userInfo.email,
+      name: userInfo.name,
+      photo: userInfo.photo,
+      phone: userInfo.phone,
+      password: "123456",
+    };
+
     if (!userInDB) {
-        user = new ModelUser(body);
-        await user.save();
+      // Nếu không tìm thấy trong ModelUser, kiểm tra ModelShipper
+      let shipperInDB = await ModelShipper.findOne({ email: userInfo.email });
+      if (!shipperInDB) {
+        // Nếu không tìm thấy trong ModelShipper, kiểm tra ModelShopOwner
+        let shopOwnerInDB = await ModelShopOwner.findOne({
+          email: userInfo.email,
+        });
+        if (!shopOwnerInDB) {
+          // Nếu không tìm thấy trong cả ba mô hình, tạo mới
+          user = new ModelUser(body);
+          await user.save();
+        } else {
+          // Nếu tìm thấy trong ModelShopOwner, trả về thông tin
+          return shopOwnerInDB; // Trả về user từ ModelShopOwner
+        }
+      } else {
+        // Nếu tìm thấy trong ModelShipper, trả về thông tin
+        return shipperInDB; // Trả về user từ ModelShipper
+      }
+    } else {
+      // Nếu tìm thấy trong ModelUser, cập nhật thông tin
+      user = await ModelUser.findByIdAndUpdate(userInDB._id, {
+        ...userInfo,
+        updatedAt: Date.now(),
+      });
     }
-    else {
-        user = await ModelUser.findByIdAndUpdate(userInDB._id, { ...userInfo, updatedAt: Date.now() });
-    }
-    return user;
-} catch (error) {
-    console.log('Error during login with social:', error);
-    throw new Error('Lỗi khi đăng nhập bằng tài khoản mạng xã hội');
-}
+
+    return user; // Trả về user từ ModelUser
+  } catch (error) {
+    console.log("Error during login with social:", error);
+    throw new Error("Lỗi khi đăng nhập bằng tài khoản mạng xã hội");
+  }
 };
 
 const verifyEmail = async (email) => {
