@@ -189,7 +189,7 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const order = await ControllerOrder.getOrderDetail(id);
-        res.status(200).json(order);
+        res.status(200).json({ status: true, data: order });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
