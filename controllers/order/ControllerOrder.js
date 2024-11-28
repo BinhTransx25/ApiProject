@@ -223,6 +223,7 @@ const confirmOrder = async (orderId, io) => {
         // Phát sự kiện tới tất cả các shipper nếu io tồn tại
         if (io) {
             io.emit('order_confirmed', { order, status: 'Tìm người giao hàng' });
+            io.emit('order_status', { order, status: 'Tìm người giao hàng' });
             console.log(`Socket emitted for order ${orderId} with status 'Tìm người giao hàng'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
@@ -268,6 +269,7 @@ const shopOwnerCancelOrder = async (orderId, io) => {
         // Phát sự kiện cho socket
         if (io) {
             io.emit('order_cancelled', { orderId, status: 'Nhà hàng đã hủy đơn' });
+            io.emit('order_status', { order, status: 'Nhà hàng đã hủy đơn' });
             console.log(`Socket emitted for order ${orderId} with status 'Nhà hàng đã hủy đơn'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
@@ -313,6 +315,7 @@ const CustomerCancelOrder = async (orderId, io) => {
         // Phát sự kiện cho socket
         if (io) {
             io.emit('order_cancelled', { orderId, status: 'Người dùng đã hủy đơn' });
+            io.emit('order_status', { order, status: 'Người dùng đã hủy đơn' });
             console.log(`Socket emitted for order ${orderId} with status 'Người dùng đã hủy đơn'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
@@ -365,6 +368,7 @@ const updateOrderStatus = async (orderId, status) => {
 
         // Phát sự kiện cập nhật trạng thái qua socket.io
         req.io.emit('orderStatusUpdated', { orderId, status });
+        req.io.emit('orderStatus', { orderId, status });
 
         return order;
     } catch (error) {
