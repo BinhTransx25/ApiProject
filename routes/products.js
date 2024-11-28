@@ -77,6 +77,26 @@ router.get('/all', async function (req, res, next) {
     }
 });
 
+router.get('/search', async function (req, res) {
+    try {
+        const { keyword } = req.query;
+
+        if (!keyword || keyword.trim() === '') {
+            return res.status(400).json({ status: false, error: 'Keyword is required' });
+        }
+
+        const results = await ControllerProduct.searchProductsAndShops(keyword.trim());
+
+        if (results.length === 0) {
+            return res.status(404).json({ status: false, message: 'No results found' });
+        }
+
+        return res.status(200).json({ status: true, data: { results } });
+    } catch (error) {
+        console.log('Search API error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
 /**
  * @swagger
  * /products/{id}:
@@ -523,5 +543,6 @@ router.delete('/delete/:id', async function (req, res, next) {
         return res.status(404).json({ status: false, error: error.message });
     }
 });
+
 
 module.exports = router;

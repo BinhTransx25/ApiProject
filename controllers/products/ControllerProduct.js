@@ -229,9 +229,72 @@ const remove = async (id) => {
     }
 };
 
+const searchProductsAndShops = async (keyword) => {
+    try {
+        const results = [];
+
+        // Tìm các sản phẩm có tên trùng khớp từ khóa
+        const products = await ModelProduct.find({
+            name: { $regex: keyword, $options: 'i' }
+        }).populate('shopOwner.shopOwner_id');
+
+        // Nhóm sản phẩm theo shop
+        const shopMap = {};
+
+        products.forEach(product => {
+            const shopId = product.shopOwner.shopOwner_id;
+            if (!shopMap[shopId]) {
+                shopMap[shopId] = {
+                    shopId,
+                    shopOwner_name: product.shopOwner.shopOwner_name,
+                    image: product.shopOwner.images?.[0] || '',
+                    product: []
+                };
+            }
+
+            shopMap[shopId].product.push({
+                name: product.name,
+                price: product.price,
+                shop: product.shopOwner.shopOwner_name,
+                image: product.images?.[0] || '',
+                product_id: product._id
+            });
+        });
+
+        // Chuyển shopMap thành mảng
+        for (const shopId in shopMap) {
+            results.push(shopMap[shopId]);
+        }
+
+        // Nếu không có sản phẩm, tìm cửa hàng
+        if (products.length === 0) {
+            const shops = await ModelShopOwner.find({
+                name: { $regex: keyword, $options: 'i' }
+            });
+
+            shops.forEach(shop => {
+                results.push({
+                    shopId: shop._id,
+                    name: shop.name,
+                    rating: shop.rating,
+                    address: shop.address,
+                    images: shop.images
+                });
+            });
+        }
+
+        return results;
+    } catch (error) {
+        console.log('Search error:', error);
+        throw new Error('Search error');
+    }
+};
+
+
 
 module.exports = {
     getAllProducts, getProductById, insert, update,
     remove, getAllProducts, getProductsByCategory,
     getProductsByShopOwner, getProductsByCategoryAndShopOwner
+    ,searchProductsAndShops
 };

@@ -10,9 +10,7 @@ const FavoriteSchema = new Schema({
         email: { type: String },
         image: { type: String }
     },
-
     shopOwner: {
-
         _id: { type: mongoose.Schema.Types.ObjectId, ref: 'shopOwner', required: true },
         name: { type: String },
         rating: { type: Number },
