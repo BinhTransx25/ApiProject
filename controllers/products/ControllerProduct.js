@@ -236,7 +236,12 @@ const searchProductsAndShops = async (keyword) => {
         // Tìm các sản phẩm có tên trùng khớp từ khóa
         const products = await ModelProduct.find({
             name: { $regex: keyword, $options: 'i' }
-        }).populate('shopOwner.shopOwner_id');
+        }).populate({
+            path: 'shopOwner.shopOwner_id',
+            model: 'shopOwner', // Tên model đúng
+            select: 'name images' // Chỉ lấy các trường cần thiết
+        }).exec();
+
 
         // Nhóm sản phẩm theo shop
         const shopMap = {};
@@ -296,5 +301,5 @@ module.exports = {
     getAllProducts, getProductById, insert, update,
     remove, getAllProducts, getProductsByCategory,
     getProductsByShopOwner, getProductsByCategoryAndShopOwner
-    ,searchProductsAndShops
+    , searchProductsAndShops
 };

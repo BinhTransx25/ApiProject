@@ -17,7 +17,7 @@ const ProductSchema = new Schema({
     create_at: { type: Date, default: Date.now },
     update_at: { type: Date, default: Date.now },
     shopOwner: { 
-        shopOwner_id: { type: mongoose.Schema.Types.ObjectId, ref: 'ShopOwner', required: true },
+        shopOwner_id: { type: mongoose.Schema.Types.ObjectId, ref: 'shopOwner', required: true },
         shopOwner_name: { type: String, required: true }
     }
 });
