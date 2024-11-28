@@ -320,7 +320,7 @@ const checkUser = async (email) => {
       return true;
     }
 
-    const shopOwnerInDB = await ShopOwner.findOne({ email });
+    const shopOwnerInDB = await ModelShopOwner.findOne({ email });
     if (shopOwnerInDB) {
       return true;
     }
