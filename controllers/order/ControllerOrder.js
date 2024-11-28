@@ -16,10 +16,10 @@ const mongoose = require('mongoose');
  * @param {String} shopOwnerId - ID của chủ cửa hàng.
  * @returns {Array} - Danh sách carts đã được cập nhật của người dùng.
  */
-const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwnerId, totalPrice, shipperId, io, voucherId, shippingfee,distance) => {
-    console.log("Adding order with data:", { userId, order, shippingAddressId, paymentMethod, shopOwnerId, shipperId });
+const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, shipperId, io, voucherId, shippingfee,distance,recipientName,address,latitude,longitude,phone,label) => {
+    console.log("Adding order with data:", { userId, order, paymentMethod, shopOwnerId, shipperId });
 
-    if (!userId || !order || !shippingAddressId || !paymentMethod || !shopOwnerId) {
+    if (!userId || !order || !paymentMethod || !shopOwnerId) {
         throw new Error('Missing required fields in request body');
     }
 
@@ -28,8 +28,8 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
         const user = await ModelUser.findById(userId);
         if (!user) throw new Error('User not found');
 
-        const address = await ModelAddress.findById(shippingAddressId);
-        if (!address) throw new Error('Address not found');
+        // const address = await ModelAddress.findById(shippingAddressId);
+        // if (!address) throw new Error('Address not found');
 
         const shopOwner = await ModelShopOwner.findById(shopOwnerId);
         if (!shopOwner) throw new Error('Shop owner not found');
@@ -57,7 +57,15 @@ const addOrder = async (userId, order, shippingAddressId, paymentMethod, shopOwn
                 price: item.price,
                 quantity: item.quantity,
             })),
-            shippingAddress: address,
+            shippingAddress: {
+                recipientName,
+                address,
+                latitude,
+                longitude,
+                phone,
+                label,
+                userId,
+            },
             paymentMethod,
             user: {
                 _id: user._id,

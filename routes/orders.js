@@ -45,12 +45,14 @@ const ControllerOrder = require('../controllers/order/ControllerOrder');
 router.post('/add-order', async (req, res) => {
 
     try {
-        const { userId, order, shippingAddressId, paymentMethod, shopOwner, totalPrice, shipper, voucher, shippingfee, distance } = req.body;
+        const { userId, order, paymentMethod, shopOwner, totalPrice, shipper, voucher, shippingfee, distance, recipientName, address, latitude, longitude, phone, label } = req.body;
         const io = req.app.get('io');
-        const addOrder = await ControllerOrder.addOrder(userId, order, shippingAddressId, paymentMethod, shopOwner, totalPrice, shipper, io, voucher, shippingfee, distance);
+        const addOrder = await ControllerOrder.addOrder(userId, order, paymentMethod, shopOwner, totalPrice, shipper, io, voucher, shippingfee, distance, recipientName, address, latitude, longitude, phone, label);
         return res.status(200).json({ status: true, data: addOrder });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        console.log('Error adding order:', error);
+        return res.status(500).json({ status: false, data: error.message });
+        
     }
 });
 
@@ -86,9 +88,9 @@ router.post('/add-order', async (req, res) => {
  *         description: Lỗi khi lấy danh sách đơn hàng
  */
 router.get('/orders-by-shop/:shopId', async function (req, res, next) {
-   
+
     try {
-         const { shopId } = req.params;
+        const { shopId } = req.params;
         // Lấy shopId từ query parameters
         if (!shopId) {
             return res.status(400).json({ success: false, message: 'Shop ID is required' });
@@ -133,9 +135,9 @@ router.get('/orders-by-shop/:shopId', async function (req, res, next) {
  *         description: Lỗi khi lấy danh sách đơn hàng
  */
 router.get('/orders-by-shipper/:shipperId', async function (req, res, next) {
-   
+
     try {
-         const { shipperId } = req.params;
+        const { shipperId } = req.params;
         // Lấy shopId từ query parameters
         if (!shipperId) {
             return res.status(400).json({ success: false, message: 'Shop ID is required' });
