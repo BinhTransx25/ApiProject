@@ -94,7 +94,7 @@ module.exports = function (io) {
       "confirm_order_shipper_exists",
       async ({ orderId, shipperId }) => {
         try {
-          const order = await confirmOrderShipperExists(orderId, shipperId);
+          const order = await confirmOrderShipperExists(orderId, shipperId,io);
           socket.emit("order_confirmed", { orderId, status: order.status });
           socket.emit("order_status", { orderId, status: order.status });
         } catch (error) {
