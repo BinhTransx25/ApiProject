@@ -231,69 +231,98 @@ const remove = async (id) => {
 
 const searchProductsAndShops = async (keyword) => {
     try {
-        const results = [];
+        const results = []; // Kết quả tìm kiếm sản phẩm và cửa hàng sẽ được lưu ở đây.
 
-        // Tìm các sản phẩm có tên trùng khớp từ khóa
+        // **Tìm kiếm sản phẩm có tên khớp với từ khóa**
         const products = await ModelProduct.find({
-            name: { $regex: keyword, $options: 'i' }
-        }).populate({
-            path: 'shopOwner.shopOwner_id',
-            model: 'shopOwner', // Tên model đúng
-            select: 'name images' // Chỉ lấy các trường cần thiết
-        }).exec();
+            name: { $regex: keyword, $options: 'i' } // Sử dụng biểu thức regex để tìm kiếm không phân biệt chữ hoa, chữ thường.
+        })
+        .populate({
+            path: 'shopOwner.shopOwner_id', // Tham chiếu đến shopOwner từ sản phẩm.
+            model: 'shopOwner', // Model tương ứng trong MongoDB.
+            select: 'name images' // Chỉ lấy các trường `name` và `images` của shop.
+        })
+        .exec(); // Thực thi câu lệnh truy vấn.
 
-
-        // Nhóm sản phẩm theo shop
-        const shopMap = {};
+        // **Nhóm các sản phẩm tìm được theo từng cửa hàng**
+        const shopMap = {}; // Để gom nhóm các sản phẩm theo cửa hàng.
 
         products.forEach(product => {
-            const shopId = product.shopOwner.shopOwner_id;
+            const shopId = product.shopOwner.shopOwner_id; // Lấy ID của shop từ sản phẩm.
+            
+            // Nếu shop chưa có trong `shopMap`, khởi tạo một nhóm mới.
             if (!shopMap[shopId]) {
                 shopMap[shopId] = {
-                    shopId,
-                    shopOwner_name: product.shopOwner.shopOwner_name,
-                    image: product.shopOwner.images?.[0] || '',
-                    product: []
+                    shopId, // ID của cửa hàng.
+                    shopOwner_name: product.shopOwner.shopOwner_name, // Tên cửa hàng.
+                    image: product.shopOwner.images?.[0] || '', // Ảnh đại diện của cửa hàng (lấy ảnh đầu tiên hoặc rỗng nếu không có).
+                    product: [] // Danh sách sản phẩm thuộc cửa hàng này.
                 };
             }
 
+            // Thêm sản phẩm vào nhóm tương ứng với shop.
             shopMap[shopId].product.push({
-                name: product.name,
-                price: product.price,
-                shop: product.shopOwner.shopOwner_name,
-                image: product.images?.[0] || '',
-                product_id: product._id
+                name: product.name, // Tên sản phẩm.
+                price: product.price, // Giá sản phẩm.
+                shop: product.shopOwner.shopOwner_name, // Tên cửa hàng của sản phẩm.
+                image: product.images?.[0] || '', // Ảnh sản phẩm (lấy ảnh đầu tiên hoặc để trống).
+                product_id: product._id // ID của sản phẩm.
             });
         });
 
-        // Chuyển shopMap thành mảng
+        // Chuyển các nhóm shop từ `shopMap` thành mảng để thêm vào kết quả.
         for (const shopId in shopMap) {
             results.push(shopMap[shopId]);
         }
 
-        // Nếu không có sản phẩm, tìm cửa hàng
-        if (products.length === 0) {
-            const shops = await ModelShopOwner.find({
-                name: { $regex: keyword, $options: 'i' }
-            });
+        // **Tìm kiếm cửa hàng có tên khớp với từ khóa**
+        const shops = await ModelShopOwner.find({
+            name: { $regex: keyword, $options: 'i' } // Tìm kiếm các cửa hàng theo từ khóa.
+        });
 
-            shops.forEach(shop => {
-                results.push({
-                    shopId: shop._id,
-                    name: shop.name,
-                    rating: shop.rating,
-                    address: shop.address,
-                    images: shop.images
-                });
+        // Thêm thông tin từng cửa hàng vào kết quả.
+        shops.forEach(shop => {
+            results.push({
+                shopId: shop._id, // ID cửa hàng.
+                name: shop.name, // Tên cửa hàng.
+                rating: shop.rating, // Đánh giá của cửa hàng.
+                address: shop.address, // Địa chỉ cửa hàng.
+                images: shop.images // Ảnh của cửa hàng.
             });
-        }
+        });
 
-        return results;
+        // **Tạo danh sách gợi ý từ sản phẩm và cửa hàng**
+        const suggestions = [
+            // Gợi ý từ sản phẩm
+            ...products.map(product => ({
+                name: product.name, // Tên sản phẩm.
+                image: product.images?.[0] || '', // Ảnh sản phẩm.
+                price: product.price, // Giá sản phẩm.
+                type: 'product', // Loại: sản phẩm.
+                product_id: product._id // ID sản phẩm.
+            })),
+            // Gợi ý từ cửa hàng
+            ...shops.map(shop => ({
+                name: shop.name, // Tên cửa hàng.
+                image: shop.images?.[0] || '', // Ảnh đại diện cửa hàng.
+                rating: shop.rating, // Đánh giá cửa hàng.
+                type: 'shop', // Loại: cửa hàng.
+                shopId: shop._id // ID cửa hàng.
+            }))
+        ];
+
+        // **Trả về kết quả**
+        return {
+            results,       // Kết quả tìm kiếm đầy đủ (sản phẩm và cửa hàng).
+            suggestions    // Gợi ý nhanh (từ sản phẩm và cửa hàng).
+        };
+
     } catch (error) {
-        console.log('Search error:', error);
-        throw new Error('Search error');
+        console.error('Search error:', error); // In lỗi ra console.
+        throw new Error('Search error'); // Ném lỗi để xử lý bên ngoài.
     }
 };
+
 
 
 

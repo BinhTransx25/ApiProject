@@ -81,22 +81,42 @@ router.get('/search', async function (req, res) {
     try {
         const { keyword } = req.query;
 
+        // Kiểm tra từ khóa nhập vào
         if (!keyword || keyword.trim() === '') {
-            return res.status(400).json({ status: false, error: 'Keyword is required' });
+            return res.status(400).json({ 
+                status: false, 
+                error: 'Keyword is required' 
+            });
         }
 
-        const results = await ControllerProduct.searchProductsAndShops(keyword.trim());
+        // Gọi hàm tìm kiếm trong Controller
+        const { results, suggestions } = await ControllerProduct.searchProductsAndShops(keyword.trim());
 
-        if (results.length === 0) {
-            return res.status(404).json({ status: false, message: 'No results found' });
+        // Nếu không tìm thấy kết quả
+        if (results.length === 0 && suggestions.length === 0) {
+            return res.status(404).json({ 
+                status: false, 
+                message: 'No results or suggestions found' 
+            });
         }
 
-        return res.status(200).json({ status: true, data: { results } });
+        // Trả về kết quả
+        return res.status(200).json({ 
+            status: true, 
+            data: { 
+                results,       // Kết quả tìm kiếm (chi tiết sản phẩm & cửa hàng)
+                suggestions    // Gợi ý (danh sách nhanh)
+            } 
+        });
     } catch (error) {
-        console.log('Search API error:', error);
-        return res.status(500).json({ status: false, error: error.message });
+        console.error('Search API error:', error);
+        return res.status(500).json({ 
+            status: false, 
+            error: error.message 
+        });
     }
 });
+
 /**
  * @swagger
  * /products/{id}:
