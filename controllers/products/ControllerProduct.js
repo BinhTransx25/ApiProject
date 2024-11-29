@@ -231,82 +231,86 @@ const remove = async (id) => {
 
 const searchProductsAndShops = async (keyword) => {
     try {
-        const results = []; // Kết quả tìm kiếm cửa hàng sẽ được lưu ở đây.
+        const results = []; // Kết quả tìm kiếm sản phẩm và cửa hàng.
 
         // **Tìm kiếm sản phẩm có tên khớp với từ khóa**
         const products = await ModelProduct.find({
-            name: { $regex: keyword, $options: 'i' } // Sử dụng biểu thức regex để tìm kiếm không phân biệt chữ hoa, chữ thường.
+            name: { $regex: keyword, $options: 'i' } // Tìm kiếm sản phẩm không phân biệt chữ hoa, chữ thường.
         })
         .populate({
-            path: 'shopOwner.shopOwner_id', // Tham chiếu đến shopOwner từ sản phẩm.
-            model: 'shopOwner', // Model tương ứng trong MongoDB.
-            select: 'name images address rating distance latitude longitude status' // Lấy thông tin cần thiết từ shopOwner.
+            path: 'shopOwner.shopOwner_id', // Liên kết đến cửa hàng từ sản phẩm.
+            model: 'shopOwner',
+            select: 'name images' // Chỉ lấy các trường tên và ảnh của cửa hàng.
         })
-        .exec(); // Thực thi câu lệnh truy vấn.
+        .exec();
 
-        // **Nhóm các cửa hàng có sản phẩm khớp với từ khóa**
-        const shopMap = {}; // Để gom nhóm các cửa hàng có sản phẩm khớp.
-
+        // **Nhóm các sản phẩm theo từng cửa hàng**
+        const shopMap = {}; // Để gom nhóm các sản phẩm theo cửa hàng.
         products.forEach(product => {
-            const shopId = product.shopOwner.shopOwner_id._id; // Lấy ID của shop từ sản phẩm.
+            const shopId = product.shopOwner.shopOwner_id; // Lấy ID của cửa hàng từ sản phẩm.
             
-            // Nếu shop chưa có trong `shopMap`, khởi tạo một nhóm mới.
             if (!shopMap[shopId]) {
                 shopMap[shopId] = {
-                    shopId, // ID của cửa hàng.
-                    name: product.shopOwner.shopOwner_name, // Tên cửa hàng.
-                    images: product.shopOwner.images, // Ảnh của cửa hàng.
-                    address: product.shopOwner.address, // Địa chỉ cửa hàng.
-                    rating: product.shopOwner.rating, // Đánh giá của cửa hàng.
-                    distance: product.shopOwner.distance, // Khoảng cách từ khách hàng đến cửa hàng.
-                    latitude: product.shopOwner.latitude, // Vĩ độ cửa hàng.
-                    longitude: product.shopOwner.longitude, // Kinh độ cửa hàng.
-                    status: product.shopOwner.status, // Trạng thái cửa hàng.
+                    shopId, 
+                    shopOwner_name: product.shopOwner.shopOwner_name, 
+                    image: product.shopOwner.images?.[0] || '', // Ảnh đại diện cửa hàng (nếu có).
+                    product: [] // Danh sách sản phẩm thuộc cửa hàng này.
                 };
             }
+
+            // Thêm sản phẩm vào nhóm cửa hàng tương ứng.
+            shopMap[shopId].product.push({
+                name: product.name,
+                price: product.price,
+                shop: product.shopOwner.shopOwner_name,
+                image: product.images?.[0] || '', // Ảnh sản phẩm (nếu có).
+                product_id: product._id // ID của sản phẩm.
+            });
         });
 
-        // Chuyển các nhóm shop từ `shopMap` thành mảng để thêm vào kết quả.
+        // Thêm các nhóm cửa hàng vào kết quả.
         for (const shopId in shopMap) {
             results.push(shopMap[shopId]);
         }
 
-        // **Tìm kiếm cửa hàng có tên khớp với từ khóa (không cần sản phẩm)** 
+        // **Tìm kiếm cửa hàng có tên khớp với từ khóa**
         const shops = await ModelShopOwner.find({
-            name: { $regex: keyword, $options: 'i' } // Tìm kiếm các cửa hàng theo từ khóa.
+            name: { $regex: keyword, $options: 'i' }
         });
 
-        // Thêm thông tin từng cửa hàng vào kết quả.
+        // Thêm thông tin cửa hàng vào kết quả tìm kiếm.
         shops.forEach(shop => {
-            // Nếu cửa hàng này không có sản phẩm khớp, bỏ qua
-            if (!results.some(result => result.shopId.toString() === shop._id.toString())) {
-                results.push({
-                    shopId: shop._id, // ID cửa hàng.
-                    name: shop.name, // Tên cửa hàng.
-                    rating: shop.rating, // Đánh giá của cửa hàng.
-                    address: shop.address, // Địa chỉ cửa hàng.
-                    images: shop.images, // Ảnh của cửa hàng.
-                    distance: shop.distance, // Khoảng cách từ khách hàng đến cửa hàng.
-                    latitude: shop.latitude, // Vĩ độ cửa hàng.
-                    longitude: shop.longitude, // Kinh độ cửa hàng.
-                    status: shop.status, // Trạng thái cửa hàng.
-                });
-            }
+            results.push({
+                shopId: shop._id,
+                name: shop.name,
+                rating: shop.rating,
+                address: shop.address,
+                images: shop.images
+            });
         });
 
-        // **Tạo danh sách gợi ý từ cửa hàng**
-        const suggestions = shops.map(shop => ({
-            name: shop.name, // Tên cửa hàng.
-            image: shop.images?.[0] || '', // Ảnh đại diện cửa hàng.
-            rating: shop.rating, // Đánh giá cửa hàng.
-            type: 'shop', // Loại: cửa hàng.
-            shopId: shop._id // ID cửa hàng.
-        }));
+        // **Tạo danh sách gợi ý từ sản phẩm và cửa hàng**
+        const suggestions = [
+            ...products.map(product => ({
+                name: product.name,
+                image: product.images?.[0] || '',
+                price: product.price,
+                type: 'product',
+                product_id: product._id
+            })),
+            ...shops.map(shop => ({
+                name: shop.name,
+                image: shop.images?.[0] || '',
+                rating: shop.rating,
+                type: 'shop',
+                shopId: shop._id
+            }))
+        ];
 
         // **Trả về kết quả**
         return {
-            results,       // Kết quả tìm kiếm đầy đủ (cửa hàng có sản phẩm khớp với từ khóa)
-            suggestions    // Gợi ý nhanh (danh sách cửa hàng)
+            results,       // Kết quả tìm kiếm (sản phẩm và cửa hàng).
+            suggestions    // Gợi ý nhanh (danh sách nhanh sản phẩm và cửa hàng).
         };
 
     } catch (error) {
@@ -314,6 +318,7 @@ const searchProductsAndShops = async (keyword) => {
         throw new Error('Search error'); // Ném lỗi để xử lý bên ngoài.
     }
 };
+
 
 
 

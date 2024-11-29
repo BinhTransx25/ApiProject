@@ -104,8 +104,8 @@ router.get('/search', async function (req, res) {
         return res.status(200).json({ 
             status: true, 
             data: { 
-                results,       // Kết quả tìm kiếm (cửa hàng có sản phẩm khớp với từ khóa)
-                suggestions    // Gợi ý (danh sách cửa hàng)
+                results,       // Kết quả tìm kiếm (chi tiết sản phẩm & cửa hàng)
+                suggestions    // Gợi ý (danh sách nhanh)
             } 
         });
     } catch (error) {
@@ -116,6 +116,7 @@ router.get('/search', async function (req, res) {
         });
     }
 });
+
 
 
 /**

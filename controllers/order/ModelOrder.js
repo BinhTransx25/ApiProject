@@ -22,7 +22,7 @@ const OrderSchema = new Schema({
         enum: ['Chưa giải quyết',
             'Chờ thanh toán',
             'Tìm tài xế',
-            'Đã tìm được tài xế',
+            'Đang đến nhà hàng',
             'Tài xế đã đến nhà hàng',
             'Đang giao hàng',
             'Shipper đã đến điểm giao hàng',
