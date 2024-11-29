@@ -16,7 +16,9 @@ const mongoose = require('mongoose');
  * @param {String} shopOwnerId - ID của chủ cửa hàng.
  * @returns {Array} - Danh sách carts đã được cập nhật của người dùng.
  */
-const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, shipperId, io, voucherId, shippingfee,distance,recipientName,address,latitude,longitude,phone,label) => {
+const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, shipperId, io, 
+    voucherId, shippingfee, distance, recipientName, address, latitude, longitude, phone, label,
+     statusReview, reasonCancel) => {
     console.log("Adding order with data:", { userId, order, paymentMethod, shopOwnerId, shipperId });
 
     if (!userId || !order || !paymentMethod || !shopOwnerId) {
@@ -96,7 +98,9 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
                 expirationDate: voucher.expirationDate
             } : null,
             shippingfee,
-            distance
+            distance,
+            statusReview, 
+            reasonCancel
         });
 
         let result = await newOrder.save();
@@ -250,8 +254,8 @@ const confirmOrder = async (orderId, io) => {
  * @returns {Object} - Đơn hàng đã bị hủy.
  */
 // Cho ShopOwner Bấm
-const shopOwnerCancelOrder = async (orderId, io) => {
-    console.log('Cancelling order with ID:', orderId); // Log kiểm tra orderId
+const shopOwnerCancelOrder = async (orderId, reason, io) => {
+    console.log('Cancelling order with ID:', orderId, 'Reason:', reason); // Log kiểm tra
 
     try {
         // Tìm đơn hàng theo ID
@@ -260,8 +264,9 @@ const shopOwnerCancelOrder = async (orderId, io) => {
             throw new Error('Order not found');
         }
 
-        // Cập nhật trạng thái của đơn hàng thành "Nhà hàng đã hủy đơn"
+        // Cập nhật trạng thái và lý do hủy
         order.status = 'Nhà hàng đã hủy đơn';
+        order.reasonCancel = reason; // Lưu lý do hủy
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
@@ -274,11 +279,11 @@ const shopOwnerCancelOrder = async (orderId, io) => {
             }
         }
 
-        // Phát sự kiện cho socket
+        // Phát sự kiện qua socket
         if (io) {
-            io.emit('order_cancelled', { orderId, status: 'Nhà hàng đã hủy đơn' });
-            io.emit('order_status', { order, status: 'Nhà hàng đã hủy đơn' });
-            console.log(`Socket emitted for order ${orderId} with status 'Nhà hàng đã hủy đơn'`);
+            io.emit('order_cancelled', { orderId, status: 'Nhà hàng đã hủy đơn', reason });
+            io.emit('order_status', { order, status: 'Nhà hàng đã hủy đơn', reason });
+            console.log(`Socket emitted for order ${orderId} with status 'Nhà hàng đã hủy đơn' and reason: ${reason}`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
         }
@@ -289,6 +294,7 @@ const shopOwnerCancelOrder = async (orderId, io) => {
         throw new Error('Error cancelling order');
     }
 };
+
 
 /**
  * Hủy đơn hàng theo orderId.

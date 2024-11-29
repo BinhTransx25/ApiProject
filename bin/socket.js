@@ -43,6 +43,7 @@ module.exports = function (io) {
       io.to(roomID).emit("receive_message", data);
       //console.log(`Message from ${data.name}: ${data.text}`);
     });
+    
     // Khi có đơn hàng mới được tạo và bắn socket tới shopOwner
     socket.on("order_created", (orderData) => {
       const shopOwnerId = orderData.shopOwnerId; // Lấy ID của cửa hàng từ orderData

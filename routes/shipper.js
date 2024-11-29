@@ -315,15 +315,21 @@ router.patch('/confirm-order-finish/:orderId', async (req, res) => {
  */
 router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
     const { orderId } = req.params;
-    const { shipperId } = req.body;
+    const { shipperId, reason } = req.body;  // Lấy shipperId và reason từ body
     const io = req.app.get('io');
+
     try {
-        const updatedOrder = await ShipperController.cancelOrderByShipperId(orderId, shipperId,io);
+        if (!reason || reason.trim() === '') {
+            return res.status(400).json({ error: 'Reason for cancellation is required' });  // Kiểm tra lý do hủy
+        }
+
+        const updatedOrder = await ShipperController.cancelOrderByShipperId(orderId, shipperId, reason.trim(), io);
         res.status(200).json(updatedOrder); 
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 // hàm lấy doanh thu theo shipper_id và lọc theo ngày, tuần, tháng
 // /shipper/{shipperId}/revenue?date={date}&filter={filter}
 

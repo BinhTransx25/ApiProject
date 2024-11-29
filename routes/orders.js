@@ -45,9 +45,11 @@ const ControllerOrder = require('../controllers/order/ControllerOrder');
 router.post('/add-order', async (req, res) => {
 
     try {
-        const { userId, order, paymentMethod, shopOwner, totalPrice, shipper, voucher, shippingfee, distance, recipientName, address, latitude, longitude, phone, label } = req.body;
+        const { userId, order, paymentMethod, shopOwner, totalPrice, shipper, voucher, shippingfee,
+             distance, recipientName, address, latitude, longitude, phone, label, statusReview, reasonCancel } = req.body;
         const io = req.app.get('io');
-        const addOrder = await ControllerOrder.addOrder(userId, order, paymentMethod, shopOwner, totalPrice, shipper, io, voucher, shippingfee, distance, recipientName, address, latitude, longitude, phone, label);
+        const addOrder = await ControllerOrder.addOrder(userId, order, paymentMethod, shopOwner, totalPrice, shipper, io, voucher, shippingfee,
+             distance, recipientName, address, latitude, longitude, phone, label, statusReview, reasonCancel);
         return res.status(200).json({ status: true, data: addOrder });
     } catch (error) {
         console.log('Error adding order:', error);
@@ -253,15 +255,21 @@ router.patch('/confirm-order/:orderId', async (req, res) => {
  */
 router.patch('/shopOwnerCancel/:orderId', async (req, res) => {
     const { orderId } = req.params;
-    const io = req.app.get('io');  // Lấy io từ app (hoặc nơi bạn lưu trữ socket.io)
+    const { reason } = req.body; // Lấy lý do từ body request
+    const io = req.app.get('io'); // Lấy io từ app (hoặc nơi bạn lưu trữ socket.io)
 
     try {
-        const cancelledOrder = await ControllerOrder.shopOwnerCancelOrder(orderId, io);
+        if (!reason || reason.trim() === '') {
+            return res.status(400).json({ error: 'Reason for cancellation is required' }); // Kiểm tra lý do
+        }
+
+        const cancelledOrder = await ControllerOrder.shopOwnerCancelOrder(orderId, reason.trim(), io);
         res.status(200).json(cancelledOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 /**
  * @swagger

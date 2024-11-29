@@ -19,9 +19,18 @@ const OrderSchema = new Schema({
     paymentMethod: { type: String, enum: ['Tiền mặt', 'PayOS', 'ZaloPay'], required: true },
     status: {
         type: String,
-        enum: ['Chưa giải quyết', 'Chờ thanh toán', 'Tìm người giao hàng',
-            'Người dùng đã hủy đơn', 'Đơn hàng đã được giao hoàn tất',
-            'Đang giao hàng', 'Nhà hàng đã hủy đơn', 'Shipper đã hủy đơn', 'Đã đánh giá đơn hàng'],
+        enum: ['Chưa giải quyết',
+            'Chờ thanh toán',
+            'Tìm tài xế',
+            'Đã tìm được tài xế',
+            'Tài xế đã đến nhà hàng',
+            'Đang giao hàng',
+            'Shipper đã đến điểm giao hàng',
+            'Đơn hàng đã được giao hoàn tất',
+            'Nhà hàng đã hủy đơn',
+            'Shipper đã hủy đơn',
+            'Người dùng đã hủy đơn'
+        ],
         default: function () {
             // Tự động thiết lập trạng thái dựa trên phương thức thanh toán
             return this.paymentMethod === 'PayOS' || this.paymentMethod === 'ZaloPay' ? 'Chờ thanh toán' : 'Chưa giải quyết';
@@ -36,6 +45,8 @@ const OrderSchema = new Schema({
     shippingfee: { type: Number, required: false, default: 0 },
     updatedAt: { type: Date, default: Date.now },
     distance: { type: Number, required: false, default: 0 },
+    statusReview: { type: Boolean, required: true, default: false }, // Đã thêm cột statusReview
+    reasonCancel: { type: String, required: false, default: '' },   // Cột mới reasonCancel
 });
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);

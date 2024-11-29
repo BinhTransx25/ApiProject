@@ -18,7 +18,7 @@ const create = async (order_id, user_id, rating, comment, image) => {
         if (!order) {
             throw new Error('Order không tồn tại');
         }
-        
+
         // Lấy thông tin user
         const user = await ModelUser.findById(user_id);
         if (!user) {
@@ -65,9 +65,9 @@ const create = async (order_id, user_id, rating, comment, image) => {
 
         // Cập nhật rating trung bình cho ShopOwner
         await ModelShopOwner.findByIdAndUpdate(shopOwnerId, { rating: averageRating });
-        
+
         // Cập nhật trạng thái của đơn hàng thành "Đã đánh giá đơn hàng"
-        order.status = 'Đã đánh giá đơn hàng';
+        order.statusReview = true;
         await order.save();
 
         return review;
@@ -76,8 +76,6 @@ const create = async (order_id, user_id, rating, comment, image) => {
         throw new Error('Lỗi khi tạo đánh giá sản phẩm');
     }
 };
-
-
 
 // Xóa đánh giá sản phẩm theo id
 const remove = async (id) => {
@@ -100,7 +98,7 @@ const getAllByProduct = async (product_id) => {
         // Tìm tất cả các đánh giá có chứa sản phẩm với ID phù hợp trong cột `product`
         const reviews = await ModelProductReview.find({
             'product._id': product_id
-        }).select('rating comment image user created_at').sort({created_at:-1}); // Chỉ lấy các trường cần thiết
+        }).select('rating comment image user created_at').sort({ created_at: -1 }); // Chỉ lấy các trường cần thiết
 
         return reviews;
     } catch (error) {
@@ -137,7 +135,7 @@ const getReviewProductByShopId = async (shopOwnerId) => {
         // Dò tất cả các đánh giá có chứa product_id trong cột `product`
         const reviews = await ModelProductReview.find({
             'product._id': { $in: productIds }
-        }).select('rating comment image user product created_at').sort({created_at:-1});
+        }).select('rating comment image user product created_at').sort({ created_at: -1 });
 
         return reviews;
     } catch (error) {

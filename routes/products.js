@@ -507,14 +507,18 @@ router.post('/add', async (req, res, next) => {
 router.put('/update/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name, price, images, description } = req.body;
-        const product = await ControllerProduct.update(id, name, price, images, description);
+        const { name, price, images, description, category_ids, shopOwner_id } = req.body; // Thêm category_ids và shopOwner_id vào body
+
+        // Gọi Controller để cập nhật sản phẩm
+        const product = await ControllerProduct.update(id, name, price, images, description, category_ids, shopOwner_id);
+
         return res.status(200).json({ status: true, data: product });
     } catch (error) {
         console.log('Update product error:', error);
-        return res.status(500).json({ status: false, error: error });
+        return res.status(500).json({ status: false, error: error.message });
     }
-})
+});
+
 
 /**
  * @swagger

@@ -163,8 +163,6 @@ const confirmOrderShipperExists = async (orderId, shipperId, io) => {
                 io.emit('order_assigned', { orderId, shipperId, status: order.status });
                 console.log(`Socket emitted for order ${orderId} assigned to shipper ${shipperId}`);
             }
-
-
             return order; // Trả về đơn hàng đã cập nhật
         } else {
             // Nếu đã có shipper
@@ -218,23 +216,27 @@ const confirmOrderByShipperId = async (orderId, shipperId, io) => {
  * @param {String} shipperId - ID của shipper.
  * @returns {Object} - Đơn hàng đã được cập nhật hoặc thông báo.
  */
-const cancelOrderByShipperId = async (orderId, shipperId, io) => {
-    console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId);
+const cancelOrderByShipperId = async (orderId, shipperId, reason, io) => {
+    console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId, 'Reason:', reason);
+
     try {
         // Tìm đơn hàng theo ID
         const order = await ModelOrder.findById(orderId);
         if (!order) {
             throw new Error('Order not found');
         }
+
         // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
         if (order.shipper._id && order.shipper._id.toString() === shipperId) {
-            // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
+            // Cập nhật trạng thái và lý do hủy của shipper
             order.status = 'Shipper đã hủy đơn';
+            order.reasonCancel = reason; // Lưu lý do hủy
             await order.save();
+
             // Phát sự kiện cho socket
             if (io) {
-                io.emit('order_cancelled', { orderId, status: order.status });
-                console.log(`Socket emitted for order ${orderId} cancelled by shipper ${shipperId}`);
+                io.emit('order_cancelled', { orderId, status: order.status, reason });
+                console.log(`Socket emitted for order ${orderId} cancelled by shipper ${shipperId} with reason: ${reason}`);
             }
 
             return order; // Trả về đơn hàng đã cập nhật
@@ -246,6 +248,7 @@ const cancelOrderByShipperId = async (orderId, shipperId, io) => {
         throw new Error('Error confirming order by shipper ID');
     }
 };
+
 
 const getRevenueByShipper = async (shipperId, date, filter) => {
     try {
