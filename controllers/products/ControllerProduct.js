@@ -183,8 +183,8 @@ const update = async (id, name, price, images, description, category_ids, shopOw
                     throw new Error('Category not found');
                 }
                 categories.push({
-                    category_id: categoryInDB._id,
-                    category_name: categoryInDB.name
+                    categoryProduct_id: categoryInDB._id,
+                    categoryProduct_name: categoryInDB.name
                 });
             }
             productInDB.categories = categories;
