@@ -38,7 +38,7 @@ const OrderSchema = new Schema({
     },
     totalPrice: { type: Number, required: false, default: 0 },
     user: { type: Object, required: true, default: {} },
-    shopOwner: { type: Object, required: true, default: {} },
+    shopOwner: { type: Object, required: true, default: {} }, 
     shipper: { type: Object, required: false, default: {} },
     // image: { type: Array, required: true, default: [] },
     voucher: { type: Object, require: false, default: {} },
