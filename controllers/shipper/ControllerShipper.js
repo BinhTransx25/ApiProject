@@ -24,8 +24,14 @@ const addShipper = async (name, phone, email, address, role, rating, image, pass
         const newShipper = new Shipper({ name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate });
         return await newShipper.save();
     } catch (error) {
-        console.error('Lỗi khi thêm shipper:', error);
-        throw new Error('Lỗi khi thêm shipper');
+        if (error.code === 11000) {
+            // Xử lý lỗi MongoDB duplicate key
+            console.error("Lỗi: Email đã được sử dụng");
+            throw new Error("Email đã được sử dụng");
+          } else {
+            console.error("Lỗi khi thêm shipper:", error);
+            throw new Error("Lỗi khi thêm shipper");
+          }
     }
 };
 
