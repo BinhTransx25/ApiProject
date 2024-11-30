@@ -210,7 +210,7 @@ const loginWithSocial = async (userInfo) => {
     const body = {
       email: userInfo.email,
       name: userInfo.name,
-      photo: userInfo.photo,
+      image: userInfo.photo,
       phone: userInfo.phone,
       password: "123456",
     };
