@@ -68,9 +68,9 @@ module.exports = function (io) {
     });
 
     // ShopOwner Hủy đơn hàng
-    socket.on("cancel_order", async (orderId) => {
+    socket.on("cancel_order", async (orderId,reason) => {
       try {
-        const order = await shopOwnerCancelOrder(orderId, io); // Gọi hàm shopOwnerCancelOrder từ controller
+        const order = await shopOwnerCancelOrder(orderId,reason, io); // Gọi hàm shopOwnerCancelOrder từ controller
         socket.emit("order_cancelled", { orderId, status: order.status });
         socket.emit("order_status", { orderId, status: order.status });
       } catch (error) {
