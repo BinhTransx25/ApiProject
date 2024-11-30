@@ -167,6 +167,7 @@ const confirmOrderShipperExists = async (orderId, shipperId, io) => {
             // Phát sự kiện cho socket
             if (io) {
                 io.emit('order_assigned', { orderId, shipperId, status: order.status });
+                io.emit('order_status', { orderId, status: order.status });
                 console.log(`Socket emitted for order ${orderId} assigned to shipper ${shipperId}`);
             }
             return order; // Trả về đơn hàng đã cập nhật
@@ -204,6 +205,7 @@ const confirmOrderByShipperId = async (orderId, shipperId, io) => {
             // Phát sự kiện cho socket
             if (io) {
                 io.emit('order_completed', { orderId, status: order.status });
+                io.emit('order_status', { orderId, status: order.status });
                 console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
             }
             return order; // Trả về đơn hàng đã cập nhật
@@ -242,6 +244,7 @@ const cancelOrderByShipperId = async (orderId, shipperId, reason, io) => {
             // Phát sự kiện cho socket
             if (io) {
                 io.emit('order_cancelled', { orderId, status: order.status, reason });
+                io.emit('order_status', { orderId, status: order.status,reason });
                 console.log(`Socket emitted for order ${orderId} cancelled by shipper ${shipperId} with reason: ${reason}`);
             }
 
