@@ -18,7 +18,7 @@ const mongoose = require('mongoose');
  */
 const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, shipperId, io, 
     voucherId, shippingfee, distance, recipientName, address, latitude, longitude, phone, label,
-     statusReview, reasonCancel) => {
+     reasonCancel) => {
     console.log("Adding order with data:", { userId, order, paymentMethod, shopOwnerId, shipperId });
 
     if (!userId || !order || !paymentMethod || !shopOwnerId) {
@@ -99,7 +99,6 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
             } : null,
             shippingfee,
             distance,
-            statusReview, 
             reasonCancel
         });
 

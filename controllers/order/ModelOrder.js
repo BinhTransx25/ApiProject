@@ -45,7 +45,7 @@ const OrderSchema = new Schema({
     shippingfee: { type: Number, required: false, default: 0 },
     updatedAt: { type: Date, default: Date.now },
     distance: { type: Number, required: false, default: 0 },
-    statusReview: { type: Boolean, required: true, default: false }, // Đã thêm cột statusReview
+    statusReview: { type: Boolean, required: false, default: false }, // Đã thêm cột statusReview
     reasonCancel: { type: String, required: false, default: '' },   // Cột mới reasonCancel
 });
 

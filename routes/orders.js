@@ -46,10 +46,10 @@ router.post('/add-order', async (req, res) => {
 
     try {
         const { userId, order, paymentMethod, shopOwner, totalPrice, shipper, voucher, shippingfee,
-             distance, recipientName, address, latitude, longitude, phone, label, statusReview, reasonCancel } = req.body;
+             distance, recipientName, address, latitude, longitude, phone, label, reasonCancel } = req.body;
         const io = req.app.get('io');
         const addOrder = await ControllerOrder.addOrder(userId, order, paymentMethod, shopOwner, totalPrice, shipper, io, voucher, shippingfee,
-             distance, recipientName, address, latitude, longitude, phone, label, statusReview, reasonCancel);
+             distance, recipientName, address, latitude, longitude, phone, label, reasonCancel);
         return res.status(200).json({ status: true, data: addOrder });
     } catch (error) {
         console.log('Error adding order:', error);
