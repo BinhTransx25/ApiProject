@@ -197,11 +197,11 @@ const confirmShipperArrivedShopOwner = async (orderId, shipperId, io) => {
             await order.save();
 
             // Phát sự kiện cho socket
-            // if (io) {
-            //     io.emit('order_completed', { orderId, status: order.status });
-            //     io.emit('order_status', { orderId, status: order.status });
-            //     console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
-            // }
+            if (io) {
+                io.emit('order_completed', { orderId, status: order.status });
+                io.emit('order_status', { orderId, status: order.status });
+                console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
+            }
             return order; // Trả về đơn hàng đã cập nhật
         } 
     } catch (error) {
@@ -225,11 +225,11 @@ const confirmShipperOnDelivery = async (orderId, shipperId, io) => {
             await order.save();
 
             // Phát sự kiện cho socket
-            // if (io) {
-            //     io.emit('order_completed', { orderId, status: order.status });
-            //     io.emit('order_status', { orderId, status: order.status });
-            //     console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
-            // }
+            if (io) {
+                io.emit('order_completed', { orderId, status: order.status });
+                io.emit('order_status', { orderId, status: order.status });
+                console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
+            }
             return order; // Trả về đơn hàng đã cập nhật
         } 
     } catch (error) {
@@ -254,11 +254,11 @@ const confirmShipperArrivedDeliveryPoint = async (orderId, shipperId, io) => {
             await order.save();
 
             // Phát sự kiện cho socket
-            // if (io) {
-            //     io.emit('order_completed', { orderId, status: order.status });
-            //     io.emit('order_status', { orderId, status: order.status });
-            //     console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
-            // }
+            if (io) {
+                io.emit('order_completed', { orderId, status: order.status });
+                io.emit('order_status', { orderId, status: order.status });
+                console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
+            }
             return order; // Trả về đơn hàng đã cập nhật
         } 
     } catch (error) {
