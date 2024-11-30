@@ -324,6 +324,11 @@ const searchProductsAndShops = async (keyword) => {
             }
         });
 
+        // Nếu không tìm thấy sản phẩm hoặc cửa hàng nào
+        if (products.length === 0 && shops.length === 0) {
+            return null;
+        }
+
         // **Tạo danh sách gợi ý từ sản phẩm và cửa hàng**
         const suggestions = [
             ...products.map(product => ({
@@ -353,6 +358,7 @@ const searchProductsAndShops = async (keyword) => {
         throw new Error('Search error'); // Ném lỗi để xử lý bên ngoài.
     }
 };
+
 
 
 
