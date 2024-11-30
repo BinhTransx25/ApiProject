@@ -217,8 +217,8 @@ const confirmOrder = async (orderId, io) => {
             throw new Error('Order not found');
         }
 
-        // Cập nhật trạng thái của đơn hàng thành "Tìm người giao hàng"
-        order.status = 'Tìm người giao hàng';
+        // Cập nhật trạng thái của đơn hàng thành "Tìm tài xế"
+        order.status = 'Tìm tài xế';
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
@@ -226,16 +226,16 @@ const confirmOrder = async (orderId, io) => {
         if (user) {
             const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
             if (orderItem) {
-                orderItem.status = 'Tìm người giao hàng'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Tìm tài xế'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
 
         // Phát sự kiện tới tất cả các shipper nếu io tồn tại
         if (io) {
-            io.emit('order_confirmed', { order, status: 'Tìm người giao hàng' });
-            io.emit('order_status', { order, status: 'Tìm người giao hàng' });
-            console.log(`Socket emitted for order ${orderId} with status 'Tìm người giao hàng'`);
+            io.emit('order_confirmed', { order, status: 'Tìm tài xế' });
+            io.emit('order_status', { order, status: 'Tìm tài xế' });
+            console.log(`Socket emitted for order ${orderId} with status 'Tìm tài xế'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
         }

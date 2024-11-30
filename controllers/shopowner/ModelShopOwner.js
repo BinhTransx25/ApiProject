@@ -19,7 +19,6 @@ const ShopOwnerSchema = new Schema({
     address: { type: String, required: true },
     openingHours: { type: String, required: false, default: 0  },  // Giờ mở cửa (VD: "08:00")
     closeHours: { type: String, required: false,default: 0 },  // Giờ đóng cửa (VD: "22:00")
-
     status: { 
         type: String, 
         enum: ['Mở cửa', 'Đóng cửa', 'Ngưng hoạt động'], 

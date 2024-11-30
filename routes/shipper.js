@@ -244,6 +244,42 @@ router.patch('/confirm-order-shipper/:orderId', async (req, res) => {
     }
 });
 
+router.patch('/confirm-order-arrived-shopowner/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const { shipperId } = req.body;
+    const io = req.app.get('io');
+    try {
+        const updatedOrder = await ShipperController.confirmShipperArrivedShopOwner(orderId, shipperId,io);
+        res.status(200).json(updatedOrder); 
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.patch('/confirm-order-on-delivery/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const { shipperId } = req.body;
+    const io = req.app.get('io');
+    try {
+        const updatedOrder = await ShipperController.confirmShipperOnDelivery(orderId, shipperId,io);
+        res.status(200).json(updatedOrder); 
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.patch('/confirm-order-arrived-delivery-point/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+    const { shipperId } = req.body;
+    const io = req.app.get('io');
+    try {
+        const updatedOrder = await ShipperController.confirmShipperArrivedDeliveryPoint(orderId, shipperId,io);
+        res.status(200).json(updatedOrder); 
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 /**
  * @swagger
  * /shipper/confirm-order-finish/{orderId}:
@@ -284,6 +320,7 @@ router.patch('/confirm-order-finish/:orderId', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 /**
  * @swagger
  * /shipper/shipper-cancel-order/{orderId}:

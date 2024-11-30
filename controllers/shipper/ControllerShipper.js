@@ -161,7 +161,7 @@ const confirmOrderShipperExists = async (orderId, shipperId, io) => {
                 phone: shipper.phone,
                 image: shipper.image,
             };
-            order.status = 'Đang giao hàng';
+            order.status = 'Đang đến nhà hàng';
             await order.save();
 
             // Phát sự kiện cho socket
@@ -181,6 +181,91 @@ const confirmOrderShipperExists = async (orderId, shipperId, io) => {
     }
 };
 
+// shipper đã đến nhà hàng 
+const confirmShipperArrivedShopOwner = async (orderId, shipperId, io) => {
+    console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId);
+    try {
+        // Tìm đơn hàng theo ID
+        const order = await ModelOrder.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+        // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
+        if (order.shipper._id && order.shipper._id.toString() === shipperId) {
+            // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
+            order.status = 'Tài xế đã đến nhà hàng';
+            await order.save();
+
+            // Phát sự kiện cho socket
+            // if (io) {
+            //     io.emit('order_completed', { orderId, status: order.status });
+            //     io.emit('order_status', { orderId, status: order.status });
+            //     console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
+            // }
+            return order; // Trả về đơn hàng đã cập nhật
+        } 
+    } catch (error) {
+        console.error('Error confirming order by shipper ID:', error);
+        throw new Error('Error confirming order by shipper ID');
+    }
+};
+// shipper đang giao hàng
+const confirmShipperOnDelivery = async (orderId, shipperId, io) => {
+    console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId);
+    try {
+        // Tìm đơn hàng theo ID
+        const order = await ModelOrder.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+        // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
+        if (order.shipper._id && order.shipper._id.toString() === shipperId) {
+            // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
+            order.status = 'Đang giao hàng';
+            await order.save();
+
+            // Phát sự kiện cho socket
+            // if (io) {
+            //     io.emit('order_completed', { orderId, status: order.status });
+            //     io.emit('order_status', { orderId, status: order.status });
+            //     console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
+            // }
+            return order; // Trả về đơn hàng đã cập nhật
+        } 
+    } catch (error) {
+        console.error('Error confirming order by shipper ID:', error);
+        throw new Error('Error confirming order by shipper ID');
+    }
+};
+
+// shipper đã đến điểm giao hàng
+const confirmShipperArrivedDeliveryPoint = async (orderId, shipperId, io) => {
+    console.log('Confirming order with ID:', orderId, 'by shipper with ID:', shipperId);
+    try {
+        // Tìm đơn hàng theo ID
+        const order = await ModelOrder.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found');
+        }
+        // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
+        if (order.shipper._id && order.shipper._id.toString() === shipperId) {
+            // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
+            order.status = 'Shipper đã đến điểm giao hàng';
+            await order.save();
+
+            // Phát sự kiện cho socket
+            // if (io) {
+            //     io.emit('order_completed', { orderId, status: order.status });
+            //     io.emit('order_status', { orderId, status: order.status });
+            //     console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
+            // }
+            return order; // Trả về đơn hàng đã cập nhật
+        } 
+    } catch (error) {
+        console.error('Error confirming order by shipper ID:', error);
+        throw new Error('Error confirming order by shipper ID');
+    }
+};
 
 /**
  * Xác nhận đơn hàng bởi shipper (kiểm tra ID của shipper).
@@ -257,7 +342,6 @@ const cancelOrderByShipperId = async (orderId, shipperId, reason, io) => {
         throw new Error('Error confirming order by shipper ID');
     }
 };
-
 
 const getRevenueByShipper = async (shipperId, date, filter) => {
     try {
@@ -379,5 +463,9 @@ module.exports = {
     confirmOrderByShipperId,
     cancelOrderByShipperId,
     getRevenueByShipper,
-    changePassword
+    changePassword,
+    confirmShipperArrivedShopOwner,
+    confirmShipperOnDelivery,
+    confirmShipperArrivedDeliveryPoint
+
 };
