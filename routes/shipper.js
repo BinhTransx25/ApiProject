@@ -456,4 +456,14 @@ router.post('/change-password', async (req, res) => {
       return res.status(500).json({ status: false, message: error.message });
     }
   });
+
+router.put('/verified/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        let result = await ShipperController.changeShipperVerified(id);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});  
 module.exports = router;

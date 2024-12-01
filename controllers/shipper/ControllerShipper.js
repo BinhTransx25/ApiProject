@@ -6,7 +6,9 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const bcrypt = require('bcryptjs');
 
 // thêm shipper mới
-const addShipper = async (name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate) => {
+const addShipper = async (name, phone, email, address, role, rating,
+     image, password, gender, birthDate, vehicleBrand, vehiclePlate,
+     verified, imageVerified) => {
     try {
         // Kiểm tra email đã tồn tại trong hệ thống hay chưa
         let user = await ModelUser.findOne({ email });
@@ -21,7 +23,8 @@ const addShipper = async (name, phone, email, address, role, rating, image, pass
         const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
 
-        const newShipper = new Shipper({ name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate });
+        const newShipper = new Shipper({ name, phone, email, address, role, rating,
+             image, password, gender, birthDate, vehicleBrand, vehiclePlate, verified, imageVerified});
         return await newShipper.save();
     } catch (error) {
         if (error.code === 11000) {
@@ -48,7 +51,7 @@ const getAllShippers = async () => {
 // Lấy thông tin shipper theo ID
 const getShipperById = async (id) => {
     try {
-        const shipper = await ModelShipper.findById(id, 'name phone email address rating image gender birthDate vehicleBrand vehiclePlate status')
+        const shipper = await ModelShipper.findById(id, 'name phone email address rating image gender birthDate vehicleBrand vehiclePlate status  verified imageVerified')
 
         if (!shipper) {
             throw new Error('Shipper not found');
@@ -61,7 +64,7 @@ const getShipperById = async (id) => {
 };
 
 // Cập nhật thông tin shipper
-const updateShipper = async (id, name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate) => {
+const updateShipper = async (id, name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate, imageVerified) => {
     try {
 
         const shipperInDB = await ModelShipper.findById(id);
@@ -78,6 +81,7 @@ const updateShipper = async (id, name, phone, email, address, image, password, g
         shipperInDB.birthDate = birthDate || shipperInDB.birthDate;
         shipperInDB.vehicleBrand = vehicleBrand || shipperInDB.vehicleBrand;
         shipperInDB.vehiclePlate = vehiclePlate || shipperInDB.vehiclePlate;
+        shipperInDB.imageVerified = imageVerified || shipperInDB.imageVerified;
 
         let result = await shipperInDB.save();
         return result;
@@ -124,7 +128,6 @@ const changeShipperStatusUnActive = async (id) => {
         throw new Error('Lỗi khi hủy shipper');
     }
 };
-
 
 /**
  * Xác nhận đơn hàng bởi shipper (kiểm tra có shipper hay không).
@@ -451,6 +454,33 @@ const changePassword = async (email, oldPassword, newPassword) => {
     }
 };
 
+//  Xác thực shipper
+const changeShipperVerified = async (id) => {
+    try {
+        // Lấy thông tin shipper theo ID
+        const shipper = await Shipper.findById(id);
+
+        if (!shipper) {
+            throw new Error('Không tìm thấy shipper');
+        }
+
+        // Kiểm tra nếu cột imageVerified không có hình ảnh thì từ chối cập nhật
+        if (!shipper.imageVerified || shipper.imageVerified.length === 0) {
+            throw new Error('Không thể xác thực shipper vì chưa có hình ảnh xác thực');
+        }
+
+        // Cập nhật cột verified thành true và status thành active
+        return await Shipper.findByIdAndUpdate(
+            id,
+            { verified: true,  updated_at: Date.now() },
+            { new: true }
+        );
+    } catch (error) {
+        console.error('Thay đổi xác thực thất bại', error);
+        throw new Error(error.message || 'Lỗi khi xác thực shipper');
+    }
+};
+
 module.exports = {
     addShipper,
     getAllShippers,
@@ -466,6 +496,7 @@ module.exports = {
     changePassword,
     confirmShipperArrivedShopOwner,
     confirmShipperOnDelivery,
-    confirmShipperArrivedDeliveryPoint
+    confirmShipperArrivedDeliveryPoint,
+    changeShipperVerified
 
 };

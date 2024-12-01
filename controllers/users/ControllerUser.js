@@ -17,7 +17,9 @@ const register = async (
   shopCategory_ids,
   address,
   latitude,
-  longitude
+  longitude,
+  verified,
+  imageVerified
 ) => {
   try {
     // Kiểm tra email đã tồn tại trong hệ thống hay chưa
@@ -68,6 +70,8 @@ const register = async (
         address,
         latitude,
         longitude, // Sử dụng coordinates thay vì latitude và longitude riêng biệt
+        verified,
+        imageVerified
       });
       await shopOwner.save(); // Lưu shop owner vào cơ sở dữ liệu
     } else {

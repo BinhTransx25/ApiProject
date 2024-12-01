@@ -326,8 +326,12 @@ const searchProductsAndShops = async (keyword) => {
 
         // Nếu không tìm thấy sản phẩm hoặc cửa hàng nào
         if (products.length === 0 && shops.length === 0) {
-            return null;
+            return {
+                results: [],
+                suggestions: []
+            };
         }
+        
 
         // **Tạo danh sách gợi ý từ sản phẩm và cửa hàng**
         const suggestions = [
