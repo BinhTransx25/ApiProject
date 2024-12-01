@@ -47,7 +47,7 @@ const getProductsByCategory = async (category_id, page, limit) => {
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
         const skip = (page - 1) * limit;
-        const sort = { create_at: -1 };
+        const sort = { soldOut: -1 };
 
         const products = await ModelProduct
             .find(
@@ -71,12 +71,12 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
         let skip = (page - 1) * limit;
-        let sort = { create_at: -1 };
+        let sort = { soldOut: -1 };
 
         const products = await ModelProduct
             .find(
                 { 'shopOwner.shopOwner_id': shopOwner_id },
-                'name price categories description images shopOwner')
+                'name price categories description images shopOwner soldOut')
             .skip(skip)
             .limit(limit)
             .sort(sort);
