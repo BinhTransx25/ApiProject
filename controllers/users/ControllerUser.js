@@ -308,6 +308,36 @@ const resetPassword = async (email, password) => {
   }
 };
 
+const changePassword = async (email, oldPassword, newPassword) => {
+  try {
+    // Tìm admin theo email
+    const userInDB = await ModelUser.findOne({ email });
+    if (!userInDB) {
+      throw new Error('Email không tồn tại');
+    }
+
+    // Kiểm tra mật khẩu cũ
+    // Nếu mật khẩu đã được băm
+    const checkPassword = await bcrypt.compare(oldPassword, userInDB.password);
+    if (!checkPassword) {
+      return { message: 'Mật khẩu cũ không đúng' };
+    }
+
+
+    // Băm mật khẩu mới
+    const salt = await bcrypt.genSalt(10);
+    userInDB.password = await bcrypt.hash(newPassword, salt);
+
+    // Lưu mật khẩu mới vào cơ sở dữ liệu
+    await userInDB.save();
+
+    return { message: 'Đổi mật khẩu thành công' };
+  } catch (error) {
+    console.error('Error changing password:', error);
+    throw new Error('Error changing password');
+  }
+};
+
 const checkUser = async (email) => {
   try {
     const userInDB = await ModelUser.findOne({ email });
@@ -400,4 +430,5 @@ module.exports = {
   getAllUsers,
   getUserById,
   deleteUser,
+  changePassword,
 };

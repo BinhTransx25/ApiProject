@@ -350,10 +350,20 @@ router.get('/:id', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
   const { id } = req.params;
   try {
-      let result = await ControllerUser.deleteUser(id);
-      return res.status(200).json({ status: true, data: result });
+    let result = await ControllerUser.deleteUser(id);
+    return res.status(200).json({ status: true, data: result });
   } catch (error) {
-      return res.status(500).json({ status: false, data: error.message });
+    return res.status(500).json({ status: false, data: error.message });
+  }
+});
+
+router.post('/change-password', async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body;
+  try {
+    const result = await ControllerUser.changePassword(email, oldPassword, newPassword);
+    return res.status(200).json({ status: true, data: result.message });
+  } catch (error) {
+    return res.status(500).json({ status: false, data: error.message });
   }
 });
 module.exports = router;
