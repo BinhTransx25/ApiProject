@@ -138,6 +138,7 @@ const login = async (identifier, password) => {
           email: shipper.email,
           role: "shipper",
           address: shipper.address,
+          verified:shipper.verified,
           token,
         };
       }
