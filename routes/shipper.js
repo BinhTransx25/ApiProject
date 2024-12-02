@@ -35,9 +35,9 @@ const ShipperController = require('../controllers/shipper/ControllerShipper');
  *         description: Shipper đã được thêm
  */
 router.post('/add', async (req, res) => {
-    const { name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate ,imageVerified} = req.body;
+    const { name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate ,verified,imageVerified} = req.body;
     try {
-        let result = await ShipperController.addShipper(name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate,imageVerified);
+        let result = await ShipperController.addShipper(name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate,verified,imageVerified);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });

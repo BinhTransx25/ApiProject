@@ -24,7 +24,7 @@ const addShipper = async (name, phone, email, address, role, rating,
         password = await bcrypt.hash(password, salt);
 
         const newShipper = new Shipper({ name, phone, email, address, role, rating,
-             image, password, gender, birthDate, vehicleBrand, vehiclePlate, verified, imageVerified});
+             image, password, gender, birthDate, vehicleBrand, vehiclePlate, verified,imageVerified});
         return await newShipper.save();
     } catch (error) {
         if (error.code === 11000) {
