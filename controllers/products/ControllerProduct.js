@@ -47,7 +47,7 @@ const getProductsByCategory = async (category_id, page, limit) => {
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
         const skip = (page - 1) * limit;
-        const sort = { create_at: -1 };
+        const sort = { soldOut: -1 };
 
         const products = await ModelProduct
             .find(
@@ -71,12 +71,12 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
         let skip = (page - 1) * limit;
-        let sort = { create_at: -1 };
+        let sort = { soldOut: -1 };
 
         const products = await ModelProduct
             .find(
                 { 'shopOwner.shopOwner_id': shopOwner_id },
-                'name price categories description images shopOwner')
+                'name price categories description images shopOwner soldOut')
             .skip(skip)
             .limit(limit)
             .sort(sort);
@@ -231,25 +231,76 @@ const remove = async (id) => {
 
 const searchProductsAndShops = async (keyword) => {
     try {
-        const results = []; // Kết quả tìm kiếm cửa hàng.
-        const suggestions = []; // Gợi ý tìm kiếm (sản phẩm và cửa hàng).
+        const results = []; // Kết quả tìm kiếm sản phẩm và cửa hàng.
 
         // **Tìm kiếm sản phẩm có tên khớp với từ khóa**
         const products = await ModelProduct.find({
             name: { $regex: keyword, $options: 'i' } // Tìm kiếm không phân biệt chữ hoa, chữ thường.
         })
-            .populate({
-                path: 'shopOwner.shopOwner_id', // Liên kết đến bảng shopOwner.
-                model: 'shopOwner',
-                select: 'name rating address images shopCategory countReview openingHours closeHours status distance latitude longitude',
-            });
+        .select('name price images shopOwner') // Chỉ chọn các trường cần thiết.
+        .populate({
+            path: 'shopOwner.shopOwner_id', // Liên kết đến bảng shopOwner.
+            model: 'shopOwner',
+            select: 'name images rating address shopCategory countReview openingHours closeHours status distance latitude longitude', // Thông tin cần thiết.
+        });
 
-        // **Nhóm các cửa hàng từ sản phẩm**
-        const shopIds = new Set(); // Đảm bảo không trùng lặp cửa hàng.
+        // **Nhóm các sản phẩm theo từng cửa hàng**
+        const shopMap = {}; // Gom nhóm các sản phẩm theo cửa hàng.
         products.forEach(product => {
-            const shop = product.shopOwner?.shopOwner_id;
-            if (shop && !shopIds.has(shop._id.toString())) {
-                shopIds.add(shop._id.toString());
+            const shop = product.shopOwner?.shopOwner_id; // Lấy thông tin cửa hàng từ sản phẩm.
+
+            if (shop) {
+                if (!shopMap[shop._id]) {
+                    shopMap[shop._id] = {
+                        shopId: shop._id,
+                        name: shop.name,
+                        rating: shop.rating,
+                        address: shop.address,
+                        images: shop.images,
+                        shopCategories: shop.shopCategory?.map(category => ({
+                            id: category.shopCategory_id?._id || category.shopCategory_id,
+                            name: category.shopCategory_name,
+                            description: category.shopCategory_id?.description || '',
+                        })) || [],
+                        countReview: shop.countReview || 0,
+                        openingHours: shop.openingHours || '08:00',
+                        closeHours: shop.closeHours || '20:00',
+                        status: shop.status || 'Open',
+                        distance: shop.distance || 'N/A',
+                        latitude: shop.latitude,
+                        longitude: shop.longitude,
+                        product: [] // Danh sách sản phẩm thuộc cửa hàng.
+                    };
+                }
+
+                // Thêm sản phẩm vào nhóm của cửa hàng.
+                shopMap[shop._id].product.push({
+                    name: product.name,
+                    price: product.price,
+                    image: product.images?.[0] || '',
+                    product_id: product._id,
+                });
+            }
+        });
+
+        // Thêm các nhóm cửa hàng vào kết quả.
+        for (const shopId in shopMap) {
+            results.push(shopMap[shopId]);
+        }
+
+        // **Tìm kiếm cửa hàng có tên khớp với từ khóa**
+        const shops = await ModelShopOwner.find({
+            name: { $regex: keyword, $options: 'i' }
+        })
+        .select('name rating address images shopCategory countReview openingHours closeHours status distance latitude longitude')
+        .populate({
+            path: 'shopCategory.shopCategory_id',
+            select: 'name description',
+        });
+
+        // **Đưa thông tin cửa hàng vào kết quả tìm kiếm**
+        shops.forEach(shop => {
+            if (!shopMap[shop._id]) { // Tránh thêm trùng lặp cửa hàng đã tồn tại trong `shopMap`.
                 results.push({
                     shopId: shop._id,
                     name: shop.name,
@@ -257,9 +308,9 @@ const searchProductsAndShops = async (keyword) => {
                     address: shop.address,
                     images: shop.images,
                     shopCategories: shop.shopCategory?.map(category => ({
-                        id: category.shopCategory_id?._id || category.shopCategory_id, // ID của danh mục.
-                        name: category.shopCategory_name, // Tên danh mục.
-                        description: category.shopCategory_id?.description || '', // Mô tả danh mục.
+                        id: category.shopCategory_id?._id || category.shopCategory_id,
+                        name: category.shopCategory_name,
+                        description: category.shopCategory_id?.description || '',
                     })) || [],
                     countReview: shop.countReview || 0,
                     openingHours: shop.openingHours || '08:00',
@@ -268,65 +319,22 @@ const searchProductsAndShops = async (keyword) => {
                     distance: shop.distance || 'N/A',
                     latitude: shop.latitude,
                     longitude: shop.longitude,
-                });
-
-                // Thêm gợi ý sản phẩm tương ứng
-                suggestions.push({
-                    name: product.name,
-                    image: product.images?.[0] || '',
-                    price: product.price,
-                    type: 'product',
-                    product_id: product._id
+                    product: [] // Cửa hàng không có sản phẩm.
                 });
             }
         });
 
-        // **Tìm kiếm cửa hàng có tên khớp với từ khóa**
-        const shops = await ModelShopOwner.find({
-            name: { $regex: keyword, $options: 'i' }
-        })
-            .select('name rating address images shopCategory countReview openingHours closeHours status distance latitude longitude')
-            .populate({
-                path: 'shopCategory.shopCategory_id',
-                select: 'name description',
-            });
+        // Nếu không tìm thấy sản phẩm hoặc cửa hàng nào
+        if (products.length === 0 && shops.length === 0) {
+            return {
+                results: [],
+                suggestions: []
+            };
+        }
+        
 
-        // **Thêm thông tin các cửa hàng vào kết quả (không trùng lặp)**
-        shops.forEach(shop => {
-            if (!shopIds.has(shop._id.toString())) {
-                results.push({
-                    shopId: shop._id,
-                    name: shop.name,
-                    rating: shop.rating,
-                    address: shop.address,
-                    images: shop.images,
-                    shopCategories: shop.shopCategory.map(category => ({
-                        id: category.shopCategory_id?._id || category.shopCategory_id,
-                        name: category.shopCategory_name,
-                        description: category.shopCategory_id?.description || '',
-                    })),
-                    countReview: shop.countReview || 0,
-                    openingHours: shop.openingHours || '08:00',
-                    closeHours: shop.closeHours || '20:00',
-                    status: shop.status || 'Open',
-                    distance: shop.distance || 'N/A',
-                    latitude: shop.latitude,
-                    longitude: shop.longitude,
-                });
-
-                // Thêm gợi ý cửa hàng
-                suggestions.push({
-                    name: shop.name,
-                    image: shop.images?.[0] || '',
-                    rating: shop.rating,
-                    type: 'shop',
-                    shopId: shop._id
-                });
-            }
-        });
-
-        // **Tạo gợi ý từ sản phẩm và cửa hàng**
-        const finalSuggestions = [
+        // **Tạo danh sách gợi ý từ sản phẩm và cửa hàng**
+        const suggestions = [
             ...products.map(product => ({
                 name: product.name,
                 image: product.images?.[0] || '',
@@ -345,15 +353,16 @@ const searchProductsAndShops = async (keyword) => {
 
         // **Trả về kết quả**
         return {
-            results,       // Kết quả tìm kiếm (chỉ cửa hàng)
-            suggestions: finalSuggestions    // Gợi ý tìm kiếm (sản phẩm và cửa hàng)
+            results,       // Kết quả tìm kiếm (cửa hàng và sản phẩm của cửa hàng).
+            suggestions    // Gợi ý nhanh (danh sách nhanh sản phẩm và cửa hàng).
         };
 
     } catch (error) {
-        console.error('Search error:', error);
-        throw new Error('Search error');
+        console.error('Search error:', error); // In lỗi ra console.
+        throw new Error('Search error'); // Ném lỗi để xử lý bên ngoài.
     }
 };
+
 
 
 

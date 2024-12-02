@@ -31,7 +31,7 @@ const getShopOwnerById = async (id) => {
 };
 
 // Cập nhật thông tin nhà hàng
-const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours, closeHours) => {
+const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours, closeHours, imageVerified) => {
     try {
 
         const shopOwnerInDB = await ModelShopOwner.findById(id);
@@ -46,6 +46,7 @@ const updateShopOwner = async (id, name, phone, email, address, rating, images, 
         shopOwnerInDB.password = rating || shopOwnerInDB.password;
         shopOwnerInDB.openingHours = openingHours || shopOwnerInDB.openingHours;
         shopOwnerInDB.closeHours = closeHours || shopOwnerInDB.closeHours;
+        shopOwnerInDB.imageVerified = imageVerified || shopOwnerInDB.imageVerified;
 
         let result = await shopOwnerInDB.save();
         return result;
@@ -304,6 +305,32 @@ const changeShopOwnerStatusUnactive = async (id) => {
     }
 };
 
+//  Xác thực shipper
+const changeShopOwnerVerified = async (id) => {
+    try {
+        // Lấy thông tin shopOwner theo ID
+        const shopowner = await ModelShopOwner.findById(id);
+
+        if (!shopowner) {
+            throw new Error('Không tìm thấy shopowner');
+        }
+
+        // Kiểm tra nếu cột imageVerified không có hình ảnh thì từ chối cập nhật
+        if (!shopowner.imageVerified || shopowner.imageVerified.length === 0) {
+            throw new Error('Không thể xác thực shopowner vì chưa có hình ảnh xác thực');
+        }
+
+        // Cập nhật cột verified thành true 
+        return await ModelShopOwner.findByIdAndUpdate(
+            id,
+            { verified: true,  updated_at: Date.now() },
+            { new: true }
+        );
+    } catch (error) {
+        console.error('Thay đổi xác thực thất bại', error);
+        throw new Error(error.message || 'Lỗi khi xác thực shopowner');
+    }
+};
 
 module.exports = {
     getAllShopOwners,
@@ -318,5 +345,6 @@ module.exports = {
     updateShopCategory,
     changeShopOwnerStatusOpen,
     changeShopOwnerStatusClosed,
-    changeShopOwnerStatusUnactive
+    changeShopOwnerStatusUnactive,
+    changeShopOwnerVerified
 };

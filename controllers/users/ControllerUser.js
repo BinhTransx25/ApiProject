@@ -17,7 +17,9 @@ const register = async (
   shopCategory_ids,
   address,
   latitude,
-  longitude
+  longitude,
+  verified,
+  imageVerified
 ) => {
   try {
     // Kiểm tra email đã tồn tại trong hệ thống hay chưa
@@ -68,6 +70,8 @@ const register = async (
         address,
         latitude,
         longitude, // Sử dụng coordinates thay vì latitude và longitude riêng biệt
+        verified,
+        imageVerified
       });
       await shopOwner.save(); // Lưu shop owner vào cơ sở dữ liệu
     } else {
@@ -210,7 +214,7 @@ const loginWithSocial = async (userInfo) => {
     const body = {
       email: userInfo.email,
       name: userInfo.name,
-      photo: userInfo.photo,
+      image: userInfo.photo,
       phone: userInfo.phone,
       password: "123456",
     };
@@ -308,6 +312,36 @@ const resetPassword = async (email, password) => {
   }
 };
 
+const changePassword = async (email, oldPassword, newPassword) => {
+  try {
+    // Tìm admin theo email
+    const userInDB = await ModelUser.findOne({ email });
+    if (!userInDB) {
+      throw new Error('Email không tồn tại');
+    }
+
+    // Kiểm tra mật khẩu cũ
+    // Nếu mật khẩu đã được băm
+    const checkPassword = await bcrypt.compare(oldPassword, userInDB.password);
+    if (!checkPassword) {
+      return { message: 'Mật khẩu cũ không đúng' };
+    }
+
+
+    // Băm mật khẩu mới
+    const salt = await bcrypt.genSalt(10);
+    userInDB.password = await bcrypt.hash(newPassword, salt);
+
+    // Lưu mật khẩu mới vào cơ sở dữ liệu
+    await userInDB.save();
+
+    return { message: 'Đổi mật khẩu thành công' };
+  } catch (error) {
+    console.error('Error changing password:', error);
+    throw new Error('Error changing password');
+  }
+};
+
 const checkUser = async (email) => {
   try {
     const userInDB = await ModelUser.findOne({ email });
@@ -400,4 +434,5 @@ module.exports = {
   getAllUsers,
   getUserById,
   deleteUser,
+  changePassword,
 };

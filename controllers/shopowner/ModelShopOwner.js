@@ -28,7 +28,9 @@ const ShopOwnerSchema = new Schema({
     latitude: { type: Number, required: false },
     longitude: { type: Number, required: false },
     created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now }
+    updated_at: { type: Date, default: Date.now },
+    verified: { type: Boolean, default: false },
+    imageVerified: { type: Array, required: false, default: [] },
 });
 
 module.exports = mongoose.models.shopOwner || mongoose.model('shopOwner', ShopOwnerSchema);

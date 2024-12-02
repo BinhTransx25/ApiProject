@@ -17,7 +17,10 @@ const ShipperSchema = new Schema({
   gender: { type: String, enum: ['male', 'female', 'other'], required: true }, // Giới tính
   birthDate: { type: Date, required: false }, // Ngày sinh
   vehicleBrand: { type: String, required: false }, // Hãng xe
-  vehiclePlate: { type: String, required: false } // Biển số xe
+  vehiclePlate: { type: String, required: false }, // Biển số xe
+  verified: { type: Boolean, default: false },
+  imageVerified: { type: Array, required: false, default: [] },
+
 });
 
 module.exports = mongoose.models.Shipper || mongoose.model('Shipper', ShipperSchema);
