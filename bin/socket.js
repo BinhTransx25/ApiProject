@@ -61,12 +61,6 @@ module.exports = function (io) {
           throw new Error("Order không tồn tại.");
         }
 
-        const orderdetail = await findOrderById(orderId);
-
-        if (!orderdetail) {
-          throw new Error("Order không tồn tại.");
-        }
-
         io.emit("order_status_updated", {
           orderId,
           status: order.status,
