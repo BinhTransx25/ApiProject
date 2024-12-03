@@ -69,6 +69,7 @@ module.exports = function (io) {
         io.to(orderId).emit("order_status", {
           orderId,
           status: order.status,
+          orderdetail:order
         });
 
         console.log(`Order ${orderId} status updated to ${status}`);
