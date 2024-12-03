@@ -113,8 +113,8 @@ router.get('/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const {name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate} = req.body;
-        const shipper = await ShipperController.updateShipper(id, name,  phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate);
+        const {name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate, imageVerified} = req.body;
+        const shipper = await ShipperController.updateShipper(id, name,  phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate, imageVerified);
         return res.status(200).json({ status: true, data: shipper });
     } catch (error) {
         console.log('Update shipper error:', error);

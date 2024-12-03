@@ -7,8 +7,8 @@ const bcrypt = require('bcryptjs');
 
 // thêm shipper mới
 const addShipper = async (name, phone, email, address, role, rating,
-     image, password, gender, birthDate, vehicleBrand, vehiclePlate,
-     verified, imageVerified) => {
+    image, password, gender, birthDate, vehicleBrand, vehiclePlate,
+    verified, imageVerified) => {
     try {
         // Kiểm tra email đã tồn tại trong hệ thống hay chưa
         let user = await ModelUser.findOne({ email });
@@ -23,18 +23,20 @@ const addShipper = async (name, phone, email, address, role, rating,
         const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
 
-        const newShipper = new Shipper({ name, phone, email, address, role, rating,
-             image, password, gender, birthDate, vehicleBrand, vehiclePlate, verified,imageVerified});
+        const newShipper = new Shipper({
+            name, phone, email, address, role, rating,
+            image, password, gender, birthDate, vehicleBrand, vehiclePlate, verified, imageVerified
+        });
         return await newShipper.save();
     } catch (error) {
         if (error.code === 11000) {
             // Xử lý lỗi MongoDB duplicate key
             console.error("Lỗi: Email đã được sử dụng");
             throw new Error("Email đã được sử dụng");
-          } else {
+        } else {
             console.error("Lỗi khi thêm shipper:", error);
             throw new Error("Lỗi khi thêm shipper");
-          }
+        }
     }
 };
 
@@ -81,7 +83,16 @@ const updateShipper = async (id, name, phone, email, address, image, password, g
         shipperInDB.birthDate = birthDate || shipperInDB.birthDate;
         shipperInDB.vehicleBrand = vehicleBrand || shipperInDB.vehicleBrand;
         shipperInDB.vehiclePlate = vehiclePlate || shipperInDB.vehiclePlate;
-        shipperInDB.imageVerified = imageVerified || shipperInDB.imageVerified;
+        // Xử lý cập nhật imageVerified
+        if (imageVerified) {
+            if (Array.isArray(imageVerified)) {
+                // Nếu imageVerified là mảng, cập nhật trực tiếp
+                shipperInDB.imageVerified = imageVerified;
+            } else {
+                // Nếu imageVerified là chuỗi, chuyển thành mảng
+                shipperInDB.imageVerified = [imageVerified];
+            }
+        }
 
         let result = await shipperInDB.save();
         return result;
@@ -206,7 +217,7 @@ const confirmShipperArrivedShopOwner = async (orderId, shipperId, io) => {
                 console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
             }
             return order; // Trả về đơn hàng đã cập nhật
-        } 
+        }
     } catch (error) {
         console.error('Error confirming order by shipper ID:', error);
         throw new Error('Error confirming order by shipper ID');
@@ -234,7 +245,7 @@ const confirmShipperOnDelivery = async (orderId, shipperId, io) => {
                 console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
             }
             return order; // Trả về đơn hàng đã cập nhật
-        } 
+        }
     } catch (error) {
         console.error('Error confirming order by shipper ID:', error);
         throw new Error('Error confirming order by shipper ID');
@@ -263,7 +274,7 @@ const confirmShipperArrivedDeliveryPoint = async (orderId, shipperId, io) => {
                 console.log(`Socket emitted for order ${orderId} completed by shipper ${shipperId}`);
             }
             return order; // Trả về đơn hàng đã cập nhật
-        } 
+        }
     } catch (error) {
         console.error('Error confirming order by shipper ID:', error);
         throw new Error('Error confirming order by shipper ID');
@@ -332,7 +343,7 @@ const cancelOrderByShipperId = async (orderId, shipperId, reason, io) => {
             // Phát sự kiện cho socket
             if (io) {
                 io.emit('order_cancelled', { orderId, status: order.status, reason });
-                io.emit('order_status', { orderId, status: order.status,reason });
+                io.emit('order_status', { orderId, status: order.status, reason });
                 console.log(`Socket emitted for order ${orderId} cancelled by shipper ${shipperId} with reason: ${reason}`);
             }
 
@@ -472,7 +483,7 @@ const changeShipperVerified = async (id) => {
         // Cập nhật cột verified thành true và status thành active
         return await Shipper.findByIdAndUpdate(
             id,
-            { verified: true,  updated_at: Date.now() },
+            { verified: true, updated_at: Date.now() },
             { new: true }
         );
     } catch (error) {

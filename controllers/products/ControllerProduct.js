@@ -203,7 +203,15 @@ const update = async (id, name, price, images, description, category_ids, shopOw
 
         productInDB.name = name || productInDB.name;
         productInDB.price = price || productInDB.price;
-        productInDB.images = images || productInDB.images;
+        if (images) {
+            if (Array.isArray(images)) {
+                // Nếu imageVerified là mảng, cập nhật trực tiếp
+                productInDB.images = images;
+            } else {
+                // Nếu imageVerified là chuỗi, chuyển thành mảng
+                productInDB.images = [images];
+            }
+        }
         productInDB.description = description || productInDB.description;
 
         let result = await productInDB.save();
@@ -237,12 +245,12 @@ const searchProductsAndShops = async (keyword) => {
         const products = await ModelProduct.find({
             name: { $regex: keyword, $options: 'i' } // Tìm kiếm không phân biệt chữ hoa, chữ thường.
         })
-        .select('name price images shopOwner') // Chỉ chọn các trường cần thiết.
-        .populate({
-            path: 'shopOwner.shopOwner_id', // Liên kết đến bảng shopOwner.
-            model: 'shopOwner',
-            select: 'name images rating address shopCategory countReview openingHours closeHours status distance latitude longitude', // Thông tin cần thiết.
-        });
+            .select('name price images shopOwner') // Chỉ chọn các trường cần thiết.
+            .populate({
+                path: 'shopOwner.shopOwner_id', // Liên kết đến bảng shopOwner.
+                model: 'shopOwner',
+                select: 'name images rating address shopCategory countReview openingHours closeHours status distance latitude longitude', // Thông tin cần thiết.
+            });
 
         // **Nhóm các sản phẩm theo từng cửa hàng**
         const shopMap = {}; // Gom nhóm các sản phẩm theo cửa hàng.
@@ -292,11 +300,11 @@ const searchProductsAndShops = async (keyword) => {
         const shops = await ModelShopOwner.find({
             name: { $regex: keyword, $options: 'i' }
         })
-        .select('name rating address images shopCategory countReview openingHours closeHours status distance latitude longitude')
-        .populate({
-            path: 'shopCategory.shopCategory_id',
-            select: 'name description',
-        });
+            .select('name rating address images shopCategory countReview openingHours closeHours status distance latitude longitude')
+            .populate({
+                path: 'shopCategory.shopCategory_id',
+                select: 'name description',
+            });
 
         // **Đưa thông tin cửa hàng vào kết quả tìm kiếm**
         shops.forEach(shop => {
@@ -331,7 +339,7 @@ const searchProductsAndShops = async (keyword) => {
                 suggestions: []
             };
         }
-        
+
 
         // **Tạo danh sách gợi ý từ sản phẩm và cửa hàng**
         const suggestions = [
