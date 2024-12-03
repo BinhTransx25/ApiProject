@@ -173,6 +173,7 @@ const login = async (identifier, password) => {
         shopCategory: shopOwner.shopCategory,
         address: shopOwner.address,
         coordinates: shopOwner.coordinates,
+        verified:shopOwner.verified,
         token,
       };
     }
