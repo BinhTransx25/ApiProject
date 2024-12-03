@@ -94,8 +94,8 @@ router.get('/search', async function (req, res) {
 
         // Nếu không tìm thấy kết quả
         if (results.length === 0 && suggestions.length === 0) {
-            return res.status(404).json({
-                status: false,
+            return res.status(200).json({
+                status: true,
                 message: 'No results or suggestions found',
                 data: {
                     results,       // Kết quả tìm kiếm (chi tiết sản phẩm & cửa hàng)

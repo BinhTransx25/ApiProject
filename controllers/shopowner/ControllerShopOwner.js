@@ -46,7 +46,16 @@ const updateShopOwner = async (id, name, phone, email, address, rating, images, 
         shopOwnerInDB.password = rating || shopOwnerInDB.password;
         shopOwnerInDB.openingHours = openingHours || shopOwnerInDB.openingHours;
         shopOwnerInDB.closeHours = closeHours || shopOwnerInDB.closeHours;
-        shopOwnerInDB.imageVerified = imageVerified || shopOwnerInDB.imageVerified;
+        // Xử lý cập nhật imageVerified
+        if (imageVerified) {
+            if (Array.isArray(imageVerified)) {
+                // Nếu imageVerified là mảng, cập nhật trực tiếp
+                shopOwnerInDB.imageVerified = imageVerified || shopOwnerInDB.imageVerified;
+            } else {
+                // Nếu imageVerified là chuỗi, chuyển thành mảng
+                shopOwnerInDB.imageVerified = [imageVerified] || shopOwnerInDB.imageVerified;
+            }
+        }
 
         let result = await shopOwnerInDB.save();
         return result;
@@ -323,7 +332,7 @@ const changeShopOwnerVerified = async (id) => {
         // Cập nhật cột verified thành true 
         return await ModelShopOwner.findByIdAndUpdate(
             id,
-            { verified: true,  updated_at: Date.now() },
+            { verified: true, updated_at: Date.now() },
             { new: true }
         );
     } catch (error) {
