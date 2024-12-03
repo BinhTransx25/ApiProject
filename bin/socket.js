@@ -67,9 +67,8 @@ module.exports = function (io) {
         });
         // Gửi thông báo trạng thái mới đến các client trong room của đơn hàng
         io.to(orderId).emit("order_status", {
-          orderId: orderId,
+          orderId,
           status: order.status,
-          detail: order,
         });
 
         console.log(`Order ${orderId} status updated to ${status}`);
