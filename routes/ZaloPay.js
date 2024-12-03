@@ -15,7 +15,7 @@ const config = {
 router.post('/payment', async (req, res) => {
   const embed_data = {
     //sau khi hoàn tất thanh toán sẽ đi vào link này (thường là link web thanh toán thành công của mình)
-    "redirecturl": "coodyfood://fail-payment",
+    "redirecturl": "https://www.youtube.com/watch?v=OeYVGtIiEO8&t=412s&ab_channel=Lucin3x",
   };
 
   const items = [];
@@ -31,7 +31,7 @@ router.post('/payment', async (req, res) => {
     amount: 50000,
     //khi thanh toán xong, zalopay server sẽ POST đến url này để thông báo cho server của mình
     //Chú ý: cần dùng ngrok để public url thì Zalopay Server mới call đến được
-    callback_url: 'https://aba0-2405-4803-c75b-a410-b521-5adb-e7ec-1049.ngrok-free.app/zaloPay/callback',
+    callback_url: 'https://20ae-2405-4803-c75b-a410-1534-a856-f3aa-66ac.ngrok-free.app/zaloPay/callback',
     description: `CoodyFood - Payment for the order #${transID}`,
     bank_code: '',
   };
