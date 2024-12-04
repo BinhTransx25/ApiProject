@@ -368,7 +368,7 @@ const checkUser = async (email) => {
   }
 };
 // Cập nhật thông tin nhà hàng
-const updateUser = async (id, name, phone, email, password, image) => {
+const updateUser = async (id, name, phone, email, password, image,birthday) => {
   try {
     const userInDB = await ModelUser.findById(id);
     if (!userInDB) {
@@ -379,6 +379,8 @@ const updateUser = async (id, name, phone, email, password, image) => {
     userInDB.email = email || userInDB.email;
     userInDB.password = password || userInDB.password;
     userInDB.image = image || userInDB.image;
+    userInDB.birthday = birthday || userInDB.birthday;
+    userInDB.updatedAt = Date.now();
 
     let result = await userInDB.save();
     return result;

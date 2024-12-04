@@ -16,9 +16,9 @@ const mongoose = require('mongoose');
  * @param {String} shopOwnerId - ID của chủ cửa hàng.
  * @returns {Array} - Danh sách carts đã được cập nhật của người dùng.
  */
-const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, shipperId, io, 
+const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, shipperId, io,
     voucherId, shippingfee, distance, recipientName, address, latitude, longitude, phone, label,
-     reasonCancel) => {
+    reasonCancel) => {
     console.log("Adding order with data:", { userId, order, paymentMethod, shopOwnerId, shipperId });
 
     if (!userId || !order || !paymentMethod || !shopOwnerId) {
@@ -73,7 +73,7 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
                 _id: user._id,
                 name: user.name,
                 phone: user.phone,
-                image:user.image,
+                image: user.image,
             },
             shopOwner: {
                 _id: shopOwner._id,
@@ -82,7 +82,7 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
                 images: shopOwner.images,
                 rating: shopOwner.rating,
                 latitude: shopOwner.latitude,
-                longitude:shopOwner.longitude,
+                longitude: shopOwner.longitude,
             },
             totalPrice,
             shipper: shipper ? {
@@ -391,7 +391,7 @@ const updateOrderStatus = async (orderId, status) => {
 };
 
 // Người Dùng Bấm 
-const updateOrderStatusAfterPayment = async (orderId) => {
+const updateOrderStatusAfterPayment = async (orderId, paymentMethod) => {
     console.log('Order with ID:', orderId); // Log kiểm tra orderId
 
     try {
@@ -403,6 +403,7 @@ const updateOrderStatusAfterPayment = async (orderId) => {
 
         // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
         order.status = 'Chưa giải quyết';
+        order.paymentMethod = paymentMethod;
         order.updatedAt = Date.now();
         await order.save();
 
