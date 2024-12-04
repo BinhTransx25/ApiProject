@@ -277,8 +277,8 @@ router.post('/check-user', async (req, res, next) => {
 router.put('/update/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, email, password, image } = req.body;
-    const user = await ControllerUser.updateUser(id, name, phone, email, password, image);
+    const { name, phone, email, password, image, birthday } = req.body;
+    const user = await ControllerUser.updateUser(id, name, phone, email, password, image, birthday);
     return res.status(200).json({ status: true, data: user });
   } catch (error) {
     if (error.message === 'Không Tìm Thấy Tài Khoản, Hãy thử lại') {

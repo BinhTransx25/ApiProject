@@ -46,15 +46,15 @@ router.post('/add-order', async (req, res) => {
 
     try {
         const { userId, order, paymentMethod, shopOwner, totalPrice, shipper, voucher, shippingfee,
-             distance, recipientName, address, latitude, longitude, phone, label, reasonCancel } = req.body;
+            distance, recipientName, address, latitude, longitude, phone, label, reasonCancel } = req.body;
         const io = req.app.get('io');
         const addOrder = await ControllerOrder.addOrder(userId, order, paymentMethod, shopOwner, totalPrice, shipper, io, voucher, shippingfee,
-             distance, recipientName, address, latitude, longitude, phone, label, reasonCancel);
+            distance, recipientName, address, latitude, longitude, phone, label, reasonCancel);
         return res.status(200).json({ status: true, data: addOrder });
     } catch (error) {
         console.log('Error adding order:', error);
         return res.status(500).json({ status: false, data: error.message });
-        
+
     }
 });
 
@@ -405,7 +405,8 @@ router.delete('/:orderId', async (req, res) => {
 router.put('/Success-Payment/:orderId', async (req, res) => {
     try {
         const { orderId } = req.params;
-        const result = await ControllerOrder.updateOrderStatusAfterPayment(orderId);
+        const { paymentMethod } = req.body;
+        const result = await ControllerOrder.updateOrderStatusAfterPayment(orderId, paymentMethod);
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error("Error updating order status:", error);

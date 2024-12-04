@@ -16,6 +16,7 @@ const UserSchema = new Schema({
     orders: { type: [OrderSchema], default: [] }, // Mảng các đơn hàng
     carts: { type: [CartSchema], default: [] },
     address: { type: [UserAddressSchema], default: [] }, // Mảng các địa chỉ đã lưu 
+    birthday: { type: Date, default: null },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });
