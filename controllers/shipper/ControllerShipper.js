@@ -397,7 +397,6 @@ const getRevenueByShipper = async (shipperId, date, filter) => {
         const orders = await ModelOrder.find({
             'shipper._id': shipperObjectId, // Lọc theo shipperId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
-            isDeleted: false // Lọc những đơn hàng chưa bị xóa
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
@@ -457,7 +456,6 @@ const getRevenueByShipperCustomRange = async (shipperId, startDateInput, endDate
         const orders = await ModelOrder.find({
             'shipper._id': shipperObjectId, // Lọc theo shipperId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
-            isDeleted: false // Lọc những đơn hàng chưa bị xóa
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
