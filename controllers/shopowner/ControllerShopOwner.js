@@ -31,7 +31,7 @@ const getShopOwnerById = async (id) => {
 };
 
 // Cập nhật thông tin nhà hàng
-const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours, closeHours, imageVerified) => {
+const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours, closeHours, imageVerified,latitude,longitude) => {
     try {
 
         const shopOwnerInDB = await ModelShopOwner.findById(id);
@@ -46,6 +46,8 @@ const updateShopOwner = async (id, name, phone, email, address, rating, images, 
         shopOwnerInDB.password = rating || shopOwnerInDB.password;
         shopOwnerInDB.openingHours = openingHours || shopOwnerInDB.openingHours;
         shopOwnerInDB.closeHours = closeHours || shopOwnerInDB.closeHours;
+        shopOwnerInDB.latitude = latitude || shopOwnerInDB.latitude;
+        shopOwnerInDB.longitude = longitude || shopOwnerInDB.longitude;
         // Xử lý cập nhật imageVerified
         if (imageVerified) {
             if (Array.isArray(imageVerified)) {
