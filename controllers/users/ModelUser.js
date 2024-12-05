@@ -18,7 +18,10 @@ const UserSchema = new Schema({
     address: { type: [UserAddressSchema], default: [] }, // Mảng các địa chỉ đã lưu 
     birthday: { type: Date, default: null },
     created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now }
+    updated_at: { type: Date, default: Date.now },
+    status: { type: String, enum: ['Hoạt động', 'Tài khoản bị khóa', ], default: 'Hoạt động' },
+    isDeleted:{type:Boolean, required:false, default:false},
+
 });
 
 module.exports = mongoose.models.user || mongoose.model('user', UserSchema);

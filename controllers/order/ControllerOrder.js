@@ -26,15 +26,28 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
     }
 
     try {
-        // Tìm người dùng, địa chỉ, và shop owner
+        // Tìm người dùng, nhà hàng, và shipper
         const user = await ModelUser.findById(userId);
         if (!user) throw new Error('User not found');
 
-        // const address = await ModelAddress.findById(shippingAddressId);
-        // if (!address) throw new Error('Address not found');
-
         const shopOwner = await ModelShopOwner.findById(shopOwnerId);
         if (!shopOwner) throw new Error('Shop owner not found');
+
+        // Kiểm tra trạng thái của nhà hàng
+        if (shopOwner.status !== 'mở cửa') {
+            throw new Error('Nhà hàng hiện đang đóng cửa, không thể đặt hàng');
+        }
+
+        // Kiểm tra trạng thái của từng sản phẩm
+        for (const item of order) {
+            const product = await ModelProduct.findById(item._id);
+            if (!product) {
+                throw new Error(`Sản phẩm với ID ${item._id} không tồn tại`);
+            }
+            if (product.status !== 'còn món') {
+                throw new Error(`Sản phẩm "${product.name}" hiện không có sẵn`);
+            }
+        }
 
         // Xử lý thông tin shipper nếu có shipperId
         let shipper;
@@ -127,6 +140,7 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
         throw error;
     }
 };
+
 
 /**
  * Lấy chi tiết đơn hàng theo orderId.
@@ -264,7 +278,7 @@ const shopOwnerCancelOrder = async (orderId, reason, io) => {
         }
 
         // Cập nhật trạng thái và lý do hủy
-        order.status = 'Nhà hàng đã hủy đơn';
+        order.status = 'Nhà hàng hủy đơn';
         order.reasonCancel = reason; // Lưu lý do hủy
         await order.save();
 
@@ -273,16 +287,16 @@ const shopOwnerCancelOrder = async (orderId, reason, io) => {
         if (user) {
             const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
             if (orderItem) {
-                orderItem.status = 'Nhà hàng đã hủy đơn'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Nhà hàng hủy đơn'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
 
         // Phát sự kiện qua socket
         if (io) {
-            io.emit('order_cancelled', { orderId, status: 'Nhà hàng đã hủy đơn', reason });
-            io.emit('order_status', { order, status: 'Nhà hàng đã hủy đơn', reason });
-            console.log(`Socket emitted for order ${orderId} with status 'Nhà hàng đã hủy đơn' and reason: ${reason}`);
+            io.emit('order_cancelled', { orderId, status: 'Nhà hàng hủy đơn', reason });
+            io.emit('order_status', { order, status: 'Nhà hàng hủy đơn', reason });
+            console.log(`Socket emitted for order ${orderId} with status 'Nhà hàng hủy đơn' and reason: ${reason}`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
         }
@@ -312,7 +326,7 @@ const CustomerCancelOrder = async (orderId, io) => {
         }
 
         // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
-        order.status = 'Người dùng đã hủy đơn';
+        order.status = 'Khách hủy đơn';
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
@@ -320,16 +334,16 @@ const CustomerCancelOrder = async (orderId, io) => {
         if (user) {
             const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
             if (orderItem) {
-                orderItem.status = 'Người dùng đã hủy đơn'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Khách hủy đơn'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
 
         // Phát sự kiện cho socket
         if (io) {
-            io.emit('order_cancelled', { orderId, status: 'Người dùng đã hủy đơn' });
-            io.emit('order_status', { order, status: 'Người dùng đã hủy đơn' });
-            console.log(`Socket emitted for order ${orderId} with status 'Người dùng đã hủy đơn'`);
+            io.emit('order_cancelled', { orderId, status: 'Khách hủy đơn' });
+            io.emit('order_status', { order, status: 'Khách hủy đơn' });
+            console.log(`Socket emitted for order ${orderId} with status 'Khách hủy đơn'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
         }
@@ -402,8 +416,8 @@ const updateOrderStatusAfterPayment = async (orderId, paymentMethod) => {
         }
 
         // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
-        order.status = 'Chưa giải quyết';
         order.paymentMethod = paymentMethod;
+        order.status = 'Đang xử lý';
         order.updatedAt = Date.now();
         await order.save();
 
@@ -412,7 +426,7 @@ const updateOrderStatusAfterPayment = async (orderId, paymentMethod) => {
         if (user) {
             const orderItem = user.orders.id(orderId);
             if (orderItem) {
-                orderItem.status = 'Chưa giải quyết'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Đang xử lý'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
@@ -424,11 +438,83 @@ const updateOrderStatusAfterPayment = async (orderId, paymentMethod) => {
     }
 };
 
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Đơn hàng tạm xóa'
+const removeSoftDeleted = async (id) => {
+    try {
+        const orderInDB = await ModelOrder.findById(id);
+        if (!orderInDB) {
+            throw new Error('Order not found');
+        }
+
+        // Danh sách trạng thái cho phép xóa mềm
+        const allowedStatuses = [
+            'Giao hàng thành công',
+            'Nhà hàng hủy đơn',
+            'Tài xế hủy đơn',
+            'Khách hủy đơn'
+        ];
+
+        // Kiểm tra trạng thái hiện tại
+        if (!allowedStatuses.includes(orderInDB.status)) {
+            throw new Error('Đơn hàng đang trong quá trình xử lý, không thể xóa mềm.');
+        }
+
+        // Lưu trạng thái hiện tại trước khi xóa mềm
+        const result = await ModelOrder.findByIdAndUpdate(
+            id,
+            {
+                isDeleted: true,
+                status: 'Đơn hàng tạm xóa',
+                previousStatus: orderInDB.status // Lưu trạng thái trước khi xóa
+            },
+            { new: true } // Trả về document đã cập nhật
+        );
+
+        return result;
+    } catch (error) {
+        console.log('Remove Order error:', error.message);
+        throw new Error(error.message);
+    }
+};
+
+// Khôi phục trạng thái cho đơn hàng
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const orderInDB = await ModelOrder.findById(id);
+        if (!orderInDB) {
+            throw new Error('Order not found');
+        }
+
+        // Kiểm tra trạng thái trước đó đã được lưu
+        if (!orderInDB.previousStatus) {
+            throw new Error('Không thể khôi phục do thiếu trạng thái trước khi xóa.');
+        }
+
+        // Cập nhật trạng thái về trước khi xóa
+        const result = await ModelOrder.findByIdAndUpdate(
+            id,
+            {
+                isDeleted: false,
+                status: orderInDB.previousStatus, // Trả về trạng thái trước khi xóa
+                $unset: { previousStatus: '' } // Xóa trường previousStatus sau khi khôi phục
+            },
+            { new: true } // Trả về document đã cập nhật
+        );
+
+        return result;
+    } catch (error) {
+        console.log('Restore Order error:', error.message);
+        throw new Error(error.message);
+    }
+};
+
+
 
 module.exports = {
     addOrder, getOrderDetail, getOrdersByShop,
     confirmOrder, shopOwnerCancelOrder, deleteOrder,
     updateOrderStatus, CustomerCancelOrder,
     updateOrderStatusAfterPayment,
-    getOrdersByUser, getOrdersByShipper
+    getOrdersByUser, getOrdersByShipper,
+    removeSoftDeleted, restoreAndSetAvailable
 };

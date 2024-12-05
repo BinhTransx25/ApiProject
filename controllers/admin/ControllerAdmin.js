@@ -54,7 +54,10 @@ const login = async (identifier, password) => {
         if (!admin) {
             throw new Error('Tài khoản hoặc mật khẩu không đúng');
         };
-
+          // Kiểm tra trạng thái tài khoản shipper
+          if (admin.status === "Tài khoản bị khóa") {
+            throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+          }
 
         // Kiểm tra mật khẩu người dùng
         const checkPassword = await bcrypt.compare(password, admin.password);
@@ -93,7 +96,6 @@ const resetPassword = async (email, password) => {
     }
 }
 
-
 // Cập nhật thông tin nhà hàng
 const updateAdmin = async (id, name, phone, email, password, image) => {
     try {
@@ -130,7 +132,7 @@ const getAllAdmin = async () => {
 // Lấy thông tin nhà hàng theo ID
 const getAdminById = async (id) => {
     try {
-        const admin = await ModelAdmin.findById(id, 'name phone email image')
+        const admin = await ModelAdmin.findById(id, 'name phone email image verified status isDeleted')
 
         if (!admin) {
             throw new Error('User không tìm thấy');
@@ -183,8 +185,57 @@ const changePassword = async (email, oldPassword, newPassword) => {
         throw new Error('Error changing password');
     }
 };
+
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
+const removeSoftDeleted = async (id) => {
+    try {
+        const adminInDB = await ModelAdmin.findById(id);
+        if (!adminInDB) {
+            throw new Error('Admin not found');
+        }
+  
+        // Cập nhật trạng thái isDeleted và status
+        let result = await ModelAdmin.findByIdAndUpdate(
+            id,
+            { isDeleted: true, status: 'Tài khoản bị khóa' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove Admin error:', error);
+        throw new Error('Remove Admin error');
+    }
+  };
+  
+  // Khôi phục trạng thái cho shop 
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const adminInDB = await ModelAdmin.findById(id);
+        if (!adminInDB) {
+            throw new Error('Admin not found');
+        }
+  
+        // Cập nhật trạng thái
+        const result = await ModelAdmin.findByIdAndUpdate(
+            id,
+            { isDeleted: false, status: 'Hoạt động' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore Admin error:', error);
+        throw new Error('Restore Admin error');
+    }
+  };
+
 module.exports = {
     register, login,
     resetPassword,
-    updateAdmin, getAllAdmin, getAdminById, deleteAdmin, changePassword
+    updateAdmin, 
+    getAllAdmin, 
+    getAdminById, 
+    deleteAdmin, 
+    changePassword,
+    removeSoftDeleted,
+    restoreAndSetAvailable
 };

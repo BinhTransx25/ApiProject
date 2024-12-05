@@ -7,7 +7,9 @@ const VoucherSchema = new Schema({
     minimumOrderAmount: { type: Number, required: true }, // Tổng tiền đơn hàng tối thiểu để sử dụng voucher
     expirationDate: { type: Date, required: true }, // Ngày hết hạn của voucher
     image: { type: String, required: true }, // URL hình ảnh của voucher
-    status: { type: String, enum: ['khả dụng', 'không khả dụng'], default: 'khả dụng' }, // Trạng thái voucher
+    status: { type: String, enum: ['khả dụng', 'không khả dụng', ], default: 'khả dụng' }, // Trạng thái voucher
+    isDeleted:{type:Boolean, required:false, default:false},
+
 }, { timestamps: true });
 
 // Phương thức kiểm tra tính khả dụng của voucher

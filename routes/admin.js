@@ -270,4 +270,43 @@ router.post('/change-password', async (req, res) => {
   }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+  try {
+      const adminId = req.params.id;
+      const updatedAdmin = await ControllerAdmin.removeSoftDeleted(adminId);
+
+      if (updatedAdmin) {
+          return res.status(200).json({
+              status: true,
+              message: 'Admin successfully soft deleted',
+              data: updatedAdmin, // Trả về thông tin đã cập nhật
+          });
+      } else {
+          return res.status(404).json({
+              status: false,
+              message: 'Admin not found',
+          });
+      }
+  } catch (error) {
+      console.log('Delete Admin error:', error);
+      return res.status(500).json({ status: false, error: error.message });
+  }
+});
+
+router.put('/restore/available/:id', async (req, res) => {
+  try {
+      const adminId = req.params.id;
+      const updatedAdmin = await ControllerAdmin.restoreAndSetAvailable(adminId);
+
+      return res.status(200).json({
+          status: true,
+          message: 'Admin restored and set to available',
+          data: updatedAdmin,
+      });
+  } catch (error) {
+      console.log('Restore Admin error:', error);
+      return res.status(500).json({ status: false, error: error.message });
+  }
+});
+
 module.exports = router;

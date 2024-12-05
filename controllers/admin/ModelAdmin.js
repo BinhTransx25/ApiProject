@@ -11,7 +11,14 @@ const AdminSchema = new Schema({
     image: { type: String, default: "" },
     verified: { type: Boolean, default: false },
     created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now }
+    updated_at: { type: Date, default: Date.now },
+    status: { 
+        type: String, 
+        enum: ['Hoạt động', 'Tài khoản bị khóa',], 
+        default: 'Hoạt động' 
+    },
+    isDeleted:{type:Boolean, required:false, default:false},
+
 });
 
 module.exports = mongoose.models.admin || mongoose.model('admin', AdminSchema);

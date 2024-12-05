@@ -19,21 +19,22 @@ const OrderSchema = new Schema({
     paymentMethod: { type: String, enum: ['Tiền mặt', 'PayOS', 'ZaloPay'], required: true },
     status: {
         type: String,
-        enum: ['Chưa giải quyết',
+        enum: ['Đang xử lý',
             'Chờ thanh toán',
             'Tìm tài xế',
             'Đang đến nhà hàng',
             'Tài xế đã đến nhà hàng',
             'Đang giao hàng',
-            'Shipper đã đến điểm giao hàng',
-            'Đơn hàng đã được giao hoàn tất',
-            'Nhà hàng đã hủy đơn',
-            'Shipper đã hủy đơn',
-            'Người dùng đã hủy đơn'
+            'Đã đến điểm giao',
+            'Giao hàng thành công',
+            'Nhà hàng hủy đơn',
+            'Tài xế hủy đơn',
+            'Khách hủy đơn',
+            'Đơn hàng tạm xóa'
         ],
         default: function () {
             // Tự động thiết lập trạng thái dựa trên phương thức thanh toán
-            return this.paymentMethod === 'PayOS' || this.paymentMethod === 'ZaloPay' ? 'Chờ thanh toán' : 'Chưa giải quyết';
+            return this.paymentMethod === 'PayOS' || this.paymentMethod === 'ZaloPay' ? 'Chờ thanh toán' : 'Đang xử lý';
         }
     },
     totalPrice: { type: Number, required: false, default: 0 },
@@ -47,6 +48,9 @@ const OrderSchema = new Schema({
     distance: { type: Number, required: false, default: 0 },
     statusReview: { type: Boolean, required: false, default: false }, // Đã thêm cột statusReview
     reasonCancel: { type: String, required: false, default: '' },   // Cột mới reasonCancel
+    isDeleted:{ type:Boolean, required:false, default:false}, // Xóa mềm
+    previousStatus: { type: String, required: false, default: '' } // trạng thái trước khi xóa mềm sẽ lưu ở đây
+
 });
 
 module.exports = mongoose.models.Order || mongoose.model('Order', OrderSchema);

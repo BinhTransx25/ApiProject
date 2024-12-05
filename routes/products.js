@@ -121,7 +121,83 @@ router.get('/search', async function (req, res) {
     }
 });
 
-
+/**
+ * @swagger
+ * /products/filter:
+ *   get:
+ *     summary: Lấy tất cả sản phẩm theo điều kiện categoryId và shopOwnerId
+ *     tags: [Products]
+ *     parameters:
+ *       - name: categoryId
+ *         in: query
+ *         description: ID của loại sản phẩm
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: shopOwnerId
+ *         in: query
+ *         description: ID của shopOwner
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: keyword
+ *         in: query
+ *         description: Từ khóa tìm kiếm
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: page
+ *         in: query
+ *         description: Số trang
+ *         required: false
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         description: Số lượng sản phẩm mỗi trang
+ *         required: false
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *                       quantity:
+ *                         type: integer
+ *                       images:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       description:
+ *                         type: string
+ */
+router.get('/filter', async function (req, res, next) {
+    try {
+        const { categoryId, shopOwnerId, keyword, page, limit } = req.query;
+        const products = await ControllerProduct.getProductsByCategoryAndShopOwner(categoryId, shopOwnerId, keyword, page, limit);
+        return res.status(200).json({ status: true, data: products });
+    } catch (error) {
+        console.log('Get filtered products error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
 
 /**
  * @swagger
@@ -316,84 +392,6 @@ router.get('/shopOwner/:id', async function (req, res, next) {
 
 /**
  * @swagger
- * /products/filter:
- *   get:
- *     summary: Lấy tất cả sản phẩm theo điều kiện categoryId và shopOwnerId
- *     tags: [Products]
- *     parameters:
- *       - name: categoryId
- *         in: query
- *         description: ID của loại sản phẩm
- *         required: false
- *         schema:
- *           type: string
- *       - name: shopOwnerId
- *         in: query
- *         description: ID của shopOwner
- *         required: false
- *         schema:
- *           type: string
- *       - name: keyword
- *         in: query
- *         description: Từ khóa tìm kiếm
- *         required: false
- *         schema:
- *           type: string
- *       - name: page
- *         in: query
- *         description: Số trang
- *         required: false
- *         schema:
- *           type: integer
- *       - name: limit
- *         in: query
- *         description: Số lượng sản phẩm mỗi trang
- *         required: false
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                       name:
- *                         type: string
- *                       price:
- *                         type: number
- *                       quantity:
- *                         type: integer
- *                       images:
- *                         type: array
- *                         items:
- *                           type: string
- *                       description:
- *                         type: string
- */
-router.get('/filter', async function (req, res, next) {
-    try {
-        const { categoryId, shopOwnerId, keyword, page, limit } = req.query;
-        const products = await ControllerProduct.getFilteredProducts(categoryId, shopOwnerId, keyword, page, limit);
-        return res.status(200).json({ status: true, data: products });
-    } catch (error) {
-        console.log('Get filtered products error:', error);
-        return res.status(500).json({ status: false, error: error.message });
-    }
-});
-
-/**
- * @swagger
  * /products/add:
  *   post:
  *     summary: Thêm sản phẩm mới
@@ -525,7 +523,6 @@ router.put('/update/:id', async (req, res, next) => {
     }
 });
 
-
 /**
  * @swagger
  * /products/delete/{id}:
@@ -574,5 +571,59 @@ router.delete('/delete/:id', async function (req, res, next) {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const productId = req.params.id;
+        const updatedProduct = await ControllerProduct.removeSoftDeleted(productId);
+
+        if (updatedProduct) {
+            return res.status(200).json({
+                status: true,
+                message: 'Product successfully soft deleted',
+                data: updatedProduct, // Trả về thông tin sản phẩm đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'Product not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete product error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
+router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const updatedProduct = await ControllerProduct.restoreAndSetAvailable(productId);
+
+        return res.status(200).json({
+            status: true,
+            message: 'Product restored and set to available',
+            data: updatedProduct,
+        });
+    } catch (error) {
+        console.log('Restore product error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
+router.put('/restore/out-of-stock/:id', async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const updatedProduct = await ControllerProduct.restoreAndSetOutOfStock(productId);
+
+        return res.status(200).json({
+            status: true,
+            message: 'Product restored and set to out of stock',
+            data: updatedProduct,
+        });
+    } catch (error) {
+        console.log('Restore product to out of stock error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
 
 module.exports = router;

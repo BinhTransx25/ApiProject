@@ -42,7 +42,7 @@ const getAllCategories = async () => {
 // Get productCategory of Shop by ID 
 const getCategoryById = async (id) => {
     try {
-        const category = await ModelProductCategory.findById(id, 'name description shopOwner');
+        const category = await ModelProductCategory.findById(id, 'name description shopOwner isDeleted');
         if (!category) {
             throw new Error('Category not found');
         }
@@ -64,7 +64,7 @@ const getProductsCategoriesByShopID = async (shopOwner_id, page, limit) => {
         const products = await ModelProductCategory
             .find(
                 { 'shopOwner.shopOwner_id': shopOwner_id },
-                'name description shopOwner')
+                'name description shopOwner isDeleted')
             .skip(skip)
             .limit(limit)
             .sort(sort)
@@ -140,4 +140,55 @@ const remove = async (id) => {
     }
 };
 
-module.exports = { getAll, getAllCategories, getCategoryById, insert, update, remove, getProductsCategoriesByShopID };
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
+const removeSoftDeleted = async (id) => {
+    try {
+        const productcategoryInDB = await ModelProductCategory.findById(id);
+        if (!productcategoryInDB) {
+            throw new Error('productcategory not found');
+        }
+  
+        // Cập nhật trạng thái isDeleted và status
+        let result = await ModelProductCategory.findByIdAndUpdate(
+            id,
+            { isDeleted: true },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove productcategory error:', error);
+        throw new Error('Remove productcategory error');
+    }
+  };
+  
+  // Khôi phục trạng thái cho shop 
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const productcategoryInDB = await ModelProductCategory.findById(id);
+        if (!productcategoryInDB) {
+            throw new Error('productcategory not found');
+        }
+  
+        // Cập nhật trạng thái
+        const result = await ModelProductCategory.findByIdAndUpdate(
+            id,
+            { isDeleted: false },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore productcategory error:', error);
+        throw new Error('Restore productcategory error');
+    }
+  };
+
+module.exports = { 
+    getAll, 
+    getAllCategories, 
+    getCategoryById, 
+    insert, update, 
+    remove, 
+    getProductsCategoriesByShopID,
+    removeSoftDeleted,
+    restoreAndSetAvailable
+ };

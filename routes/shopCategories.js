@@ -271,4 +271,43 @@ router.get('/shops/search', async (req, res) => {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const shopcategoryId = req.params.id;
+        const updatedShopcategory = await ControllerShopCategory.removeSoftDeleted(shopcategoryId);
+  
+        if (updatedShopcategory) {
+            return res.status(200).json({
+                status: true,
+                message: 'Shopcategory successfully soft deleted',
+                data: updatedShopcategory, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'Shopcategory not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete Shopcategory error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+  
+router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const shopcategoryId = req.params.id;
+        const updatedShopcategory = await ControllerShopCategory.restoreAndSetAvailable(shopcategoryId);
+  
+        return res.status(200).json({
+            status: true,
+            message: 'Shopcategory restored and set to available',
+            data: updatedShopcategory,
+        });
+    } catch (error) {
+        console.log('Restore Shopcategory error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+
 module.exports = router;

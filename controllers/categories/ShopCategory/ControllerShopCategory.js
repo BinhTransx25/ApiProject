@@ -107,8 +107,8 @@ const remove = async (id) => {
     try {
         // kiểm tra sản phẩm theo id có tồn tại không
         // select * from products where _id = id
-        const productInDB = await ModelShopCategory.findById(id);
-        if (!productInDB) {
+        const shopcategoryInDB = await ModelShopCategory.findById(id);
+        if (!shopcategoryInDB) {
             throw new Error('Product not found');
         }
         // xóa sản phẩm
@@ -148,8 +148,54 @@ const getShopOwnerByShopCategory = async (keyword) => {
     }
 };
 
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
+const removeSoftDeleted = async (id) => {
+    try {
+        const shopcategoryInDB = await ModelShopCategory.findById(id);
+        if (!shopcategoryInDB) {
+            throw new Error('shopcategory not found');
+        }
+  
+        // Cập nhật trạng thái isDeleted và status
+        let result = await ModelShopCategory.findByIdAndUpdate(
+            id,
+            { isDeleted: true },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove shopcategory error:', error);
+        throw new Error('Remove shopcategory error');
+    }
+  };
+  
+  // Khôi phục trạng thái cho shop 
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const shopcategoryInDB = await ModelShopCategory.findById(id);
+        if (!shopcategoryInDB) {
+            throw new Error('shopcategory not found');
+        }
+  
+        // Cập nhật trạng thái
+        const result = await ModelShopCategory.findByIdAndUpdate(
+            id,
+            { isDeleted: false },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore shopcategory error:', error);
+        throw new Error('Restore shopcategory error');
+    }
+  };
 
+module.exports = { 
+     insert, update, remove,
+     getAllCategories, getCategoryById, 
+     getShopOwnerByCategoryId,
+     getShopOwnerByShopCategory,
+     removeSoftDeleted,
+     restoreAndSetAvailable
 
-module.exports = {  insert, update, remove,
-     getAllCategories, getCategoryById, getShopOwnerByCategoryId,
-     getShopOwnerByShopCategory }
+    }

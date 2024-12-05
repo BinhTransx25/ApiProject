@@ -185,4 +185,43 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const voucherId = req.params.id;
+        const updatedVoucher = await VoucherController.removeSoftDeleted(voucherId);
+
+        if (updatedVoucher) {
+            return res.status(200).json({
+                status: true,
+                message: 'Voucher successfully soft deleted',
+                data: updatedVoucher, // Trả về thông tin sản phẩm đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'Voucher not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete Voucher error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
+router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const voucherId = req.params.id;
+        const updatedVoucher = await VoucherController.restoreAndSetAvailable(voucherId);
+
+        return res.status(200).json({
+            status: true,
+            message: 'Voucher restored and set to available',
+            data: updatedVoucher,
+        });
+    } catch (error) {
+        console.log('Restore Voucher error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
 module.exports = router;

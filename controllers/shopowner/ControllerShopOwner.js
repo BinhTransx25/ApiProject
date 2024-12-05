@@ -92,7 +92,7 @@ const searchShopOwner = async (keyword) => {
     }
 };
 
-// Hàm thay đổi trạng thái yêu thích
+// Hàm thay đổi trạng thái yêu thích (Không dùng nữa)
 const toggleFavorite = async (shopOwnerId) => {
     try {
         const shop = await ModelShopOwner.findById(shopOwnerId);
@@ -114,7 +114,7 @@ const toggleFavorite = async (shopOwnerId) => {
     }
 };
 
-// Hàm lấy danh sách cửa hàng yêu thích
+// Hàm lấy danh sách cửa hàng yêu thích (Không dùng nữa)
 const getFavoriteShops = async () => {
     try {
         const favoriteShops = await ModelShopOwner.find({ favorite: true });
@@ -125,46 +125,40 @@ const getFavoriteShops = async () => {
     }
 };
 
+// Lấy doanh thu của shop theo ngày, tuần, tháng
 const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
     try {
-        // Chuyển `shipperId` thành ObjectId nếu cần thiết
+        // Chuyển shopOwnerId thành ObjectId nếu cần thiết
         const shopOwnerObjectId = new ObjectId(shopOwnerId);
 
         // Khai báo biến để lưu trữ khoảng thời gian bắt đầu và kết thúc
         let startDate, endDate;
 
-        // Xác định khoảng thời gian dựa trên giá trị của `filter`
+        // Xác định khoảng thời gian dựa trên giá trị của filter
         if (filter === 'day') {
-            // Nếu filter là 'day', lấy đầu ngày và cuối ngày
             startDate = new Date(new Date(date).setUTCHours(0, 0, 0, 0)); // Thời điểm bắt đầu ngày
             endDate = new Date(new Date(date).setUTCHours(23, 59, 59, 999)); // Thời điểm kết thúc ngày
         } else if (filter === 'week') {
-            // Nếu filter là 'week', lấy ngày đầu tuần (Chủ nhật) và cuối tuần (Thứ Bảy)
             const startOfWeek = new Date(date);
-            // Lấy ngày Chủ nhật của tuần đó
             startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getUTCDay());
             startDate = new Date(startOfWeek.setUTCHours(0, 0, 0, 0)); // Thời điểm bắt đầu tuần
 
-            // Tạo một đối tượng Date mới từ startOfWeek để tính ngày Thứ Bảy
             endDate = new Date(startOfWeek); // Tạo một đối tượng Date mới từ startOfWeek
             endDate.setDate(endDate.getDate() + 6); // Cộng thêm 6 ngày để có ngày Thứ Bảy
             endDate.setUTCHours(23, 59, 59, 999); // Thiết lập giờ cho endDate
         } else if (filter === 'month') {
-            // Nếu filter là 'month', lấy ngày đầu và cuối tháng
             const startOfMonth = new Date(date);
-            // Thời điểm bắt đầu tháng
-            startDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth(), 1, 0, 0, 0, 0);
-            // Thời điểm kết thúc tháng
-            endDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth() + 1, 0, 23, 59, 59, 999);
+            startDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth(), 1, 0, 0, 0, 0); // Thời điểm bắt đầu tháng
+            endDate = new Date(startOfMonth.getUTCFullYear(), startOfMonth.getUTCMonth() + 1, 0, 23, 59, 59, 999); // Thời điểm kết thúc tháng
         } else {
-            // Nếu filter không hợp lệ, ném ra lỗi
             throw new Error("Filter không hợp lệ. Chỉ chấp nhận 'day', 'week', 'month'.");
         }
 
-        // Tìm các đơn hàng của shipper trong khoảng thời gian xác định
+        // Tìm các đơn hàng của shopOwner trong khoảng thời gian xác định và có isDeleted: false
         const orders = await ModelOrder.find({
-            'shopOwner._id': shopOwnerObjectId, // Lọc theo shipperId
-            orderDate: { $gte: startDate, $lte: endDate } // Lọc theo ngày đặt hàng
+            'shopOwner._id': shopOwnerObjectId, // Lọc theo shopOwnerId
+            orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false // Chỉ lấy các đơn hàng chưa bị xóa
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
@@ -173,19 +167,75 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
         let appTotal = 0; // Tổng doanh thu qua ứng dụng
         let shippingfeeTotal = 0;
 
-        // Duyệt qua từng đơn hàng để tính doanh thu
         orders.forEach(order => {
             if (order.paymentMethod === 'Tiền mặt') {
                 cashTotal += order.totalPrice; // Cộng doanh thu từ đơn hàng thanh toán bằng tiền mặt
             } else {
                 appTotal += order.totalPrice; // Cộng doanh thu từ đơn hàng thanh toán qua ứng dụng
             }
+
+            if (order.shippingfee != null) {
+                shippingfeeTotal += order.shippingfee; // Cộng doanh thu từ shippingfee
+            }
         });
 
-        // Duyệt qua từng đơn hàng để tính shippingfee
+        // Tính tổng doanh thu
+        const totalRevenue = cashTotal + appTotal;
+
+        // Trả về kết quả
+        return {
+            startDate: startDate,
+            endDate: endDate,
+            totalOrders: totalOrders,
+            totalRevenue: totalRevenue,
+            cashTotal: cashTotal,
+            appTotal: appTotal,
+            shippingfeeTotal: shippingfeeTotal,
+            orders: orders // Danh sách đơn hàng
+        };
+    } catch (error) {
+        console.error('Lỗi khi lấy doanh thu của cửa hàng:', error);
+        throw new Error('Lỗi khi lấy doanh thu của hàng');
+    }
+};
+
+
+// Lấy doanh thu của shop theo 1 khoảng thời gian nhất định
+const getRevenueByShopOwnerCustomRange = async (shopOwnerId, startDateInput, endDateInput) => {
+    try {
+        // Chuyển `shopOwnerId` thành ObjectId nếu cần thiết
+        const shopOwnerObjectId = new ObjectId(shopOwnerId);
+
+        // Kiểm tra và chuyển đổi ngày nhập vào thành đối tượng Date
+        const startDate = new Date(startDateInput);
+        const endDate = new Date(endDateInput);
+
+        // Kiểm tra tính hợp lệ của khoảng thời gian
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            throw new Error("Ngày không hợp lệ. Vui lòng nhập ngày theo định dạng hợp lệ (yyyy-mm-dd).");
+        }
+
+        // Đảm bảo `endDate` luôn là cuối ngày
+        endDate.setUTCHours(23, 59, 59, 999);
+
+        // Tìm các đơn hàng của shopOwner trong khoảng thời gian xác định và không bị xóa
+        const orders = await ModelOrder.find({
+            'shopOwner._id': shopOwnerObjectId, // Lọc theo shopOwnerId
+            orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false // Lọc các đơn hàng chưa bị xóa
+        }).sort({ orderDate: -1 });
+
+        // Tính toán các giá trị tổng hợp
+        const totalOrders = orders.length; // Tổng số đơn hàng
+        let cashTotal = 0; // Tổng doanh thu bằng tiền mặt
+        let appTotal = 0; // Tổng doanh thu qua ứng dụng
+
+        // Duyệt qua từng đơn hàng để tính doanh thu
         orders.forEach(order => {
-            if (order.shippingfee != null) {
-                shippingfeeTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán bằng tiền mặt
+            if (order.paymentMethod === 'Tiền mặt') {
+                cashTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán bằng tiền mặt
+            } else {
+                appTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán qua ứng dụng
             }
         });
 
@@ -200,17 +250,18 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
             totalRevenue: totalRevenue, // Tổng doanh thu
             cashTotal: cashTotal, // Tổng doanh thu bằng tiền mặt
             appTotal: appTotal, // Tổng doanh thu qua ứng dụng
-            shippingfeeTotal: shippingfeeTotal,
             orders: orders // Danh sách đơn hàng
         };
     } catch (error) {
         // Ghi log lỗi nếu có
-        console.error('Lỗi khi lấy doanh thu của cửa hàng:', error);
+        console.error('Lỗi khi lấy doanh thu của shopOwner:', error);
         // Ném ra lỗi cho hàm gọi
-        throw new Error('Lỗi khi lấy doanh thu của hàng');
+        throw new Error('Lỗi khi lấy doanh thu của shopOwner');
     }
 };
 
+
+// Đổi mật khẩu
 const changePassword = async (email, oldPassword, newPassword) => {
     try {
         // Tìm admin theo email
@@ -316,7 +367,7 @@ const changeShopOwnerStatusUnactive = async (id) => {
     }
 };
 
-//  Xác thực shipper
+//  Xác thực shop
 const changeShopOwnerVerified = async (id) => {
     try {
         // Lấy thông tin shopOwner theo ID
@@ -343,6 +394,50 @@ const changeShopOwnerVerified = async (id) => {
     }
 };
 
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
+const removeSoftDeleted = async (id) => {
+    try {
+        const shopownerInDB = await ModelShopOwner.findById(id);
+        if (!shopownerInDB) {
+            throw new Error('ShopOwner not found');
+        }
+  
+        // Cập nhật trạng thái isDeleted và status
+        let result = await ModelShopOwner.findByIdAndUpdate(
+            id,
+            { isDeleted: true, status: 'Tài khoản bị khóa' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove ShopOwner error:', error);
+        throw new Error('Remove ShopOwner error');
+    }
+  };
+  
+  // Khôi phục trạng thái cho shop 
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const shopownerInDB = await ModelShopOwner.findById(id);
+        if (!shopownerInDB) {
+            throw new Error('ShopOwner not found');
+        }
+  
+        // Cập nhật trạng thái
+        const result = await ModelShopOwner.findByIdAndUpdate(
+            id,
+            { isDeleted: false, status: 'Mở cửa' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore ShopOwner error:', error);
+        throw new Error('Restore ShopOwner error');
+    }
+  };
+
+
+
 module.exports = {
     getAllShopOwners,
     getShopOwnerById,
@@ -357,5 +452,9 @@ module.exports = {
     changeShopOwnerStatusOpen,
     changeShopOwnerStatusClosed,
     changeShopOwnerStatusUnactive,
-    changeShopOwnerVerified
+    changeShopOwnerVerified,
+    getRevenueByShopOwnerCustomRange,
+    removeSoftDeleted,
+    restoreAndSetAvailable
+
 };

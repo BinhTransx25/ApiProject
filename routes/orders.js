@@ -414,5 +414,43 @@ router.put('/Success-Payment/:orderId', async (req, res) => {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const orderId = req.params.id;
+        const updatedOrder = await ControllerOrder.removeSoftDeleted(orderId);
+  
+        if (updatedOrder) {
+            return res.status(200).json({
+                status: true,
+                message: 'Order successfully soft deleted',
+                data: updatedOrder, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'Order not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete Order error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+  
+router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const updatedOrder = await ControllerOrder.restoreAndSetAvailable(orderId);
+  
+        return res.status(200).json({
+            status: true,
+            message: 'Order restored and set to available',
+            data: updatedOrder,
+        });
+    } catch (error) {
+        console.log('Restore Order error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
 
 module.exports = router;

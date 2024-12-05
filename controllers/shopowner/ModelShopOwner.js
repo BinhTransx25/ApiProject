@@ -21,8 +21,8 @@ const ShopOwnerSchema = new Schema({
     closeHours: { type: String, required: false,default: 0 },  // Giờ đóng cửa (VD: "22:00")
     status: { 
         type: String, 
-        enum: ['Mở cửa', 'Đóng cửa', 'Ngưng hoạt động'], 
-        default: 'Đóng cửa' 
+        enum: ['Mở cửa', 'Đóng cửa', 'Ngưng hoạt động', 'Tài khoản bị khóa',], 
+        default: 'Mở cửa' 
     },
     distance: { type: Number, default: 0 },
     latitude: { type: Number, required: false },
@@ -31,6 +31,7 @@ const ShopOwnerSchema = new Schema({
     updated_at: { type: Date, default: Date.now },
     verified: { type: Boolean, default: false },
     imageVerified: { type: Array, required: false, default: [] },
+    isDeleted:{type:Boolean, required:false, default:false},
 });
 
 module.exports = mongoose.models.shopOwner || mongoose.model('shopOwner', ShopOwnerSchema);

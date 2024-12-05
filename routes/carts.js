@@ -304,4 +304,43 @@ router.delete('/:user/', async (req, res) => {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const cartId = req.params.id;
+        const updatedcart = await cartController.removeSoftDeleted(cartId);
+  
+        if (updatedcart) {
+            return res.status(200).json({
+                status: true,
+                message: 'Cart successfully soft deleted',
+                data: updatedcart, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'Cart not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete Cart error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+  
+router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const cartId = req.params.id;
+        const updatedcart = await cartController.restoreAndSetAvailable(cartId);
+  
+        return res.status(200).json({
+            status: true,
+            message: 'Cart restored and set to available',
+            data: updatedcart,
+        });
+    } catch (error) {
+        console.log('Restore Cart error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+
 module.exports = router;

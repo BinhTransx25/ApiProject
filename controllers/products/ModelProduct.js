@@ -19,7 +19,10 @@ const ProductSchema = new Schema({
     shopOwner: { 
         shopOwner_id: { type: mongoose.Schema.Types.ObjectId, ref: 'shopOwner', required: true },
         shopOwner_name: { type: String, required: true }
-    }
+    },
+    status: { type: String, enum: ['Còn món', 'Hết món', 'Ngừng bán' ], default: 'Còn món' },
+    isDeleted:{type:Boolean, required:false, default:false},
+    
 });
 
 module.exports = mongoose.models.product || mongoose.model('product', ProductSchema);

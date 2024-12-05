@@ -53,7 +53,7 @@ const getAllShippers = async () => {
 // Lấy thông tin shipper theo ID
 const getShipperById = async (id) => {
     try {
-        const shipper = await ModelShipper.findById(id, 'name phone email address rating image gender birthDate vehicleBrand vehiclePlate status  verified imageVerified')
+        const shipper = await ModelShipper.findById(id, 'name phone email address rating image gender birthDate vehicleBrand vehiclePlate status verified imageVerified isDeleted')
 
         if (!shipper) {
             throw new Error('Shipper not found');
@@ -117,7 +117,7 @@ const changeShipperStatusActive = async (id) => {
     try {
         return await Shipper.findByIdAndUpdate(
             id,
-            { status: 'active', updated_at: Date.now() },
+            { status: 'Hoạt động', updated_at: Date.now() },
             { new: true }
         );
     } catch (error) {
@@ -131,7 +131,7 @@ const changeShipperStatusUnActive = async (id) => {
     try {
         return await Shipper.findByIdAndUpdate(
             id,
-            { status: 'unactive', updated_at: Date.now() },
+            { status: 'Tài khoản bị khóa', updated_at: Date.now() },
             { new: true }
         );
     } catch (error) {
@@ -264,7 +264,7 @@ const confirmShipperArrivedDeliveryPoint = async (orderId, shipperId, io) => {
         // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
         if (order.shipper._id && order.shipper._id.toString() === shipperId) {
             // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
-            order.status = 'Shipper đã đến điểm giao hàng';
+            order.status = 'Đã đến điểm giao';
             await order.save();
 
             // Phát sự kiện cho socket
@@ -298,7 +298,7 @@ const confirmOrderByShipperId = async (orderId, shipperId, io) => {
         // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
         if (order.shipper._id && order.shipper._id.toString() === shipperId) {
             // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
-            order.status = 'Đơn hàng đã được giao hoàn tất';
+            order.status = 'Giao hàng thành công';
             await order.save();
 
             // Phát sự kiện cho socket
@@ -336,7 +336,7 @@ const cancelOrderByShipperId = async (orderId, shipperId, reason, io) => {
         // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
         if (order.shipper._id && order.shipper._id.toString() === shipperId) {
             // Cập nhật trạng thái và lý do hủy của shipper
-            order.status = 'Shipper đã hủy đơn';
+            order.status = 'Tài xế hủy đơn';
             order.reasonCancel = reason; // Lưu lý do hủy
             await order.save();
 
@@ -393,10 +393,71 @@ const getRevenueByShipper = async (shipperId, date, filter) => {
             throw new Error("Filter không hợp lệ. Chỉ chấp nhận 'day', 'week', 'month'.");
         }
 
-        // Tìm các đơn hàng của shipper trong khoảng thời gian xác định
+        // Tìm các đơn hàng của shipper trong khoảng thời gian xác định và chưa bị xóa
         const orders = await ModelOrder.find({
             'shipper._id': shipperObjectId, // Lọc theo shipperId
-            orderDate: { $gte: startDate, $lte: endDate } // Lọc theo ngày đặt hàng
+            orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false // Lọc những đơn hàng chưa bị xóa
+        }).sort({ orderDate: -1 });
+
+        // Tính toán các giá trị tổng hợp
+        const totalOrders = orders.length; // Tổng số đơn hàng
+        let cashTotal = 0; // Tổng doanh thu bằng tiền mặt
+        let appTotal = 0; // Tổng doanh thu qua ứng dụng
+
+        // Duyệt qua từng đơn hàng để tính doanh thu
+        orders.forEach(order => {
+            if (order.paymentMethod === 'Tiền mặt') {
+                cashTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán bằng tiền mặt
+            } else {
+                appTotal += order.shippingfee; // Cộng doanh thu từ đơn hàng thanh toán qua ứng dụng
+            }
+        });
+
+        // Tính tổng doanh thu
+        const totalRevenue = cashTotal + appTotal;
+
+        // Trả về kết quả
+        return {
+            startDate: startDate, // Ngày bắt đầu
+            endDate: endDate, // Ngày kết thúc
+            totalOrders: totalOrders, // Tổng số đơn hàng
+            totalRevenue: totalRevenue, // Tổng doanh thu
+            cashTotal: cashTotal, // Tổng doanh thu bằng tiền mặt
+            appTotal: appTotal, // Tổng doanh thu qua ứng dụng
+            orders: orders // Danh sách đơn hàng
+        };
+    } catch (error) {
+        // Ghi log lỗi nếu có
+        console.error('Lỗi khi lấy doanh thu của shipper:', error);
+        // Ném ra lỗi cho hàm gọi
+        throw new Error('Lỗi khi lấy doanh thu của shipper');
+    }
+};
+
+
+const getRevenueByShipperCustomRange = async (shipperId, startDateInput, endDateInput) => {
+    try {
+        // Chuyển `shipperId` thành ObjectId nếu cần thiết
+        const shipperObjectId = new ObjectId(shipperId);
+
+        // Kiểm tra và chuyển đổi ngày nhập vào thành đối tượng Date
+        const startDate = new Date(startDateInput);
+        const endDate = new Date(endDateInput);
+
+        // Kiểm tra tính hợp lệ của khoảng thời gian
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            throw new Error("Ngày không hợp lệ. Vui lòng nhập ngày theo định dạng hợp lệ (yyyy-mm-dd).");
+        }
+
+        // Đảm bảo `endDate` luôn là cuối ngày
+        endDate.setUTCHours(23, 59, 59, 999);
+
+        // Tìm các đơn hàng của shipper trong khoảng thời gian xác định và chưa bị xóa
+        const orders = await ModelOrder.find({
+            'shipper._id': shipperObjectId, // Lọc theo shipperId
+            orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false // Lọc những đơn hàng chưa bị xóa
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
@@ -508,6 +569,7 @@ module.exports = {
     confirmShipperArrivedShopOwner,
     confirmShipperOnDelivery,
     confirmShipperArrivedDeliveryPoint,
-    changeShipperVerified
+    changeShipperVerified,
+    getRevenueByShipperCustomRange
 
 };

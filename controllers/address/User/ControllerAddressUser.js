@@ -85,4 +85,52 @@ const deleteUserAddress = async (id) => {
     }
 };
 
-module.exports = { addUserAddress, getUserAddresses, getUserAddressById, updateUserAddress, deleteUserAddress };
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
+const removeSoftDeleted = async (id) => {
+    try {
+        const useraddressInDB = await UserAddress.findById(id);
+        if (!useraddressInDB) {
+            throw new Error('UserAddress not found');
+        }
+  
+        // Cập nhật trạng thái isDeleted và status
+        let result = await UserAddress.findByIdAndUpdate(
+            id,
+            { isDeleted: true },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove UserAddress error:', error);
+        throw new Error('Remove UserAddress error');
+    }
+  };
+  
+  // Khôi phục trạng thái cho shop 
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const useraddressInDB = await UserAddress.findById(id);
+        if (!useraddressInDB) {
+            throw new Error('UserAddress not found');
+        }
+  
+        // Cập nhật trạng thái
+        const result = await UserAddress.findByIdAndUpdate(
+            id,
+            { isDeleted: false },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore UserAddress error:', error);
+        throw new Error('Restore UserAddress error');
+    }
+  };
+module.exports = {
+     addUserAddress, 
+     getUserAddresses, 
+     getUserAddressById, 
+     updateUserAddress, 
+     deleteUserAddress, 
+     removeSoftDeleted,
+     restoreAndSetAvailable};

@@ -197,4 +197,43 @@ router.delete('/delete', async (req, res) => {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const favouriteId = req.params.id;
+        const updatedFavourite = await ControllerUser.removeSoftDeleted(favouriteId);
+  
+        if (updatedUser) {
+            return res.status(200).json({
+                status: true,
+                message: 'Favourite successfully soft deleted',
+                data: updatedFavourite, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'Favourite not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete Favourite error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+  
+  router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const favouriteId = req.params.id;
+        const updatedFavourite = await ControllerUser.restoreAndSetAvailable(favouriteId);
+  
+        return res.status(200).json({
+            status: true,
+            message: 'Favourite restored and set to available',
+            data: updatedFavourite,
+        });
+    } catch (error) {
+        console.log('Restore User error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+
 module.exports = router;

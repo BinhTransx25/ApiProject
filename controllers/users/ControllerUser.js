@@ -97,21 +97,25 @@ const login = async (identifier, password) => {
       $or: [{ email: identifier }, { phone: identifier }],
     });
 
-    // Nếu không tìm thấy người dùng, kiểm tra xem có phải shop owner không
+    // Kiểm tra tài khoản nếu không tìm thấy trong bảng user
     if (!user) {
       let shopOwner = await ModelShopOwner.findOne({
         $or: [{ email: identifier }, { phone: identifier }],
       });
 
-      // Nếu không tìm thấy shop owner, kiểm tra xem có phải shipper không
+      // Nếu không tìm thấy shop owner, kiểm tra shipper
       if (!shopOwner) {
         let shipper = await ModelShipper.findOne({
           $or: [{ email: identifier }, { phone: identifier }],
         });
 
-        // Nếu không tìm thấy shipper, báo lỗi
         if (!shipper) {
           throw new Error("Không tồn tại tài khoản với thông tin này");
+        }
+
+        // Kiểm tra trạng thái tài khoản shipper
+        if (shipper.status === "Tài khoản bị khóa") {
+          throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
         }
 
         // Kiểm tra mật khẩu shipper
@@ -119,6 +123,7 @@ const login = async (identifier, password) => {
         if (!checkPassword) {
           throw new Error("Tài khoản hoặc mật khẩu không đúng");
         }
+
         // Tạo token JWT cho shipper
         const token = jwt.sign(
           {
@@ -127,23 +132,27 @@ const login = async (identifier, password) => {
             email: shipper.email,
             role: "shipper",
           },
-          "secret", // Khóa bí mật để mã hóa token (cần thay thế bằng giá trị thực tế)
-          { expiresIn: "1h" } // Token hết hạn sau 1 giờ
+          "secret",
+          { expiresIn: "1h" }
         );
 
-        // Trả về thông tin shipper và token
         return {
           _id: shipper._id,
           name: shipper.name,
           email: shipper.email,
           role: "shipper",
           address: shipper.address,
-          verified:shipper.verified,
+          verified: shipper.verified,
           token,
         };
       }
 
-      // Kiểm tra mật khẩu người dùng
+      // Kiểm tra trạng thái tài khoản shop owner
+      if (shopOwner.status === "Tài khoản bị khóa") {
+        throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+      }
+
+      // Kiểm tra mật khẩu shop owner
       const checkPassword = await bcrypt.compare(password, shopOwner.password);
       if (!checkPassword) {
         throw new Error("Tài khoản hoặc mật khẩu không đúng");
@@ -163,7 +172,6 @@ const login = async (identifier, password) => {
         { expiresIn: "1h" }
       );
 
-      // Trả về thông tin shop owner và token
       return {
         _id: shopOwner._id,
         name: shopOwner.name,
@@ -173,9 +181,14 @@ const login = async (identifier, password) => {
         shopCategory: shopOwner.shopCategory,
         address: shopOwner.address,
         coordinates: shopOwner.coordinates,
-        verified:shopOwner.verified,
+        verified: shopOwner.verified,
         token,
       };
+    }
+
+    // Kiểm tra trạng thái tài khoản user
+    if (user.status === "Tài khoản bị khóa") {
+      throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
     }
 
     // Kiểm tra mật khẩu người dùng
@@ -184,14 +197,13 @@ const login = async (identifier, password) => {
       throw new Error("Tài khoản hoặc mật khẩu không đúng");
     }
 
-    // Tạo token JWT cho người dùng thông thường
+    // Tạo token JWT cho người dùng
     const token = jwt.sign(
       { _id: user._id, name: user.name, email: user.email, role: user.role },
       "secret",
       { expiresIn: "1h" }
     );
 
-    // Trả về thông tin người dùng và token
     return {
       _id: user._id,
       name: user.name,
@@ -204,9 +216,10 @@ const login = async (identifier, password) => {
     };
   } catch (error) {
     console.error("Lỗi trong quá trình đăng nhập:", error);
-    throw new Error("Lỗi khi đăng nhập người dùng");
+    throw new Error(error.message || "Lỗi khi đăng nhập người dùng");
   }
 };
+
 
 const loginWithSocial = async (userInfo) => {
   try {
@@ -234,15 +247,27 @@ const loginWithSocial = async (userInfo) => {
           user = new ModelUser(body);
           await user.save();
         } else {
-          // Nếu tìm thấy trong ModelShopOwner, trả về thông tin
-          return shopOwnerInDB; // Trả về user từ ModelShopOwner
+          // Nếu tìm thấy trong ModelShopOwner, kiểm tra trạng thái
+          if (shopOwnerInDB.status === "Tài khoản bị khóa") {
+            throw new Error("Tài khoản của bạn đã bị khóa");
+          }
+          // Nếu trạng thái hợp lệ, trả về thông tin
+          return shopOwnerInDB;
         }
       } else {
-        // Nếu tìm thấy trong ModelShipper, trả về thông tin
-        return shipperInDB; // Trả về user từ ModelShipper
+        // Nếu tìm thấy trong ModelShipper, kiểm tra trạng thái
+        if (shipperInDB.status === "Tài khoản bị khóa") {
+          throw new Error("Tài khoản của bạn đã bị khóa");
+        }
+        // Nếu trạng thái hợp lệ, trả về thông tin
+        return shipperInDB;
       }
     } else {
-      // Nếu tìm thấy trong ModelUser, cập nhật thông tin
+      // Nếu tìm thấy trong ModelUser, kiểm tra trạng thái
+      if (userInDB.status === "Tài khoản bị khóa") {
+        throw new Error("Tài khoản của bạn đã bị khóa");
+      }
+      // Nếu trạng thái hợp lệ, cập nhật thông tin
       user = await ModelUser.findByIdAndUpdate(userInDB._id, {
         ...userInfo,
         updatedAt: Date.now(),
@@ -256,6 +281,7 @@ const loginWithSocial = async (userInfo) => {
   }
 };
 
+
 const verifyEmail = async (email) => {
   try {
     let userInDB = await ModelUser.findOne({ email });
@@ -268,19 +294,29 @@ const verifyEmail = async (email) => {
         }
       }
     }
+
+    // Kiểm tra trạng thái tài khoản
+    if (userInDB.status === "Tài khoản bị khóa") {
+      throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+    }
+
+    // Tạo mã xác thực
     const verifyCode = Math.floor(1000 + Math.random() * 9000).toString();
     const data = {
       email: email,
       subject: "Mã khôi phục mật khẩu",
       content: `Mã xác thực của bạn là: ${verifyCode}`,
     };
+
+    // Gửi email xác thực
     await sendMail(data);
     return verifyCode;
   } catch (error) {
     console.error("Error during verify email:", error);
-    throw new Error("Lỗi khi xác thực email");
+    throw new Error(error.message || "Lỗi khi xác thực email");
   }
 };
+
 
 const resetPassword = async (email, password) => {
   try {
@@ -367,8 +403,10 @@ const checkUser = async (email) => {
     return false; // Hoặc xử lý lỗi theo cách bạn muốn
   }
 };
+
 // Cập nhật thông tin nhà hàng
 const updateUser = async (id, name, phone, email, password, image,birthday) => {
+
   try {
     const userInDB = await ModelUser.findById(id);
     if (!userInDB) {
@@ -390,7 +428,7 @@ const updateUser = async (id, name, phone, email, password, image,birthday) => {
   }
 };
 
-// Lấy thông tin tất cả các nhà hàng
+// Lấy thông tin tất cả các user
 const getAllUsers = async () => {
   try {
     return await ModelUser.find();
@@ -400,12 +438,12 @@ const getAllUsers = async () => {
   }
 };
 
-// Lấy thông tin nhà hàng theo ID
+// Lấy thông tin user theo ID
 const getUserById = async (id) => {
   try {
     const user = await ModelUser.findById(
       id,
-      "name phone email address orders carts image"
+      "name phone email address orders carts image status isDeleted verified"
     );
 
     if (!user) {
@@ -427,6 +465,52 @@ const deleteUser = async (id) => {
     throw new Error("Lỗi khi xóa user");
   }
 };
+
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
+const removeSoftDeleted = async (id) => {
+  try {
+      const userInDB = await ModelUser.findById(id);
+      if (!userInDB) {
+          throw new Error('User not found');
+      }
+
+      // Cập nhật trạng thái isDeleted và status
+      let result = await ModelUser.findByIdAndUpdate(
+          id,
+          { isDeleted: true, status: 'Tài khoản bị khóa' },
+          { new: true } // Trả về document đã cập nhật
+      );
+      return result;
+  } catch (error) {
+      console.log('Remove User error:', error);
+      throw new Error('Remove User error');
+  }
+};
+
+// Chuyển trạng thái
+const restoreAndSetAvailable = async (id) => {
+  try {
+      const userInDB = await ModelUser.findById(id);
+      if (!userInDB) {
+          throw new Error('User not found');
+      }
+
+      // Cập nhật trạng thái
+      const result = await ModelUser.findByIdAndUpdate(
+          id,
+          { isDeleted: false, status: 'Hoạt động' },
+          { new: true } // Trả về document đã cập nhật
+      );
+      return result;
+  } catch (error) {
+      console.log('Restore User error:', error);
+      throw new Error('Restore User error');
+  }
+};
+
+
+
+
 module.exports = {
   register,
   login,
@@ -439,4 +523,7 @@ module.exports = {
   getUserById,
   deleteUser,
   changePassword,
+  removeSoftDeleted,
+  restoreAndSetAvailable
+
 };

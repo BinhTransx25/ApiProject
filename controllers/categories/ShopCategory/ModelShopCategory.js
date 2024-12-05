@@ -9,7 +9,7 @@ const ShopCategorySchema = new Schema({
     image: { type: String, required: true, },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
-
+    isDeleted:{ type: Boolean, required: false, default: false},
 });
 
 // tên schema viết thường, tiếng anh, số ít

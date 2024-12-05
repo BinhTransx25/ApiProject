@@ -158,4 +158,42 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const useradressId = req.params.id;
+        const updatedUserAddress = await ControllerUserAddress.removeSoftDeleted(useradressId);
+  
+        if (updatedUserAddress) {
+            return res.status(200).json({
+                status: true,
+                message: 'UserAddress successfully soft deleted',
+                data: updatedUserAddress, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'UserAddress not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete UserAddress error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+  
+router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const useradressId = req.params.id;
+        const updatedUserAddress = await ControllerUserAddress.restoreAndSetAvailable(useradressId);
+  
+        return res.status(200).json({
+            status: true,
+            message: 'UserAddress restored and set to available',
+            data: updatedUserAddress,
+        });
+    } catch (error) {
+        console.log('Restore UserAddress error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
 module.exports = router;

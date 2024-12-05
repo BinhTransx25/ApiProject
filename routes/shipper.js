@@ -447,6 +447,23 @@ router.get('/:shipperId/revenue', async (req, res) => {
     }
 });
 
+router.get('/:shipperId/revenue/custom-range', async (req, res) => {
+    const { shipperId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+        return res.status(400).json({ status: false, data: 'startDate và endDate là bắt buộc.' });
+    }
+
+    try {
+        const result = await ShipperController.getRevenueByShipperCustomRange(shipperId, startDate, endDate);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
+
 router.post('/change-password', async (req, res) => {
     const {email, oldPassword, newPassword } = req.body;
     try {

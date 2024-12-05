@@ -61,11 +61,56 @@ const deleteVoucher = async ( id ) => {
         throw new Error('Lỗi khi xóa voucher theo id');
     }
 };
+
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Ngừng bán'
+const removeSoftDeleted = async (id) => {
+    try {
+        const VoucherInDB = await Voucher.findById(id);
+        if (!VoucherInDB) {
+            throw new Error('Voucher not found');
+        }
+
+        // Cập nhật trạng thái isDeleted và status
+        let result = await Voucher.findByIdAndUpdate(
+            id,
+            { isDeleted: true, status: 'không khả dụng' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove product error:', error);
+        throw new Error('Remove product error');
+    }
+};
+
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const VoucherInDB = await Voucher.findById(id);
+        if (!VoucherInDB) {
+            throw new Error('Voucher not found');
+        }
+
+        // Cập nhật trạng thái isDeleted và status
+        let result = await Voucher.findByIdAndUpdate(
+            id,
+            { isDeleted: false, status: 'khả dụng' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove product error:', error);
+        throw new Error('Remove product error');
+    }
+};
+
 // Xuất các phương thức
 module.exports = {
     createVoucher,
     getAllVouchers,
     getAvailableVouchers,
     getVoucherById,
-    deleteVoucher
+    deleteVoucher,
+    removeSoftDeleted,
+    restoreAndSetAvailable
+
 };

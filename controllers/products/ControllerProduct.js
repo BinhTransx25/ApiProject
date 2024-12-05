@@ -17,7 +17,7 @@ const getAllProducts = async (page, limit, keyword) => {
         }
 
         let products = await ModelProduct
-            .find(query, 'name price categories description images shopOwner')
+            .find(query, 'name price categories description images shopOwner rating soldOut status isDeleted')
             .skip(skip)
             .limit(limit)
             .sort(sort);
@@ -52,7 +52,7 @@ const getProductsByCategory = async (category_id, page, limit) => {
         const products = await ModelProduct
             .find(
                 { 'categories.categoryProduct_id': category_id },
-                'name price categories description images shopOwner soldOut')
+                'name price categories description images shopOwner rating soldOut status isDeleted')
             .skip(skip)
             .limit(limit)
             .sort(sort)
@@ -76,7 +76,7 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
         const products = await ModelProduct
             .find(
                 { 'shopOwner.shopOwner_id': shopOwner_id },
-                'name price categories description images shopOwner soldOut')
+                'name price categories description images shopOwner rating soldOut status isDeleted')
             .skip(skip)
             .limit(limit)
             .sort(sort);
@@ -112,7 +112,7 @@ const getProductsByCategoryAndShopOwner = async (category_id, shopOwner_id, keyw
         }
 
         const products = await ModelProduct
-            .find(query, 'name pricecategories description images shopOwner')
+            .find(query, 'name price categories description images shopOwner rating soldOut status isDeleted')
             .skip(skip)
             .limit(limit)
             .sort(sort)
@@ -237,18 +237,21 @@ const remove = async (id) => {
     }
 };
 
+// tìm sản phẩm theo từ khóa 
 const searchProductsAndShops = async (keyword) => {
     try {
         const results = []; // Kết quả tìm kiếm sản phẩm và cửa hàng.
 
         // **Tìm kiếm sản phẩm có tên khớp với từ khóa**
         const products = await ModelProduct.find({
-            name: { $regex: keyword, $options: 'i' } // Tìm kiếm không phân biệt chữ hoa, chữ thường.
+            name: { $regex: keyword, $options: 'i' }, // Tìm kiếm không phân biệt chữ hoa, chữ thường.
+            status: 'Còn món' // Chỉ tìm sản phẩm đang còn món.
         })
-            .select('name price images shopOwner') // Chỉ chọn các trường cần thiết.
+            .select('name price images shopOwner status') // Chọn thêm trường status để lọc.
             .populate({
                 path: 'shopOwner.shopOwner_id', // Liên kết đến bảng shopOwner.
                 model: 'shopOwner',
+                match: { status: 'Mở cửa' }, // Chỉ lấy thông tin của các cửa hàng mở cửa.
                 select: 'name images rating address shopCategory countReview openingHours closeHours status distance latitude longitude', // Thông tin cần thiết.
             });
 
@@ -281,13 +284,15 @@ const searchProductsAndShops = async (keyword) => {
                     };
                 }
 
-                // Thêm sản phẩm vào nhóm của cửa hàng.
-                shopMap[shop._id].product.push({
-                    name: product.name,
-                    price: product.price,
-                    image: product.images?.[0] || '',
-                    product_id: product._id,
-                });
+                // Thêm sản phẩm vào nhóm của cửa hàng nếu trạng thái sản phẩm không phải "Ngừng bán".
+                if (product.status !== 'Ngừng bán') {
+                    shopMap[shop._id].product.push({
+                        name: product.name,
+                        price: product.price,
+                        image: product.images?.[0] || '',
+                        product_id: product._id,
+                    });
+                }
             }
         });
 
@@ -298,7 +303,8 @@ const searchProductsAndShops = async (keyword) => {
 
         // **Tìm kiếm cửa hàng có tên khớp với từ khóa**
         const shops = await ModelShopOwner.find({
-            name: { $regex: keyword, $options: 'i' }
+            name: { $regex: keyword, $options: 'i' },
+            status: 'Mở cửa' // Chỉ tìm cửa hàng đang mở cửa.
         })
             .select('name rating address images shopCategory countReview openingHours closeHours status distance latitude longitude')
             .populate({
@@ -308,7 +314,7 @@ const searchProductsAndShops = async (keyword) => {
 
         // **Đưa thông tin cửa hàng vào kết quả tìm kiếm**
         shops.forEach(shop => {
-            if (!shopMap[shop._id]) { // Tránh thêm trùng lặp cửa hàng đã tồn tại trong `shopMap`.
+            if (!shopMap[shop._id]) { // Tránh thêm trùng lặp cửa hàng đã tồn tại trong shopMap.
                 results.push({
                     shopId: shop._id,
                     name: shop.name,
@@ -340,16 +346,17 @@ const searchProductsAndShops = async (keyword) => {
             };
         }
 
-
         // **Tạo danh sách gợi ý từ sản phẩm và cửa hàng**
         const suggestions = [
-            ...products.map(product => ({
-                name: product.name,
-                image: product.images?.[0] || '',
-                price: product.price,
-                type: 'product',
-                product_id: product._id
-            })),
+            ...products
+                .filter(product => product.status === 'Còn món') // Chỉ gợi ý sản phẩm còn món.
+                .map(product => ({
+                    name: product.name,
+                    image: product.images?.[0] || '',
+                    price: product.price,
+                    type: 'product',
+                    product_id: product._id
+                })),
             ...shops.map(shop => ({
                 name: shop.name,
                 image: shop.images?.[0] || '',
@@ -371,16 +378,84 @@ const searchProductsAndShops = async (keyword) => {
     }
 };
 
+// Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Ngừng bán'
+const removeSoftDeleted = async (id) => {
+    try {
+        const productInDB = await ModelProduct.findById(id);
+        if (!productInDB) {
+            throw new Error('Product not found');
+        }
 
+        // Cập nhật trạng thái isDeleted và status
+        let result = await ModelProduct.findByIdAndUpdate(
+            id,
+            { isDeleted: true, status: 'Ngừng bán' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove product error:', error);
+        throw new Error('Remove product error');
+    }
+};
 
+// Chuyển trạng thái thành còn món 
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const productInDB = await ModelProduct.findById(id);
+        if (!productInDB) {
+            throw new Error('Product not found');
+        }
+
+        // Cập nhật trạng thái
+        const result = await ModelProduct.findByIdAndUpdate(
+            id,
+            { isDeleted: false, status: 'Còn món' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore product error:', error);
+        throw new Error('Restore product error');
+    }
+};
+
+// Chuyển trạng thái thành hết món 
+const restoreAndSetOutOfStock = async (id) => {
+    try {
+        const productInDB = await ModelProduct.findById(id);
+        if (!productInDB) {
+            throw new Error('Product not found');
+        }
+
+        // Cập nhật trạng thái
+        const result = await ModelProduct.findByIdAndUpdate(
+            id,
+            { isDeleted: false, status: 'Hết món' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore product to out of stock error:', error);
+        throw new Error('Restore product to out of stock error');
+    }
+};
 
 
 
 
 
 module.exports = {
-    getAllProducts, getProductById, insert, update,
-    remove, getAllProducts, getProductsByCategory,
-    getProductsByShopOwner, getProductsByCategoryAndShopOwner
-    , searchProductsAndShops
+    getAllProducts,
+    getProductById, 
+    insert, update,
+    remove, getAllProducts, 
+    getProductsByCategory,
+    getProductsByShopOwner, 
+    getProductsByCategoryAndShopOwner, 
+    searchProductsAndShops,
+    removeSoftDeleted,
+    restoreAndSetAvailable,
+    restoreAndSetOutOfStock
+
 };

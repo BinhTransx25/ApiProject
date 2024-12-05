@@ -17,7 +17,9 @@ const FavoriteSchema = new Schema({
         address: { type: String },
         images: { type: Array }
     }, // Đổi thành shopOwner
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    isDeleted:{type:Boolean, required:false, default:false},
+
 });
 
 module.exports = mongoose.models.Favorite || mongoose.model('Favorite', FavoriteSchema);

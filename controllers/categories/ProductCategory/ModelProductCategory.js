@@ -10,7 +10,8 @@ const ProductCategorySchema = new Schema({
     shopOwner: { 
         shopOwner_id: { type: mongoose.Schema.Types.ObjectId, ref: 'ShopOwner', required: true },
         shopOwner_name: { type: String, required: true }
-    }
+    },
+    isDeleted:{type:Boolean, required:false, default:false},
 });
 
 // Ensure the model is not recompiled during hot-reloading in dev

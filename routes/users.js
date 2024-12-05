@@ -366,4 +366,44 @@ router.post('/change-password', async (req, res) => {
     return res.status(500).json({ status: false, data: error.message });
   }
 });
+
+router.delete('/softdelete/:id', async function (req, res, next) {
+  try {
+      const userId = req.params.id;
+      const updatedUser = await ControllerUser.removeSoftDeleted(userId);
+
+      if (updatedUser) {
+          return res.status(200).json({
+              status: true,
+              message: 'User successfully soft deleted',
+              data: updatedUser, // Trả về thông tin đã cập nhật
+          });
+      } else {
+          return res.status(404).json({
+              status: false,
+              message: 'User not found',
+          });
+      }
+  } catch (error) {
+      console.log('Delete User error:', error);
+      return res.status(500).json({ status: false, error: error.message });
+  }
+});
+
+router.put('/restore/available/:id', async (req, res) => {
+  try {
+      const userId = req.params.id;
+      const updatedUser = await ControllerUser.restoreAndSetAvailable(userId);
+
+      return res.status(200).json({
+          status: true,
+          message: 'User restored and set to available',
+          data: updatedProduct,
+      });
+  } catch (error) {
+      console.log('Restore User error:', error);
+      return res.status(500).json({ status: false, error: error.message });
+  }
+});
+
 module.exports = router;

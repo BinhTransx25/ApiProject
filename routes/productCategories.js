@@ -322,4 +322,43 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const productcategoryId = req.params.id;
+        const updatedproductcategory = await ControllerProductCategory.removeSoftDeleted(productcategoryId);
+  
+        if (updatedproductcategory) {
+            return res.status(200).json({
+                status: true,
+                message: 'productcategory successfully soft deleted',
+                data: updatedproductcategory, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'productcategory not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete productcategory error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+  
+  router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const productcategoryId = req.params.id;
+        const updatedproductcategory = await ControllerProductCategory.restoreAndSetAvailable(productcategoryId);
+  
+        return res.status(200).json({
+            status: true,
+            message: 'productcategory restored and set to available',
+            data: updatedproductcategory,
+        });
+    } catch (error) {
+        console.log('Restore productcategory error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+
 module.exports = router;

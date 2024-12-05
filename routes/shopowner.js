@@ -282,6 +282,7 @@ router.get('/favorites', async (req, res) => {
         return res.status(500).json({ status: false, data: error.message });
     }
 });
+
 /**
  * @swagger
  * /shopOwner/{shopId}/revenue:
@@ -358,6 +359,22 @@ router.get('/:shopId/revenue', async (req, res) => {
     }
 });
 
+router.get('/:shopId/revenue/custom-range', async (req, res) => {
+    const { shopId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+        return res.status(400).json({ status: false, data: 'startDate và endDate là bắt buộc.' });
+    }
+
+    try {
+        const result = await ShopOwnerController.getRevenueByShopOwnerCustomRange(shopId, startDate, endDate);
+        return res.status(200).json({ status: true, data: result });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: error.message });
+    }
+});
+
 router.post('/change-password', async (req, res) => {
     const { email, oldPassword, newPassword } = req.body;
     try {
@@ -421,6 +438,46 @@ router.put('/verified/:id', async (req, res) => {
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
     }
-}); 
+});
+
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const shopownerId = req.params.id;
+        const updatedShopowner = await ShopOwnerController.removeSoftDeleted(shopownerId);
+  
+        if (updatedShopowner) {
+            return res.status(200).json({
+                status: true,
+                message: 'ShopOwner successfully soft deleted',
+                data: updatedShopowner, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'ShopOwner not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete ShopOwner error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+  
+  router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const shopownerId = req.params.id;
+        const updatedShopowner = await ShopOwnerController.restoreAndSetAvailable(shopownerId);
+  
+        return res.status(200).json({
+            status: true,
+            message: 'ShopOwner restored and set to available',
+            data: updatedShopowner,
+        });
+    } catch (error) {
+        console.log('Restore ShopOwner error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+  });
+
 module.exports = router;
 
