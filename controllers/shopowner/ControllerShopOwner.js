@@ -158,7 +158,6 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
         const orders = await ModelOrder.find({
             'shopOwner._id': shopOwnerObjectId, // Lọc theo shopOwnerId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
-            isDeleted: false // Chỉ lấy các đơn hàng chưa bị xóa
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
@@ -222,7 +221,6 @@ const getRevenueByShopOwnerCustomRange = async (shopOwnerId, startDateInput, end
         const orders = await ModelOrder.find({
             'shopOwner._id': shopOwnerObjectId, // Lọc theo shopOwnerId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
-            isDeleted: false // Lọc các đơn hàng chưa bị xóa
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
