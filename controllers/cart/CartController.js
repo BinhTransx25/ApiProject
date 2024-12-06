@@ -35,12 +35,26 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
         });
 
         // Kiểm tra trạng thái shop
-        if (shopOwnerInDB.status !== 'Mở cửa') {
+        if (shopOwnerInDB.status == 'Đóng cửa') {
             // if (existingCart) {
             //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
             // }
             errors = 'Shop hiện đang đóng cửa';
             return { carts: null, errors };
+        }
+        if (shopOwnerInDB.status == 'Ngưng hoạt động') {
+            // if (existingCart) {
+            //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
+            // }
+            errors = 'Shop hiện đang Ngưng hoạt động';
+            return { status: false, errors };
+        }
+        if (shopOwnerInDB.status == 'Tài khoản bị khóa') {
+            // if (existingCart) {
+            //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
+            // }
+            errors = 'Không tìm thấy cửa hàng, vui lòng thử lại sau';
+            return { status: false, errors };
         }
 
         // Kiểm tra sản phẩm
@@ -140,6 +154,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
 
 // Cập nhật số lượng trực tiếp
 const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity) => {
+    let errors = null; // Biến lưu trữ lỗi
     try {
         console.log("--- Start updateQuantityProduct ---");
 
@@ -162,8 +177,9 @@ const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity
         // Kiểm tra trạng thái của shop
         if (shopOwnerInDB.status !== 'Mở cửa') {
             // Xóa giỏ hàng liên quan
-            await CartModel.deleteMany({ 'shopOwner._id': shopOwnerObjId });
-            return { status: false, message: 'Shop is not open. All related carts have been deleted.' };
+            // await CartModel.deleteMany({ 'shopOwner._id': shopOwnerObjId });
+            errors = 'Shop hiện đang đóng cửa';
+            return { status: false, errors };
         }
 
         // Lấy thông tin sản phẩm
@@ -367,12 +383,24 @@ const getCarts = async (user_id) => {
             // Kiểm tra trạng thái của shopOwner
             const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
             if (!shopOwnerInDB) {
-                return { carts: null, errors: { reason: "ShopOwner not found" } };
+                return { 
+                    carts: null, 
+                    errors: { reason: "ShopOwner not found" } 
+                };
             }
 
-            if (shopOwnerInDB.status !== "Mở cửa") {
+            if (shopOwnerInDB.status == "Đóng cửa") {
                 // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
-
+                return {
+                    carts,
+                    errors: {
+                        shopName: cart.shopOwner.name,
+                        reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
+                    },
+                };
+            }
+            if (shopOwnerInDB.status == "Ngưng hoạt động" || "Tài khoản bị khóa") {
+                // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
                 return {
                     carts: null,
                     errors: {
@@ -381,7 +409,6 @@ const getCarts = async (user_id) => {
                     },
                 };
             }
-
             // Kiểm tra trạng thái của sản phẩm trong giỏ hàng
             for (let product of cart.products) {
                 const productObjId = new ObjectId(product._id);
@@ -460,7 +487,17 @@ const getCartByUserAndShop = async (user, shopOwner) => {
             return { cart: null, errors };
         }
 
-        if (shopOwnerInDB.status !== "Mở cửa") {
+        if (shopOwnerInDB.status == "Đóng cửa") {
+            // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
+
+            errors = {
+                shopName: shopOwnerInDB.name,
+                reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
+            };
+            return { carts, errors };
+        }
+
+        if (shopOwnerInDB.status == "Ngưng hoạt động" || "Tài khoản bị khóa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
 
             errors = {
