@@ -6,6 +6,8 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 // Thêm 1 sản phẩm vào giỏ hàng 
 const addToCart = async (user_id, shopOwner_id, products_id) => {
+    let errors = null; // Biến lưu trữ lỗi
+
     try {
         console.log("--- Start addToCart ---");
 
@@ -15,15 +17,16 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
         // Kiểm tra user
         const userInDB = await ModelUser.findById(userObjId);
         if (!userInDB) {
-            throw new Error('User not found');
+            errors = 'User không tồn tại';
+            return { status: false, errors };
         }
 
         // Kiểm tra shop
         const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
         if (!shopOwnerInDB) {
-            throw new Error('ShopOwner not found');
+            errors = 'Shop không tồn tại';
+            return { status: false, errors };
         }
-
 
         // Tìm giỏ hàng hiện tại
         const existingCart = await CartModel.findOne({
@@ -31,34 +34,34 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             "shopOwner._id": shopOwnerObjId,
         });
 
+        // Kiểm tra trạng thái shop
         if (shopOwnerInDB.status !== 'Mở cửa') {
-            // Xóa cart nếu tồn tại
-            if (existingCart) {
-                await CartModel.deleteOne({ _id: existingCart._id });
-            }
-            // Trả về thông báo cho FE
-            return { status: false, message: 'Shop đã đóng cửa' };
-
+            // if (existingCart) {
+            //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
+            // }
+            errors = 'Shop hiện đang đóng cửa';
+            return { status: false, errors };
         }
 
         // Kiểm tra sản phẩm
         const productInDB = await ModelProduct.findById(products_id);
         if (!productInDB) {
-            throw new Error('Product not found');
+            errors = 'Sản phẩm không tồn tại';
+            return { status: false, errors };
         }
 
+        // Kiểm tra trạng thái sản phẩm
         if (productInDB.status !== 'Còn món') {
-            // Xóa cart nếu tồn tại
-            if (existingCart) {
-                await CartModel.deleteOne({ _id: existingCart._id });
-            }
-            // Trả về thông báo cho FE
-            return { status: false, message: 'Sản phẩm không còn món' };
+            // if (existingCart) {
+            //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
+            // }
+            errors = 'Sản phẩm hiện không còn món';
+            return { status: false, errors };
         }
 
         // Nếu không có cart hiện tại, tạo mới
         if (!existingCart) {
-            console.log("Cart not found, creating new cart...");
+            console.log("Cart không tồn tại, tạo mới...");
             const newCart = new CartModel({
                 user: {
                     _id: userInDB._id,
@@ -89,9 +92,9 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             });
 
             await newCart.save();
-            return { status: true, message: 'Cart created successfully', cart: newCart };
+            return { status: true, message: 'Cart tạo thành công', cart: newCart };
         } else {
-            console.log("Cart found, updating...");
+            console.log("Cart đã tồn tại, cập nhật...");
 
             const productIndex = existingCart.products.findIndex((p) =>
                 p._id.equals(productInDB._id)
@@ -124,14 +127,16 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             existingCart.updatedAt = Date.now();
 
             await existingCart.save();
-            console.log("Cart updated:", existingCart);
-            return { status: true, message: 'Cart updated successfully', cart: existingCart };
+            console.log("Cart đã cập nhật:", existingCart);
+            return { status: true, message: 'Cart cập nhật thành công', cart: existingCart };
         }
     } catch (error) {
-        console.log("Error in addToCart:", error);
-        return { status: false, message: error.message };
+        console.log("Lỗi trong addToCart:", error);
+        errors = 'Đã xảy ra lỗi không xác định';
+        return { status: false, errors };
     }
 };
+
 
 // Cập nhật số lượng trực tiếp
 const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity) => {
