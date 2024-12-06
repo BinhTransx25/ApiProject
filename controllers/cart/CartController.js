@@ -383,15 +383,17 @@ const getCarts = async (user_id) => {
             // Kiểm tra trạng thái của shopOwner
             const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
             if (!shopOwnerInDB) {
-                return { 
-                    carts: null, 
-                    errors: { reason: "ShopOwner not found" } 
+                return {
+                    carts: null,
+                    errors: { reason: "ShopOwner not found" }
                 };
             }
+
             if (shopOwnerInDB.status == "Mở cửa") {
                 // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-                return { carts};
+                return {carts};
             }
+
             if (shopOwnerInDB.status == "Đóng cửa") {
                 // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
                 return {
@@ -401,8 +403,8 @@ const getCarts = async (user_id) => {
                         reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
                     },
                 };
-            }
-            if (shopOwnerInDB.status == "Ngưng hoạt động" || "Tài khoản bị khóa") {
+            } 
+             if (shopOwnerInDB.status == "Ngưng hoạt động" || shopOwnerInDB.status == "Tài khoản bị khóa") {
                 // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
                 return {
                     carts: null,
@@ -411,8 +413,9 @@ const getCarts = async (user_id) => {
                         reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
                     },
                 };
-            }
+            } 
             // Kiểm tra trạng thái của sản phẩm trong giỏ hàng
+
             for (let product of cart.products) {
                 const productObjId = new ObjectId(product._id);
 
@@ -491,7 +494,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
         }
         if (shopOwnerInDB.status == "Mở cửa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-            return { carts};
+            return { carts };
         }
         if (shopOwnerInDB.status == "Đóng cửa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
@@ -502,7 +505,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
             return { carts, errors };
         }
 
-        if (shopOwnerInDB.status == "Ngưng hoạt động" || "Tài khoản bị khóa") {
+        if (shopOwnerInDB.status == "Ngưng hoạt động" || shopOwnerInDB.status == "Tài khoản bị khóa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
 
             errors = {
