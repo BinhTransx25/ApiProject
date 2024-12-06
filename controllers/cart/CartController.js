@@ -467,7 +467,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
             throw new Error("ShopOwner not found");
         }
 
-        if (shopOwnerInDB.status !== "mở cửa") {
+        if (shopOwnerInDB.status !== "Mở cửa") {
             // Nếu shop không mở cửa, set isDeleted cho tất cả giỏ hàng liên quan đến shopOwner
             await CartModel.updateMany(
                 { "shopOwner._id": shopOwnerObjId, isDeleted: false },
