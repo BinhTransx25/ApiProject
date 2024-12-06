@@ -466,7 +466,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
         }
 
         // Kiểm tra trạng thái của các sản phẩm trong giỏ hàng
-        for (let product of cart.products) {
+        for (let product of carts.products) {
             const productObjId = new ObjectId(product._id);
             const productInDB = await ModelProduct.findById(productObjId);
 
