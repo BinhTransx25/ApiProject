@@ -367,7 +367,7 @@ const getCarts = async (user_id) => {
 
             if (shopOwnerInDB.status !== "Mở cửa") {
                 // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
-                await CartModel.deleteOne({ _id: cart._id });
+                
                 return {
                     carts: null,
                     errors: {
@@ -395,7 +395,7 @@ const getCarts = async (user_id) => {
 
                 if (productInDB.status !== "Còn món") {
                     // Nếu sản phẩm không còn món, xóa giỏ hàng và trả về lỗi
-                    await CartModel.deleteOne({ _id: cart._id });
+                    
                     return {
                         carts: null,
                         errors: {
@@ -457,7 +457,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
 
         if (shopOwnerInDB.status !== "Mở cửa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-            await CartModel.deleteOne({ _id: cart._id });
+            
             errors = {
                 shopName: shopOwnerInDB.name,
                 reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
@@ -477,7 +477,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
 
             if (productInDB.status !== "Còn món") {
                 // Nếu sản phẩm không còn món, xóa giỏ hàng và trả về lỗi
-                await CartModel.deleteOne({ _id: cart._id });
+                
                 errors = {
                     productName: product.name,
                     reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
