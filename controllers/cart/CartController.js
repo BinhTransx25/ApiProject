@@ -344,13 +344,13 @@ const getCarts = async (user_id) => {
         // Kiểm tra người dùng có tồn tại hay không
         const userInDB = await ModelUser.findById(userObjId);
         if (!userInDB) {
-            return { carts: null, errors: { reason: "User not found" } };
+            return { carts: null, error: { reason: "User not found" } };
         }
 
         // Lấy tất cả các giỏ hàng của người dùng
         const carts = await CartModel.find({ "user._id": userObjId });
         if (!carts || carts.length === 0) {
-            return { carts: null, errors: { reason: "No carts found" } };
+            return { carts: null, error: { reason: "No carts found" } };
         }
 
         const results = [];
@@ -362,7 +362,7 @@ const getCarts = async (user_id) => {
             // Kiểm tra trạng thái của shopOwner
             const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
             if (!shopOwnerInDB) {
-                return { carts: null, errors: { reason: "ShopOwner not found" } };
+                return { carts: null, error: { reason: "ShopOwner not found" } };
             }
 
             if (shopOwnerInDB.status !== "Mở cửa") {
@@ -370,7 +370,7 @@ const getCarts = async (user_id) => {
                 
                 return {
                     carts: null,
-                    errors: {
+                    error: {
                         shopName: cart.shopOwner.name,
                         reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
                     },
@@ -385,7 +385,7 @@ const getCarts = async (user_id) => {
                 if (!productInDB) {
                     return {
                         carts: null,
-                        errors: {
+                        error: {
                             shopName: cart.shopOwner.name,
                             productName: product.name,
                             reason: "Product not found",
@@ -398,7 +398,7 @@ const getCarts = async (user_id) => {
                     
                     return {
                         carts: null,
-                        errors: {
+                        error: {
                             shopName: cart.shopOwner.name,
                             productName: product.name,
                             reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
@@ -421,10 +421,10 @@ const getCarts = async (user_id) => {
         console.log("Carts retrieved:", results);
 
         // Nếu không có lỗi, trả về giỏ hàng
-        return { carts: results, errors: null };
+        return { carts: results, error: null };
     } catch (error) {
         console.log("Error in getCarts:", error);
-        return { carts: null, errors: { reason: `Lỗi hệ thống: ${error.message}` } };
+        return { carts: null, error: { reason: `Lỗi hệ thống: ${error.message}` } };
     }
 };
 
@@ -432,7 +432,7 @@ const getCarts = async (user_id) => {
 
 // Lấy chi tiết giỏ hàng của người dùng và shop
 const getCartByUserAndShop = async (user, shopOwner) => {
-    let errors = null;
+    let error = null;
 
     try {
         // Tìm giỏ hàng của user và shopOwner
@@ -442,8 +442,8 @@ const getCartByUserAndShop = async (user, shopOwner) => {
         });
 
         if (!cart) {
-            errors = { reason: "Giỏ hàng không tồn tại." };
-            return { cart: null, errors };
+            error = { reason: "Giỏ hàng không tồn tại." };
+            return { cart: null, error };
         }
 
         // Kiểm tra trạng thái của shop owner
@@ -451,18 +451,18 @@ const getCartByUserAndShop = async (user, shopOwner) => {
         const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
 
         if (!shopOwnerInDB) {
-            errors = { reason: "Shop owner không tồn tại." };
-            return { cart: null, errors };
+            error = { reason: "Shop owner không tồn tại." };
+            return { cart: null, error};
         }
 
         if (shopOwnerInDB.status !== "Mở cửa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
             
-            errors = {
+            error = {
                 shopName: shopOwnerInDB.name,
                 reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
             };
-            return { cart: null, errors };
+            return { cart: null, error };
         }
 
         // Kiểm tra trạng thái của các sản phẩm trong giỏ hàng
@@ -471,27 +471,27 @@ const getCartByUserAndShop = async (user, shopOwner) => {
             const productInDB = await ModelProduct.findById(productObjId);
 
             if (!productInDB) {
-                errors = { productName: product.name, reason: "Sản phẩm không tồn tại." };
-                return { cart: null, errors };
+                error = { productName: product.name, reason: "Sản phẩm không tồn tại." };
+                return { cart: null, error };
             }
 
             if (productInDB.status !== "Còn món") {
                 // Nếu sản phẩm không còn món, xóa giỏ hàng và trả về lỗi
                 
-                errors = {
+                error = {
                     productName: product.name,
                     reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
                 };
-                return { cart: null, errors };
+                return { cart: null, error };
             }
         }
 
         // Nếu không có lỗi, trả về giỏ hàng
-        return { cart, errors };
+        return { cart, error };
     } catch (error) {
         // Nếu lỗi xảy ra trong try-catch, gán lỗi vào errors
-        errors = { reason: `Lỗi hệ thống: ${error.message}` };
-        return { cart: null, errors };
+        error = { reason: `Lỗi hệ thống: ${error.message}` };
+        return { cart: null, error };
     }
 };
 
