@@ -7,10 +7,11 @@ const bcrypt = require('bcryptjs');
 // Lấy thông tin tất cả các nhà hàng
 const getAllShopOwners = async () => {
     try {
-        return await ModelShopOwner.find();
+        // Lọc các nhà hàng đang ở trạng thái 'Mở cửa' và chưa bị xóa
+        return await ModelShopOwner.find({ status: 'Mở cửa', isDeleted: false });
     } catch (error) {
-        console.error('Lỗi khi lấy thông tin tất cả các cửa hàng:', error);
-        throw new Error('Lỗi khi lấy thông tin tất cả các cửa hàng');
+        console.error('Lỗi khi lấy thông tin tất cả các cửa hàng đang mở cửa:', error);
+        throw new Error('Lỗi khi lấy thông tin tất cả các cửa hàng đang mở cửa');
     }
 };
 
@@ -18,8 +19,6 @@ const getAllShopOwners = async () => {
 const getShopOwnerById = async (id) => {
     try {
         const shopowner = await ModelShopOwner.findById(id)
-
-
         if (!shopowner) {
             throw new Error('Nhà hàng not found');
         }
@@ -31,7 +30,7 @@ const getShopOwnerById = async (id) => {
 };
 
 // Cập nhật thông tin nhà hàng
-const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours, closeHours, imageVerified,latitude,longitude) => {
+const updateShopOwner = async (id, name, phone, email, address, rating, images, openingHours, closeHours, imageVerified, latitude, longitude) => {
     try {
 
         const shopOwnerInDB = await ModelShopOwner.findById(id);
@@ -76,7 +75,7 @@ const deleteShopOwner = async (id) => {
         throw new Error('Lỗi khi xóa shipper');
     }
 };
-
+//(Không dùng nữa)
 const searchShopOwner = async (keyword) => {
     try {
         const shops = await ModelShopOwner.find({ name: { $regex: keyword, $options: 'i' } });
@@ -158,6 +157,15 @@ const getRevenueByShopOwner = async (shopOwnerId, date, filter) => {
         const orders = await ModelOrder.find({
             'shopOwner._id': shopOwnerObjectId, // Lọc theo shopOwnerId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false, // Chỉ lấy các order chưa bị xóa
+            status: { $nin: [
+                'Đang xử lý', 
+                'Chờ thanh toán', 
+                'Nhà hàng hủy đơn', 
+                'Tài xế hủy đơn', 
+                'Khách hủy đơn', 
+                'Đơn hàng tạm xóa'
+            ]} // Loại trừ những trạng thái không mong muốn
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
@@ -221,6 +229,15 @@ const getRevenueByShopOwnerCustomRange = async (shopOwnerId, startDateInput, end
         const orders = await ModelOrder.find({
             'shopOwner._id': shopOwnerObjectId, // Lọc theo shopOwnerId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false, // Chỉ lấy các order chưa bị xóa
+            status: { $nin: [
+                'Đang xử lý', 
+                'Chờ thanh toán', 
+                'Nhà hàng hủy đơn', 
+                'Tài xế hủy đơn', 
+                'Khách hủy đơn', 
+                'Đơn hàng tạm xóa'
+            ]} // Loại trừ những trạng thái không mong muốn
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
@@ -399,7 +416,7 @@ const removeSoftDeleted = async (id) => {
         if (!shopownerInDB) {
             throw new Error('ShopOwner not found');
         }
-  
+
         // Cập nhật trạng thái isDeleted và status
         let result = await ModelShopOwner.findByIdAndUpdate(
             id,
@@ -411,16 +428,16 @@ const removeSoftDeleted = async (id) => {
         console.log('Remove ShopOwner error:', error);
         throw new Error('Remove ShopOwner error');
     }
-  };
-  
-  // Khôi phục trạng thái cho shop 
+};
+
+// Khôi phục trạng thái cho shop 
 const restoreAndSetAvailable = async (id) => {
     try {
         const shopownerInDB = await ModelShopOwner.findById(id);
         if (!shopownerInDB) {
             throw new Error('ShopOwner not found');
         }
-  
+
         // Cập nhật trạng thái
         const result = await ModelShopOwner.findByIdAndUpdate(
             id,
@@ -432,7 +449,7 @@ const restoreAndSetAvailable = async (id) => {
         console.log('Restore ShopOwner error:', error);
         throw new Error('Restore ShopOwner error');
     }
-  };
+};
 
 
 
