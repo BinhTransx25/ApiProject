@@ -10,7 +10,7 @@ const CartSchema = new Schema({
     totalPrice: { type: Number, default: 0 }, // tổng tiền của tất cả sản phẩm
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    isDeleted:{type:Boolean, required:false, default:false},
+    
 });
 
 module.exports = mongoose.models.cart || mongoose.model('cart', CartSchema);

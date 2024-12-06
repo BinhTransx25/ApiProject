@@ -10,10 +10,13 @@ const getAllProducts = async (page, limit, keyword) => {
         limit = parseInt(limit) || 10;
         let skip = (page - 1) * limit;
         let sort = { create_at: -1 };
-        let query = {};
+        let query = {
+            status: 'Còn món', // Lọc theo trạng thái "Còn món"
+            isDeleted: false // Lọc các sản phẩm chưa bị xóa mềm
+        };
 
         if (keyword) {
-            query.name = { $regex: keyword, $options: 'i' };
+            query.name = { $regex: keyword, $options: 'i' }; // Lọc theo từ khóa tìm kiếm trong tên sản phẩm
         }
 
         let products = await ModelProduct
@@ -21,6 +24,7 @@ const getAllProducts = async (page, limit, keyword) => {
             .skip(skip)
             .limit(limit)
             .sort(sort);
+
         return products;
     } catch (error) {
         console.log('Get all products error:', error);
@@ -41,6 +45,7 @@ const getProductById = async (id) => {
         throw new Error('Get product by id error');
     }
 };
+
 // Lấy tất cả sản phẩm theo loại
 const getProductsByCategory = async (category_id, page, limit) => {
     try {
@@ -51,8 +56,13 @@ const getProductsByCategory = async (category_id, page, limit) => {
 
         const products = await ModelProduct
             .find(
-                { 'categories.categoryProduct_id': category_id },
-                'name price categories description images shopOwner rating soldOut status isDeleted')
+                { 
+                    'categories.categoryProduct_id': category_id, // Lọc theo category_id
+                    status: 'Còn món', // Lọc sản phẩm có status là "Còn món"
+                    isDeleted: false // Lọc các sản phẩm chưa bị xóa mềm
+                },
+                'name price categories description images shopOwner rating soldOut status isDeleted'
+            )
             .skip(skip)
             .limit(limit)
             .sort(sort)
@@ -65,6 +75,7 @@ const getProductsByCategory = async (category_id, page, limit) => {
     }
 };
 
+
 // Lấy tất cả sản phẩm theo shopOwner
 const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
     try {
@@ -75,11 +86,17 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
 
         const products = await ModelProduct
             .find(
-                { 'shopOwner.shopOwner_id': shopOwner_id },
-                'name price categories description images shopOwner rating soldOut status isDeleted')
+                { 
+                    'shopOwner.shopOwner_id': shopOwner_id, // Lọc theo shopOwner_id
+                    status: 'Còn món', // Lọc sản phẩm có status là "Còn món"
+                    isDeleted: false // Lọc sản phẩm chưa bị xóa mềm
+                },
+                'name price categories description images shopOwner rating soldOut status isDeleted'
+            )
             .skip(skip)
             .limit(limit)
             .sort(sort);
+        
         console.log('Products:', products);
         return products;
 
@@ -88,6 +105,7 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
         throw new Error('Get products by shopOwner error');
     }
 };
+
 
 // Lấy tất cả sản phẩm theo loại và shopOwner
 const getProductsByCategoryAndShopOwner = async (category_id, shopOwner_id, keyword, page, limit) => {

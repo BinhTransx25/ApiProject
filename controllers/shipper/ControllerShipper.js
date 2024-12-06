@@ -397,6 +397,17 @@ const getRevenueByShipper = async (shipperId, date, filter) => {
         const orders = await ModelOrder.find({
             'shipper._id': shipperObjectId, // Lọc theo shipperId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false, // Chỉ lấy các order chưa bị xóa
+            status: {
+                $nin: [
+                    'Đang xử lý',
+                    'Chờ thanh toán',
+                    'Nhà hàng hủy đơn',
+                    'Tài xế hủy đơn',
+                    'Khách hủy đơn',
+                    'Đơn hàng tạm xóa'
+                ]
+            } // Loại trừ những trạng thái không mong muốn
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp
@@ -456,6 +467,17 @@ const getRevenueByShipperCustomRange = async (shipperId, startDateInput, endDate
         const orders = await ModelOrder.find({
             'shipper._id': shipperObjectId, // Lọc theo shipperId
             orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false, // Chỉ lấy các order chưa bị xóa
+            status: {
+                $nin: [
+                    'Đang xử lý',
+                    'Chờ thanh toán',
+                    'Nhà hàng hủy đơn',
+                    'Tài xế hủy đơn',
+                    'Khách hủy đơn',
+                    'Đơn hàng tạm xóa'
+                ]
+            } // Loại trừ những trạng thái không mong muốn
         }).sort({ orderDate: -1 });
 
         // Tính toán các giá trị tổng hợp

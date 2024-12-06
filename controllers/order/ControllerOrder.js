@@ -34,7 +34,7 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
         if (!shopOwner) throw new Error('Shop owner not found');
 
         // Kiểm tra trạng thái của nhà hàng
-        if (shopOwner.status !== 'mở cửa') {
+        if (shopOwner.status !== 'Mở cửa') {
             throw new Error('Nhà hàng hiện đang đóng cửa, không thể đặt hàng');
         }
 
@@ -44,7 +44,7 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
             if (!product) {
                 throw new Error(`Sản phẩm với ID ${item._id} không tồn tại`);
             }
-            if (product.status !== 'còn món') {
+            if (product.status !== 'Còn món') {
                 throw new Error(`Sản phẩm "${product.name}" hiện không có sẵn`);
             }
         }
