@@ -88,8 +88,8 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
             .find(
                 { 
                     'shopOwner.shopOwner_id': shopOwner_id, // Lọc theo shopOwner_id
-                    status: 'Còn món', // Lọc sản phẩm có status là "Còn món"
-                    isDeleted: false // Lọc sản phẩm chưa bị xóa mềm
+                    // status: 'Còn món', // Lọc sản phẩm có status là "Còn món"
+                    // isDeleted: false // Lọc sản phẩm chưa bị xóa mềm
                 },
                 'name price categories description images shopOwner rating soldOut status isDeleted'
             )
