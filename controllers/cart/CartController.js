@@ -23,7 +23,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
         if (!shopOwnerInDB) {
             throw new Error('ShopOwner not found');
         }
-        if (shopOwnerInDB.status !== 'mở cửa') {
+        if (shopOwnerInDB.status !== 'Mở cửa') {
             // Chuyển trạng thái isDeleted: true nếu shop không mở cửa
             await CartModel.updateMany(
                 { "shopOwner._id": shopOwnerObjId, isDeleted: false },
