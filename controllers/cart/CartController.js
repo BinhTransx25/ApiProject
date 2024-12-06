@@ -388,7 +388,10 @@ const getCarts = async (user_id) => {
                     errors: { reason: "ShopOwner not found" } 
                 };
             }
-
+            if (shopOwnerInDB.status == "Mở cửa") {
+                // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
+                return { carts};
+            }
             if (shopOwnerInDB.status == "Đóng cửa") {
                 // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
                 return {
@@ -484,12 +487,14 @@ const getCartByUserAndShop = async (user, shopOwner) => {
 
         if (!shopOwnerInDB) {
             errors = { reason: "Shop owner không tồn tại." };
-            return { cart: null, errors };
+            return { carts: null, errors };
         }
-
+        if (shopOwnerInDB.status == "Mở cửa") {
+            // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
+            return { carts};
+        }
         if (shopOwnerInDB.status == "Đóng cửa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-
             errors = {
                 shopName: shopOwnerInDB.name,
                 reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
