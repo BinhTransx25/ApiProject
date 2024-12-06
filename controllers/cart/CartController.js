@@ -18,14 +18,14 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
         const userInDB = await ModelUser.findById(userObjId);
         if (!userInDB) {
             errors = 'User không tồn tại';
-            return { status: false, errors };
+            return { carts: null, errors };
         }
 
         // Kiểm tra shop
         const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
         if (!shopOwnerInDB) {
             errors = 'Shop không tồn tại';
-            return { status: false, errors };
+            return { carts: null, errors };
         }
 
         // Tìm giỏ hàng hiện tại
@@ -40,14 +40,14 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
             // }
             errors = 'Shop hiện đang đóng cửa';
-            return { status: false, errors };
+            return { carts: null, errors };
         }
 
         // Kiểm tra sản phẩm
         const productInDB = await ModelProduct.findById(products_id);
         if (!productInDB) {
             errors = 'Sản phẩm không tồn tại';
-            return { status: false, errors };
+            return { carts: null, errors };
         }
 
         // Kiểm tra trạng thái sản phẩm
@@ -56,7 +56,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
             // }
             errors = 'Sản phẩm hiện không còn món';
-            return { status: false, errors };
+            return { carts: null, errors };
         }
 
         // Nếu không có cart hiện tại, tạo mới
@@ -92,7 +92,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             });
 
             await newCart.save();
-            return { status: true, message: 'Cart tạo thành công', cart: newCart };
+            return { status: true, message: 'Cart tạo thành công', carts: newCart };
         } else {
             console.log("Cart đã tồn tại, cập nhật...");
 
@@ -128,7 +128,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
 
             await existingCart.save();
             console.log("Cart đã cập nhật:", existingCart);
-            return { status: true, message: 'Cart cập nhật thành công', cart: existingCart };
+            return { status: true, message: 'Cart cập nhật thành công', carts: existingCart };
         }
     } catch (error) {
         console.log("Lỗi trong addToCart:", error);
@@ -372,7 +372,7 @@ const getCarts = async (user_id) => {
 
             if (shopOwnerInDB.status !== "Mở cửa") {
                 // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
-                
+
                 return {
                     carts: null,
                     errors: {
@@ -400,7 +400,7 @@ const getCarts = async (user_id) => {
 
                 if (productInDB.status !== "Còn món") {
                     // Nếu sản phẩm không còn món, xóa giỏ hàng và trả về lỗi
-                    
+
                     return {
                         carts: null,
                         errors: {
@@ -462,7 +462,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
 
         if (shopOwnerInDB.status !== "Mở cửa") {
             // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-           
+
             errors = {
                 shopName: shopOwnerInDB.name,
                 reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
@@ -482,7 +482,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
 
             if (productInDB.status !== "Còn món") {
                 // Nếu sản phẩm không còn món, xóa giỏ hàng và trả về lỗi
-                
+
                 errors = {
                     productName: product.name,
                     reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
@@ -535,7 +535,7 @@ const removeSoftDeleted = async (id) => {
         if (!cartInDB) {
             throw new Error('cart not found');
         }
-  
+
         // Cập nhật trạng thái isDeleted và status
         let result = await CartModel.findByIdAndUpdate(
             id,
@@ -548,15 +548,15 @@ const removeSoftDeleted = async (id) => {
         throw new Error('Remove cart error');
     }
 };
-  
-  // Khôi phục trạng thái cho shop 
+
+// Khôi phục trạng thái cho shop 
 const restoreAndSetAvailable = async (id) => {
     try {
         const cartInDB = await CartModel.findById(id);
         if (!cartInDB) {
             throw new Error('cart not found');
         }
-  
+
         // Cập nhật trạng thái
         const result = await CartModel.findByIdAndUpdate(
             id,
