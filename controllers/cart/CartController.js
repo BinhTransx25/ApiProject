@@ -365,17 +365,17 @@ const getCarts = async (user_id) => {
         // Kiểm tra người dùng có tồn tại hay không
         const userInDB = await ModelUser.findById(userObjId);
         if (!userInDB) {
-            return { carts: null, errors: [{ reason: "User not found" }] };
+            return { carts: null, errors: { reason: "User not found" } };
         }
 
         // Lấy tất cả các giỏ hàng của người dùng
         const carts = await CartModel.find({ "user._id": userObjId });
         if (!carts || carts.length === 0) {
-            return { carts: [], errors: [{ reason: "No carts found" }] };
+            return { carts: [], errors: { reason: "No carts found" } };
         }
 
         const results = [];
-        const errors = [];
+        let errors = {};
 
         // Lặp qua tất cả giỏ hàng để kiểm tra trạng thái của shop và sản phẩm
         for (let cart of carts) {
@@ -384,17 +384,31 @@ const getCarts = async (user_id) => {
             // Kiểm tra trạng thái của shopOwner
             const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
             if (!shopOwnerInDB) {
-                errors.push({
+                errors[cart.shopOwner._id] = "ShopOwner not found";
+                // Vẫn thêm giỏ hàng nhưng gắn cờ lỗi
+                results.push({
+                    shopId: cart.shopOwner._id,
                     shopName: cart.shopOwner.name,
-                    reason: "ShopOwner not found",
+                    shopImage: cart.shopOwner.images,
+                    shopAddress: cart.shopOwner.address,
+                    totalItem: cart.totalItem,
+                    totalPrice: cart.totalPrice,
+                    error: "ShopOwner not found",
                 });
                 continue;
             }
 
             if (["Đóng cửa", "Ngưng hoạt động", "Tài khoản bị khóa"].includes(shopOwnerInDB.status)) {
-                errors.push({
+                errors[cart.shopOwner._id] = `${shopOwnerInDB.status}`;
+                // Vẫn thêm giỏ hàng nhưng gắn cờ lỗi
+                results.push({
+                    shopId: cart.shopOwner._id,
                     shopName: cart.shopOwner.name,
-                    reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
+                    shopImage: cart.shopOwner.images,
+                    shopAddress: cart.shopOwner.address,
+                    totalItem: cart.totalItem,
+                    totalPrice: cart.totalPrice,
+                    error: `${shopOwnerInDB.status}`,
                 });
                 continue;
             }
@@ -405,20 +419,12 @@ const getCarts = async (user_id) => {
 
                 const productInDB = await ModelProduct.findById(productObjId);
                 if (!productInDB) {
-                    errors.push({
-                        shopName: cart.shopOwner.name,
-                        productName: product.name,
-                        reason: "Product not found",
-                    });
+                    errors[product.name] = "Product not found";
                     continue;
                 }
 
                 if (productInDB.status !== "Còn món") {
-                    errors.push({
-                        shopName: cart.shopOwner.name,
-                        productName: product.name,
-                        reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
-                    });
+                    errors[product.name] = `${productInDB.status}`;
                     continue;
                 }
             }
@@ -437,12 +443,14 @@ const getCarts = async (user_id) => {
         console.log("Carts retrieved:", results);
 
         // Trả về giỏ hàng và danh sách lỗi
-        return { carts: results, errors };
+        return { carts: results, errors: Object.keys(errors).length > 0 ? errors : null };
     } catch (error) {
         console.log("Error in getCarts:", error);
-        return { carts: null, errors: [{ reason: `Lỗi hệ thống: ${error.message}` }] };
+        return { carts: null, errors: { reason: `Lỗi hệ thống: ${error.message}` } };
     }
 };
+
+
 
 
 
