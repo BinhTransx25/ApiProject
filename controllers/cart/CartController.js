@@ -365,16 +365,17 @@ const getCarts = async (user_id) => {
         // Kiểm tra người dùng có tồn tại hay không
         const userInDB = await ModelUser.findById(userObjId);
         if (!userInDB) {
-            return { carts: null, errors: { reason: "User not found" } };
+            return { carts: null, errors: [{ reason: "User not found" }] };
         }
 
         // Lấy tất cả các giỏ hàng của người dùng
         const carts = await CartModel.find({ "user._id": userObjId });
         if (!carts || carts.length === 0) {
-            return { carts: null, errors: { reason: "No carts found" } };
+            return { carts: [], errors: [{ reason: "No carts found" }] };
         }
 
         const results = [];
+        const errors = [];
 
         // Lặp qua tất cả giỏ hàng để kiểm tra trạng thái của shop và sản phẩm
         for (let cart of carts) {
@@ -383,72 +384,42 @@ const getCarts = async (user_id) => {
             // Kiểm tra trạng thái của shopOwner
             const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
             if (!shopOwnerInDB) {
-                return {
-                    carts: null,
-                    errors: { reason: "ShopOwner not found" }
-                };
+                errors.push({
+                    shopName: cart.shopOwner.name,
+                    reason: "ShopOwner not found",
+                });
+                continue;
             }
 
-            // if (shopOwnerInDB.status == "Mở cửa") {
-            //     // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-            //     return {carts};
-            // }
+            if (["Đóng cửa", "Ngưng hoạt động", "Tài khoản bị khóa"].includes(shopOwnerInDB.status)) {
+                errors.push({
+                    shopName: cart.shopOwner.name,
+                    reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
+                });
+                continue;
+            }
 
-            if (shopOwnerInDB.status == "Đóng cửa") {
-                // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
-                return {
-                    carts: {
-                        shopId: cart.shopOwner._id,
-                        shopName: cart.shopOwner.name,
-                        shopImage: cart.shopOwner.images,
-                        shopAddress: cart.shopOwner.address,
-                        totalItem: cart.totalItem,
-                        totalPrice: cart.totalPrice,
-                    },
-                    errors: {
-                        shopName: cart.shopOwner.name,
-                        reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
-                    },
-                };
-            }
-            if (shopOwnerInDB.status == "Ngưng hoạt động" || shopOwnerInDB.status == "Tài khoản bị khóa") {
-                // Nếu shop không mở cửa, xóa giỏ hàng và trả về lỗi
-                return {
-                    carts: null,
-                    errors: {
-                        shopName: cart.shopOwner.name,
-                        reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
-                    },
-                };
-            }
             // Kiểm tra trạng thái của sản phẩm trong giỏ hàng
-
             for (let product of cart.products) {
                 const productObjId = new ObjectId(product._id);
 
                 const productInDB = await ModelProduct.findById(productObjId);
                 if (!productInDB) {
-                    return {
-                        carts: null,
-                        errors: {
-                            shopName: cart.shopOwner.name,
-                            productName: product.name,
-                            reason: "Product not found",
-                        },
-                    };
+                    errors.push({
+                        shopName: cart.shopOwner.name,
+                        productName: product.name,
+                        reason: "Product not found",
+                    });
+                    continue;
                 }
 
                 if (productInDB.status !== "Còn món") {
-                    // Nếu sản phẩm không còn món, xóa giỏ hàng và trả về lỗi
-
-                    return {
-                        carts: null,
-                        errors: {
-                            shopName: cart.shopOwner.name,
-                            productName: product.name,
-                            reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
-                        },
-                    };
+                    errors.push({
+                        shopName: cart.shopOwner.name,
+                        productName: product.name,
+                        reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
+                    });
+                    continue;
                 }
             }
 
@@ -465,13 +436,14 @@ const getCarts = async (user_id) => {
 
         console.log("Carts retrieved:", results);
 
-        // Nếu không có lỗi, trả về giỏ hàng
-        return { carts: results, errors: null };
+        // Trả về giỏ hàng và danh sách lỗi
+        return { carts: results, errors };
     } catch (error) {
         console.log("Error in getCarts:", error);
-        return { carts: null, errors: { reason: `Lỗi hệ thống: ${error.message}` } };
+        return { carts: null, errors: [{ reason: `Lỗi hệ thống: ${error.message}` }] };
     }
 };
+
 
 
 
