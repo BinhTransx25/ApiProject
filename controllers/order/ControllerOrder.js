@@ -6,6 +6,7 @@ const ModelShipper = require('../shipper/ModelShipper');
 const ModelVoucher = require('../vouchers/ModelVouher');
 const ModelProduct = require('../products/ModelProduct')
 const mongoose = require('mongoose');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 /**
  * Thêm đơn hàng mới.
@@ -26,6 +27,7 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
     }
 
     try {
+        let errors = {};
         // Tìm người dùng, nhà hàng, và shipper
         const user = await ModelUser.findById(userId);
         if (!user) throw new Error('User not found');
@@ -34,18 +36,29 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
         if (!shopOwner) throw new Error('Shop owner not found');
 
         // Kiểm tra trạng thái của nhà hàng
-        if (shopOwner.status !== 'Mở cửa') {
-            throw new Error('Nhà hàng hiện đang đóng cửa, không thể đặt hàng');
+        if (shopOwner.status !== "Mở cửa") {
+            return (
+                errors = {
+                    shopId: shopOwner._id,
+                    status: shopOwner.status
+                });
+
         }
 
         // Kiểm tra trạng thái của từng sản phẩm
         for (const item of order) {
-            const product = await ModelProduct.findById(item._id);
+
+            const productObjId = new ObjectId(item._id);
+            const product = await ModelProduct.findById(productObjId);
             if (!product) {
                 throw new Error(`Sản phẩm với ID ${item._id} không tồn tại`);
             }
-            if (product.status !== 'Còn món') {
-                throw new Error(`Sản phẩm "${product.name}" hiện không có sẵn`);
+            if (product.status !== "Còn món") {
+                return (errors = {
+                    Product_id: product._id,
+                    status: product.status
+                });
+
             }
         }
 
@@ -278,7 +291,7 @@ const shopOwnerCancelOrder = async (orderId, reason, io) => {
         }
 
         // Cập nhật trạng thái và lý do hủy
-        order.status = 'Nhà hàng hủy đơn';
+        order.status = 'Nhà hàng đã hủy đơn';
         order.reasonCancel = reason; // Lưu lý do hủy
         await order.save();
 
@@ -287,7 +300,7 @@ const shopOwnerCancelOrder = async (orderId, reason, io) => {
         if (user) {
             const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
             if (orderItem) {
-                orderItem.status = 'Nhà hàng hủy đơn'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Nhà hàng đã hủy đơn'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
@@ -308,12 +321,12 @@ const shopOwnerCancelOrder = async (orderId, reason, io) => {
     }
 };
 
-
 /**
  * Hủy đơn hàng theo orderId.
  * @param {String} orderId - ID của đơn hàng.
  * @returns {Object} - Đơn hàng đã bị hủy.
  */
+
 // Người Dùng Bấm 
 const CustomerCancelOrder = async (orderId, io) => {
     console.log('Cancelling order with ID:', orderId); // Log kiểm tra orderId
@@ -326,7 +339,7 @@ const CustomerCancelOrder = async (orderId, io) => {
         }
 
         // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
-        order.status = 'Khách hủy đơn';
+        order.status = 'Người dùng đã hủy đơn';
         await order.save();
 
         // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
@@ -334,7 +347,7 @@ const CustomerCancelOrder = async (orderId, io) => {
         if (user) {
             const orderItem = user.orders.id(orderId); // Lấy đơn hàng trong orders có ID của order
             if (orderItem) {
-                orderItem.status = 'Khách hủy đơn'; // Cập nhật trạng thái trong orders
+                orderItem.status = 'Người dùng đã hủy đơn'; // Cập nhật trạng thái trong orders
                 await user.save(); // Lưu lại user với trạng thái đã cập nhật
             }
         }
@@ -372,6 +385,7 @@ const deleteOrder = async (orderId) => {
         throw new Error('Error deleting order');
     }
 };
+
 // Chưa biết dùng cho cái gì 
 const updateOrderStatus = async (orderId, status) => {
     try {
@@ -449,9 +463,9 @@ const removeSoftDeleted = async (id) => {
         // Danh sách trạng thái cho phép xóa mềm
         const allowedStatuses = [
             'Giao hàng thành công',
-            'Nhà hàng hủy đơn',
-            'Tài xế hủy đơn',
-            'Khách hủy đơn'
+            'Nhà hàng đã hủy đơn',
+            'Shipper đã hủy đơn',
+            'Người dùng đã hủy đơn'
         ];
 
         // Kiểm tra trạng thái hiện tại
@@ -508,6 +522,48 @@ const restoreAndSetAvailable = async (id) => {
     }
 };
 
+// lấy order user theo 1 khoảng thời gian nhất định 
+const getOrdersByUserCustomRange = async (userId, startDateInput, endDateInput) => {
+    try {
+        // Chuyển userId thành ObjectId nếu cần
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        // Kiểm tra và chuyển đổi ngày nhập vào thành đối tượng Date
+        const startDate = new Date(startDateInput);
+        const endDate = new Date(endDateInput);
+
+        // Kiểm tra tính hợp lệ của khoảng thời gian
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            throw new Error("Ngày không hợp lệ. Vui lòng nhập ngày theo định dạng hợp lệ (yyyy-mm-dd).");
+        }
+
+        // Đảm bảo `endDate` luôn là cuối ngày
+        endDate.setUTCHours(23, 59, 59, 999);
+
+        // Tìm các đơn hàng của user trong khoảng thời gian xác định
+        const orders = await ModelOrder.find({
+            'user._id': userObjectId, // Lọc theo userId
+            orderDate: { $gte: startDate, $lte: endDate }, // Lọc theo ngày đặt hàng
+            isDeleted: false // Chỉ lấy các đơn hàng chưa bị xóa
+        }).sort({ updatedAt: -1 }); // Sắp xếp theo ngày cập nhật mới nhất
+
+        // Tổng số đơn hàng
+        const totalOrders = orders.length;
+
+        // Trả về kết quả
+        return {
+            startDate, // Ngày bắt đầu
+            endDate, // Ngày kết thúc
+            totalOrders, // Tổng số đơn hàng
+            orders // Danh sách đơn hàng
+        };
+    } catch (error) {
+        // Ghi log lỗi nếu có
+        console.error("Lỗi khi lấy danh sách đơn hàng của user:", error);
+        // Ném ra lỗi cho hàm gọi
+        throw new Error("Lỗi khi lấy danh sách đơn hàng của user.");
+    }
+};
 
 
 module.exports = {
@@ -516,5 +572,6 @@ module.exports = {
     updateOrderStatus, CustomerCancelOrder,
     updateOrderStatusAfterPayment,
     getOrdersByUser, getOrdersByShipper,
-    removeSoftDeleted, restoreAndSetAvailable
+    removeSoftDeleted, restoreAndSetAvailable,
+    getOrdersByUserCustomRange
 };

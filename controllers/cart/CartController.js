@@ -40,7 +40,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
                 shopId: shopOwnerInDB._id,
                 status: shopOwnerInDB.status
             }
-            return {errors}
+            return { errors }
 
         }
 
@@ -414,7 +414,10 @@ const getCarts = async (user_id) => {
                 }
 
                 if (productInDB.status !== "Còn món") {
-                    errors[product.name] = `${productInDB.status}`;
+                    errors = {
+                        product_id: productInDB._id,
+                        status: productInDB.status
+                    };
                     continue;
                 }
             }
@@ -439,11 +442,6 @@ const getCarts = async (user_id) => {
         return { carts: null, errors: { reason: `Lỗi hệ thống: ${error.message}` } };
     }
 };
-
-
-
-
-
 
 // Lấy chi tiết giỏ hàng của người dùng và shop
 const getCartByUserAndShop = async (user, shopOwner) => {
@@ -491,8 +489,8 @@ const getCartByUserAndShop = async (user, shopOwner) => {
 
             if (productInDB.status !== "Còn món") {
                 errors = {
-                    Product_name: product._id,
-                    status: product.status
+                    Product_id: productInDB._id,
+                    status: productInDB.status
                 };
             }
         }
