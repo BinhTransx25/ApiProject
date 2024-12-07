@@ -399,7 +399,10 @@ const getCarts = async (user_id) => {
             }
 
             if (["Đóng cửa", "Ngưng hoạt động", "Tài khoản bị khóa"].includes(shopOwnerInDB.status)) {
-                errors[cart.shopOwner._id] = `${shopOwnerInDB.status}`;
+                errors = {
+                    shopId: shopOwnerInDB._id,
+                    status: shopOwnerInDB.status
+                };
                 // Vẫn thêm giỏ hàng nhưng gắn cờ lỗi
                 results.push({
                     shopId: cart.shopOwner._id,
@@ -457,80 +460,64 @@ const getCarts = async (user_id) => {
 
 // Lấy chi tiết giỏ hàng của người dùng và shop
 const getCartByUserAndShop = async (user, shopOwner) => {
-    let errors = null;
+    let errors = {};
 
     try {
         // Tìm giỏ hàng của user và shopOwner
-        const carts = await CartModel.findOne({
+        const cart = await CartModel.findOne({
             "user._id": new ObjectId(user),
             "shopOwner._id": new ObjectId(shopOwner),
         });
 
-        if (!carts) {
-            errors = { reason: "Giỏ hàng không tồn tại." };
-            return { carts: null, errors };
+        if (!cart) {
+            return { cart: null, errors: { reason: "Giỏ hàng không tồn tại." } };
         }
 
-        // Kiểm tra trạng thái của shop owner
+        // Kiểm tra trạng thái của shopOwner
         const shopOwnerObjId = new ObjectId(shopOwner);
         const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
 
         if (!shopOwnerInDB) {
-            errors = { reason: "Shop owner không tồn tại." };
-            return { carts: null, errors };
+            return { cart: null, errors: { reason: "Shop owner không tồn tại." } };
         }
-        // if (shopOwnerInDB.status == "Mở cửa") {
-        //     // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-        //     return { carts };
-        // }
-        if (shopOwnerInDB.status == "Đóng cửa") {
-            // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
+
+        if (["Đóng cửa", "Ngưng hoạt động", "Tài khoản bị khóa"].includes(shopOwnerInDB.status)) {
+            // Nếu shop không mở cửa, vẫn trả về giỏ hàng nhưng gắn cờ lỗi
             errors = {
-                shopName: shopOwnerInDB.name,
-                reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
+                shopId: shopOwnerInDB._id,
+                status: shopOwnerInDB.status
             };
-            return { carts, errors };
         }
 
-        if (shopOwnerInDB.status == "Ngưng hoạt động" || shopOwnerInDB.status == "Tài khoản bị khóa") {
-            // Nếu shop đóng cửa, xóa giỏ hàng và trả về lỗi
-
-            errors = {
-                shopName: shopOwnerInDB.name,
-                reason: `Vui lòng thêm lại sau, Shop hiện tại đang: ${shopOwnerInDB.status}`,
-            };
-            return { carts: null, errors };
-        }
-
-        // Kiểm tra trạng thái của các sản phẩm trong giỏ hàng
-        for (let product of carts.products) {
+        // Kiểm tra trạng thái của từng sản phẩm trong giỏ hàng
+        for (let product of cart.products) {
             const productObjId = new ObjectId(product._id);
             const productInDB = await ModelProduct.findById(productObjId);
 
             if (!productInDB) {
-                errors = { productName: product.name, reason: "Sản phẩm không tồn tại." };
-                return { carts: null, errors };
+                errors = { 
+                    Product_name: "Sản phẩm không tồn tại.", 
+                    
+                };
+                continue;
             }
 
             if (productInDB.status !== "Còn món") {
-                // Nếu sản phẩm không còn món, xóa giỏ hàng và trả về lỗi
-
-                errors = {
-                    productName: product.name,
-                    reason: `Vui lòng thêm lại sau, Món hiện tại đang: ${productInDB.status}`,
+                errors = { 
+                    Product_name: product._id, 
+                    status: product.status 
                 };
-                return { carts: null, errors };
             }
         }
 
-        // Nếu không có lỗi, trả về giỏ hàng
-        return { carts, errors };
+        // Trả về giỏ hàng và lỗi (nếu có)
+        return { cart, errors: Object.keys(errors).length > 0 ? errors : null };
     } catch (error) {
-        // Nếu lỗi xảy ra trong try-catch, gán lỗi vào errors
-        errors = { reason: `Lỗi hệ thống: ${error.message}` };
-        return { carts: null, errors };
+        // Nếu lỗi xảy ra trong try-catch
+        return { cart: null, errors: { reason: `Lỗi hệ thống: ${error.message}` } };
     }
 };
+
 
 // Xóa giỏ hàng đó khi đã được thanh toán 
 const deleteCartWhenPayment = async (user, shopOwner) => {
