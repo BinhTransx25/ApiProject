@@ -362,7 +362,7 @@ const getCarts = async (user_id) => {
         }
 
         const results = [];
-        let errors = null;
+        let errors = {};
 
         // Lặp qua tất cả giỏ hàng để kiểm tra trạng thái của shop và sản phẩm
         for (let cart of carts) {
