@@ -390,6 +390,20 @@ router.get('/shopOwner/:id', async function (req, res, next) {
     }
 });
 
+router.get('/shopOwner/normal/:id', async function (req, res, next) {
+    try {
+        const shopOwnerId = req.params.id;
+        const page = req.query.page;
+        const limit = req.query.limit;
+
+        const products = await ControllerProduct.getProductsByShopOwner(shopOwnerId, page, limit);
+        return res.status(200).json({ status: true, data: products });
+    } catch (error) {
+        console.log('Get products by shopOwner error:', error);
+        return res.status(500).json({ status: false, error: error });
+    }
+});
+
 /**
  * @swagger
  * /products/add:

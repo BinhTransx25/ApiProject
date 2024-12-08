@@ -105,7 +105,34 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
         throw new Error('Get products by shopOwner error');
     }
 };
+// Lấy tất cả sản phẩm theo shopOwner không có điều kiện 
+const getProductsByShopOwnerNormal = async (shopOwner_id, page, limit) => {
+    try {
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        let skip = (page - 1) * limit;
+        let sort = { soldOut: -1 };
 
+        const products = await ModelProduct
+            .find(
+                { 
+                    'shopOwner.shopOwner_id': shopOwner_id, // Lọc theo shopOwner_id
+                   
+                },
+                'name price categories description images shopOwner rating soldOut status isDeleted'
+            )
+            .skip(skip)
+            .limit(limit)
+            .sort(sort);
+        
+        console.log('Products:', products);
+        return products;
+
+    } catch (error) {
+        console.log('Get products by shopOwner error:', error);
+        throw new Error('Get products by shopOwner error');
+    }
+};
 
 // Lấy tất cả sản phẩm theo loại và shopOwner
 const getProductsByCategoryAndShopOwner = async (category_id, shopOwner_id, keyword, page, limit) => {
@@ -474,6 +501,7 @@ module.exports = {
     searchProductsAndShops,
     removeSoftDeleted,
     restoreAndSetAvailable,
-    restoreAndSetOutOfStock
+    restoreAndSetOutOfStock,
+    getProductsByShopOwnerNormal
 
 };
