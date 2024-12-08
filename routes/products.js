@@ -396,7 +396,7 @@ router.get('/shopOwner/normal/:id', async function (req, res, next) {
         const page = req.query.page;
         const limit = req.query.limit;
 
-        const products = await ControllerProduct.getProductsByShopOwner(shopOwnerId, page, limit);
+        const products = await ControllerProduct.getProductsByShopOwnerNormal(shopOwnerId, page, limit);
         return res.status(200).json({ status: true, data: products });
     } catch (error) {
         console.log('Get products by shopOwner error:', error);
