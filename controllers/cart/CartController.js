@@ -164,17 +164,21 @@ const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity
         }
 
         // Kiểm tra trạng thái của shop
-        if (shopOwnerInDB.status !== 'Mở cửa') {
-            // Xóa giỏ hàng liên quan
-            // await CartModel.deleteMany({ 'shopOwner._id': shopOwnerObjId });
-            errors = 'Shop hiện đang đóng cửa';
-            return { status: false, errors };
+        // Kiểm tra trạng thái shop
+        if (["Đóng cửa", "Ngưng hoạt động", "Tài khoản bị khóa"].includes(shopOwnerInDB.status)) {
+            errors = {
+                shopId: shopOwnerInDB._id,
+                status: shopOwnerInDB.status
+            }
+            return { errors }
+
         }
 
         // Lấy thông tin sản phẩm
         const productInDB = await ModelProduct.findById(productObjId);
         if (!productInDB) {
-            throw new Error('Product not found');
+            errors = 'Sản phẩm không tồn tại';
+            return { carts: null, errors };
         }
 
         // Kiểm tra trạng thái của sản phẩm
@@ -189,7 +193,6 @@ const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity
         const cart = await CartModel.findOne({
             'user._id': userObjId,
             'shopOwner._id': shopOwnerObjId,
-            isDeleted: false
         });
 
         if (!cart) {
@@ -510,7 +513,7 @@ const getCartByUserAndShop = async (user, shopOwner) => {
             }
             validProducts.push(product);
         }
-         // Nếu không còn sản phẩm hợp lệ, xóa giỏ hàng
+        // Nếu không còn sản phẩm hợp lệ, xóa giỏ hàng
         if (validProducts.length === 0) {
             await CartModel.deleteOne({ _id: carts._id });
             return { carts: null, errors: { reason: "Không còn sản phẩm nào hợp lệ. Giỏ hàng đã bị xóa." } };
