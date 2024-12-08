@@ -138,8 +138,8 @@ router.put('/update', async (req, res) => {
  */
 router.put('/delete', async (req, res) => {
     try {
-        const { user, shopOwner, product } = req.body;
-        const result = await cartController.deleteFromCart(user, shopOwner, product);
+        const { user, shopOwner, products } = req.body;
+        const result = await cartController.deleteFromCart(user, shopOwner, products);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, message: error.message });

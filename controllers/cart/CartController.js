@@ -56,7 +56,7 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             // if (existingCart) {
             //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
             // }
-            errors = {status:'Hết món'};
+            errors = { status: 'Hết món' };
             return { carts: [], errors };
         }
 
@@ -251,6 +251,8 @@ const updateQuantityProduct = async (user_id, shopOwner_id, product_id, quantity
 
 // Trừ 1 sản phẩm trong giỏ hàng
 const deleteFromCart = async (user_id, shopOwner_id, product_id) => {
+    let errors = null;
+
     try {
         console.log("--- Start deleteFromCart ---");
 
@@ -261,92 +263,98 @@ const deleteFromCart = async (user_id, shopOwner_id, product_id) => {
         // Kiểm tra user
         const userInDB = await ModelUser.findById(userObjId);
         if (!userInDB) {
-            throw new Error('User not found');
+            errors = 'User không tồn tại';
+            return { carts: null, errors };
         }
 
-        // Kiểm tra shopOwner
+        // Kiểm tra shop
         const shopOwnerInDB = await ModelShopOwner.findById(shopOwnerObjId);
-        if (!shopOwnerInDB) throw new Error('ShopOwner not found');
-
-
-        // Kiểm tra trạng thái của cửa hàng
-        if (shopOwnerInDB.status !== "Mở cửa") {
-            // Xóa cart nếu đã tạo
-            const deletedCart = await CartModel.findOneAndDelete({
-                "user._id": userObjId,
-                "shopOwner._id": shopOwnerObjId,
-            });
-            return {
-                status: false,
-                message: 'Shop is closed, cart deleted',
-                cartDeleted: !!deletedCart, // Thông báo xem cart có được xóa hay không
-            };
+        if (!shopOwnerInDB) {
+            errors = 'Shop không tồn tại';
+            return { carts: null, errors };
         }
+
+        // Kiểm tra trạng thái shop
+        if (["Đóng cửa", "Ngưng hoạt động", "Tài khoản bị khóa"].includes(shopOwnerInDB.status)) {
+            errors = {
+                shopId: shopOwnerInDB._id,
+                status: shopOwnerInDB.status
+            };
+            return { carts: null, errors };
+        }
+
         // Kiểm tra sản phẩm
         const productInDB = await ModelProduct.findById(productObjId);
-        if (!productInDB) throw new Error('Product not found');
-
-
-        // Kiểm tra trạng thái của sản phẩm
-        if (productInDB.status !== "Còn món") {
-            // Xóa cart nếu chứa sản phẩm
-            const deletedCart = await CartModel.findOneAndDelete({
-                "user._id": userObjId,
-                "shopOwner._id": shopOwnerObjId,
-                "products._id": productObjId,
-            });
-            return {
-                status: false,
-                message: 'Product is no longer available, cart deleted',
-                cartDeleted: !!deletedCart, // Thông báo xem cart có được xóa hay không
-            };
+        if (!productInDB) {
+            errors = 'Sản phẩm không tồn tại';
+            return { carts: null, errors };
         }
 
-
-
-        if (!cart) throw new Error('Cart not found');
+        // Tìm giỏ hàng hiện tại
+        const existingCart = await CartModel.findOne({
+            "user._id": userObjId,
+            "shopOwner._id": shopOwnerObjId,
+        });
+        
+        // Kiểm tra trạng thái sản phẩm
+        if (productInDB.status !== 'Còn món') {
+            // if (existingCart) {
+            //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
+            // }
+            errors = { status: 'Hết món' };
+            return { carts: [], errors };
+        }
+        if (!existingCart) {
+            errors = 'Giỏ hàng không tồn tại';
+            return { carts: null, errors };
+        }
 
         // Tìm sản phẩm trong giỏ hàng
-        const productIndex = cart.products.findIndex((p) =>
+        const productIndex = existingCart.products.findIndex((p) =>
             p._id.equals(productObjId)
         );
 
-        if (productIndex === -1) throw new Error('Product not found in cart');
+        if (productIndex === -1) {
+            errors = 'Sản phẩm không tồn tại trong giỏ hàng';
+            return { carts: null, errors };
+        }
 
-        const existingProduct = cart.products[productIndex];
+        // Xử lý giảm số lượng hoặc xóa sản phẩm
+        const existingProduct = existingCart.products[productIndex];
 
         if (existingProduct.quantity > 1) {
             // Nếu số lượng > 1, giảm số lượng
             existingProduct.quantity -= 1;
-            cart.products[productIndex] = existingProduct;
-            console.log(`Decreased quantity of product to: ${existingProduct.quantity}`);
+            existingCart.products[productIndex] = existingProduct;
         } else {
             // Nếu số lượng = 1, xóa sản phẩm khỏi giỏ
-            cart.products.splice(productIndex, 1);
-            console.log(`Removed product from cart`);
+            existingCart.products.splice(productIndex, 1);
         }
 
-        // Cập nhật tổng số lượng, tổng giá
-        cart.totalItem = cart.products.reduce((acc, product) => acc + product.quantity, 0);
-        cart.totalPrice = cart.products.reduce((acc, product) => acc + product.price * product.quantity, 0);
-        cart.updatedAt = Date.now();
-
-        console.log(`Updated totalItem: ${cart.totalItem}, totalPrice: ${cart.totalPrice}`);
+        // Cập nhật tổng số lượng và tổng giá
+        existingCart.totalItem = existingCart.products.reduce(
+            (acc, product) => acc + product.quantity, 0
+        );
+        existingCart.totalPrice = existingCart.products.reduce(
+            (acc, product) => acc + product.price * product.quantity, 0
+        );
+        existingCart.updatedAt = Date.now();
 
         // Xóa giỏ hàng nếu không còn sản phẩm
-        if (cart.products.length === 0) {
-            await CartModel.deleteOne({ _id: cart._id });
-            return { status: true, message: 'Cart is empty and deleted' };
+        if (existingCart.products.length === 0) {
+            await CartModel.deleteOne({ _id: existingCart._id });
+            return { status: true, message: 'Giỏ hàng đã bị xóa do trống', carts: null };
         }
+
         // Lưu lại giỏ hàng
-        await cart.save();
-        return { status: true, cart };
+        await existingCart.save();
+        return { status: true, message: 'Cập nhật giỏ hàng thành công', carts: existingCart };
     } catch (error) {
-        console.log('Error in deleteFromCart:', error);
-        return { status: false, message: error.message };
+        console.log('Lỗi trong deleteFromCart:', error);
+        errors = 'Đã xảy ra lỗi không xác định';
+        return { status: false, errors };
     }
 };
-
 
 // Lấy tất cả giỏ hàng của người dùng
 const getCarts = async (user_id) => {
