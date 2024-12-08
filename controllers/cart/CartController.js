@@ -56,8 +56,8 @@ const addToCart = async (user_id, shopOwner_id, products_id) => {
             // if (existingCart) {
             //     await CartModel.deleteOne({ _id: existingCart._id }); // Xóa cart nếu tồn tại
             // }
-            errors = 'Sản phẩm hiện không còn món';
-            return { carts: null, errors };
+            errors = {status:'Hết món'};
+            return { carts: [], errors };
         }
 
         // Nếu không có cart hiện tại, tạo mới

@@ -37,11 +37,8 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
 
         // Kiểm tra trạng thái của nhà hàng
         if (shopOwner.status !== "Mở cửa") {
-            return (
-                errors = {
-                    shopId: shopOwner._id,
-                    status: shopOwner.status
-                });
+            errors = { shopId: shopOwner._id, status: shopOwner.status };
+            return { errors }
 
         }
 
