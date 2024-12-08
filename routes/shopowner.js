@@ -134,8 +134,8 @@ router.get('/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, phone, email, address, rating, images, openingHours, closeHours, imageVerified,latitude,longitude} = req.body;
-        const shopOwner = await ShopOwnerController.updateShopOwner(id, name, phone, email, address, rating, images, openingHours, closeHours, imageVerified,latitude,longitude);
+        const { name, phone, email, address, rating, images, openingHours, closeHours, imageVerified, latitude, longitude } = req.body;
+        const shopOwner = await ShopOwnerController.updateShopOwner(id, name, phone, email, address, rating, images, openingHours, closeHours, imageVerified, latitude, longitude);
         return res.status(200).json({ status: true, data: shopOwner });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
@@ -455,7 +455,7 @@ router.delete('/softdelete/:id', async function (req, res, next) {
     try {
         const shopownerId = req.params.id;
         const updatedShopowner = await ShopOwnerController.removeSoftDeleted(shopownerId);
-  
+
         if (updatedShopowner) {
             return res.status(200).json({
                 status: true,
@@ -472,13 +472,13 @@ router.delete('/softdelete/:id', async function (req, res, next) {
         console.log('Delete ShopOwner error:', error);
         return res.status(500).json({ status: false, error: error.message });
     }
-  });
-  
-  router.put('/restore/available/:id', async (req, res) => {
+});
+
+router.put('/restore/available/:id', async (req, res) => {
     try {
         const shopownerId = req.params.id;
         const updatedShopowner = await ShopOwnerController.restoreAndSetAvailable(shopownerId);
-  
+
         return res.status(200).json({
             status: true,
             message: 'ShopOwner restored and set to available',
@@ -488,7 +488,7 @@ router.delete('/softdelete/:id', async function (req, res, next) {
         console.log('Restore ShopOwner error:', error);
         return res.status(500).json({ status: false, error: error.message });
     }
-  });
+});
 
 module.exports = router;
 

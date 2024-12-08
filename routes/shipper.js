@@ -35,9 +35,9 @@ const ShipperController = require('../controllers/shipper/ControllerShipper');
  *         description: Shipper đã được thêm
  */
 router.post('/add', async (req, res) => {
-    const { name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate ,verified,imageVerified} = req.body;
+    const { name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate, verified, imageVerified } = req.body;
     try {
-        let result = await ShipperController.addShipper(name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate,verified,imageVerified);
+        let result = await ShipperController.addShipper(name, phone, email, address, role, rating, image, password, gender, birthDate, vehicleBrand, vehiclePlate, verified, imageVerified);
         return res.status(200).json({ status: true, data: result });
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
@@ -113,8 +113,8 @@ router.get('/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const {name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate, imageVerified} = req.body;
-        const shipper = await ShipperController.updateShipper(id, name,  phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate, imageVerified);
+        const { name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate, imageVerified } = req.body;
+        const shipper = await ShipperController.updateShipper(id, name, phone, email, address, image, password, gender, birthDate, vehicleBrand, vehiclePlate, imageVerified);
         return res.status(200).json({ status: true, data: shipper });
     } catch (error) {
         console.log('Update shipper error:', error);
@@ -234,7 +234,7 @@ router.patch('/confirm-order-shipper/:orderId', async (req, res) => {
     const { shipperId } = req.body;
     const io = req.app.get('io');
     try {
-        const result = await ShipperController.confirmOrderShipperExists(orderId, shipperId,io);
+        const result = await ShipperController.confirmOrderShipperExists(orderId, shipperId, io);
         if (result.message) {
             return res.status(400).json({ message: result.message });
         }
@@ -249,8 +249,8 @@ router.patch('/confirm-order-arrived-shopowner/:orderId', async (req, res) => {
     const { shipperId } = req.body;
     const io = req.app.get('io');
     try {
-        const updatedOrder = await ShipperController.confirmShipperArrivedShopOwner(orderId, shipperId,io);
-        res.status(200).json(updatedOrder); 
+        const updatedOrder = await ShipperController.confirmShipperArrivedShopOwner(orderId, shipperId, io);
+        res.status(200).json(updatedOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -261,8 +261,8 @@ router.patch('/confirm-order-on-delivery/:orderId', async (req, res) => {
     const { shipperId } = req.body;
     const io = req.app.get('io');
     try {
-        const updatedOrder = await ShipperController.confirmShipperOnDelivery(orderId, shipperId,io);
-        res.status(200).json(updatedOrder); 
+        const updatedOrder = await ShipperController.confirmShipperOnDelivery(orderId, shipperId, io);
+        res.status(200).json(updatedOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -273,8 +273,8 @@ router.patch('/confirm-order-arrived-delivery-point/:orderId', async (req, res) 
     const { shipperId } = req.body;
     const io = req.app.get('io');
     try {
-        const updatedOrder = await ShipperController.confirmShipperArrivedDeliveryPoint(orderId, shipperId,io);
-        res.status(200).json(updatedOrder); 
+        const updatedOrder = await ShipperController.confirmShipperArrivedDeliveryPoint(orderId, shipperId, io);
+        res.status(200).json(updatedOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -314,8 +314,8 @@ router.patch('/confirm-order-finish/:orderId', async (req, res) => {
     const { shipperId } = req.body;
     const io = req.app.get('io');
     try {
-        const updatedOrder = await ShipperController.confirmOrderByShipperId(orderId, shipperId,io);
-        res.status(200).json(updatedOrder); 
+        const updatedOrder = await ShipperController.confirmOrderByShipperId(orderId, shipperId, io);
+        res.status(200).json(updatedOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -361,7 +361,7 @@ router.patch('/shipper-cancel-order/:orderId', async (req, res) => {
         }
 
         const updatedOrder = await ShipperController.cancelOrderByShipperId(orderId, shipperId, reason.trim(), io);
-        res.status(200).json(updatedOrder); 
+        res.status(200).json(updatedOrder);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -465,17 +465,17 @@ router.get('/:shipperId/revenue/custom-range', async (req, res) => {
 
 
 router.post('/change-password', async (req, res) => {
-    const {email, oldPassword, newPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
     try {
-      const result = await ShipperController.changePassword(email, oldPassword, newPassword);
-      return res.status(200).json({ status: true, message: result.message });
+        const result = await ShipperController.changePassword(email, oldPassword, newPassword);
+        return res.status(200).json({ status: true, message: result.message });
     } catch (error) {
         if (error.message === 'Error: Mật khẩu không đúng') {
             return res.status(401).json({ status: false, message: 'Mật khẩu cũ không chính xác' });
         }
-      return res.status(500).json({ status: false, message: error.message });
+        return res.status(500).json({ status: false, message: error.message });
     }
-  });
+});
 
 router.put('/verified/:id', async (req, res) => {
     const { id } = req.params;
@@ -485,5 +485,45 @@ router.put('/verified/:id', async (req, res) => {
     } catch (error) {
         return res.status(500).json({ status: false, data: error.message });
     }
-});  
+});
+
+router.delete('/softdelete/:id', async function (req, res, next) {
+    try {
+        const shipperId = req.params.id;
+        const updatedShipper = await ShipperController.removeSoftDeleted(shipperId);
+
+        if (updatedShipper) {
+            return res.status(200).json({
+                status: true,
+                message: 'shipper successfully soft deleted',
+                data: updatedShipper, // Trả về thông tin đã cập nhật
+            });
+        } else {
+            return res.status(404).json({
+                status: false,
+                message: 'shipper not found',
+            });
+        }
+    } catch (error) {
+        console.log('Delete shipper error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
+router.put('/restore/available/:id', async (req, res) => {
+    try {
+        const shipperId = req.params.id;
+        const updatedShipper = await ShipperController.restoreAndSetAvailable(shipperId);
+
+        return res.status(200).json({
+            status: true,
+            message: 'Shipper restored and set to available',
+            data: updatedShipper,
+        });
+    } catch (error) {
+        console.log('Restore shipper error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
 module.exports = router;

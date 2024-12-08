@@ -573,6 +573,47 @@ const changeShipperVerified = async (id) => {
     }
 };
 
+// Cập nhật tài xế thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
+const removeSoftDeleted = async (id) => {
+    try {
+        const shipperInDB = await Shipper.findById(id);
+        if (!shipperInDB) {
+            throw new Error('Shipper not found');
+        }
+
+        // Cập nhật trạng thái isDeleted và status
+        let result = await Shipper.findByIdAndUpdate(
+            id,
+            { isDeleted: true, status: 'Tài khoản bị khóa' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Remove Shipper error:', error);
+        throw new Error('Remove Shipper error');
+    }
+};
+
+// Khôi phục trạng thái cho shipper
+const restoreAndSetAvailable = async (id) => {
+    try {
+        const shipperInDB = await Shipper.findById(id);
+        if (!shipperInDB) {
+            throw new Error('Shipper not found');
+        }
+
+        // Cập nhật trạng thái
+        const result = await Shipper.findByIdAndUpdate(
+            id,
+            { isDeleted: false, status: 'Hoạt động' },
+            { new: true } // Trả về document đã cập nhật
+        );
+        return result;
+    } catch (error) {
+        console.log('Restore Shipper error:', error);
+        throw new Error('Restore Shipper error');
+    }
+};
 module.exports = {
     addShipper,
     getAllShippers,
@@ -590,6 +631,8 @@ module.exports = {
     confirmShipperOnDelivery,
     confirmShipperArrivedDeliveryPoint,
     changeShipperVerified,
-    getRevenueByShipperCustomRange
+    getRevenueByShipperCustomRange,
+    removeSoftDeleted,
+    restoreAndSetAvailable
 
 };
