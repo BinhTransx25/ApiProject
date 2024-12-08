@@ -528,7 +528,7 @@ const changePassword = async (email, oldPassword, newPassword) => {
             // Nếu mật khẩu đã được băm
             const checkPassword = await bcrypt.compare(oldPassword, shipperInDB.password);
             if (!checkPassword) {
-                return res.status(400).json({ message: "Mật khẩu không đúng" }); 
+                throw new Error('Mật khẩu không đúng');
             }
         }
 
@@ -542,7 +542,7 @@ const changePassword = async (email, oldPassword, newPassword) => {
         return { message: 'Password changed successfully' };
     } catch (error) {
         console.error('Error changing password:', error);
-        throw new Error('Error changing password');
+        throw new Error(error);
     }
 };
 
