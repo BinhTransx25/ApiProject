@@ -470,6 +470,9 @@ router.post('/change-password', async (req, res) => {
       const result = await ShipperController.changePassword(email, oldPassword, newPassword);
       return res.status(200).json({ status: true, message: result.message });
     } catch (error) {
+        if (error.message === 'Error: Mật khẩu không đúng') {
+            return res.status(401).json({ status: false, message: 'Mật khẩu cũ không chính xác' });
+        }
       return res.status(500).json({ status: false, message: error.message });
     }
   });
