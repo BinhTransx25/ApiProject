@@ -14,6 +14,16 @@ const getAllShopOwners = async () => {
         throw new Error('Lỗi khi lấy thông tin tất cả các cửa hàng đang mở cửa');
     }
 };
+// Lấy thông tin tất cả các nhà hàng
+const getAllShopOwnersNormal = async () => {
+    try {
+        // Lọc các nhà hàng đang ở trạng thái 'Mở cửa' và chưa bị xóa
+        return await ModelShopOwner.find();
+    } catch (error) {
+        console.error('Lỗi khi lấy thông tin tất cả các cửa hàng đang mở cửa:', error);
+        throw new Error('Lỗi khi lấy thông tin tất cả các cửa hàng đang mở cửa');
+    }
+};
 
 // Lấy thông tin nhà hàng theo ID
 const getShopOwnerById = async (id) => {
@@ -470,6 +480,7 @@ module.exports = {
     changeShopOwnerVerified,
     getRevenueByShopOwnerCustomRange,
     removeSoftDeleted,
-    restoreAndSetAvailable
+    restoreAndSetAvailable,
+    getAllShopOwnersNormal
 
 };

@@ -453,4 +453,30 @@ router.put('/restore/available/:id', async (req, res) => {
     }
   });
 
+// Route để lấy danh sách đơn hàng của user theo khoảng thời gian
+router.get("/user/custom-range", async (req, res) => {
+    try {
+        // Lấy các tham số từ query
+        const { userId, startDate, endDate } = req.query;
+
+        // Kiểm tra tham số đầu vào
+        if (!userId || !startDate || !endDate) {
+            return res.status(400).json({
+                error: "Thiếu tham số. Vui lòng cung cấp userId, startDate và endDate.",
+            });
+        }
+
+        // Gọi hàm xử lý
+        const result = await ControllerOrder.getOrdersByUserCustomRange(userId, startDate, endDate);
+
+        // Trả về kết quả
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("Lỗi trong route /user/custom-range:", error);
+        return res.status(500).json({
+            error: "Lỗi khi lấy danh sách đơn hàng của user.",
+        });
+    }
+});
+
 module.exports = router;

@@ -175,7 +175,7 @@ const confirmOrderShipperExists = async (orderId, shipperId, io) => {
                 phone: shipper.phone,
                 image: shipper.image,
             };
-            order.status = 'Đang đến nhà hàng';
+            order.status = 'Tài xế đang đến nhà hàng';
             await order.save();
 
             // Phát sự kiện cho socket
@@ -264,7 +264,7 @@ const confirmShipperArrivedDeliveryPoint = async (orderId, shipperId, io) => {
         // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
         if (order.shipper._id && order.shipper._id.toString() === shipperId) {
             // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
-            order.status = 'Đã đến điểm giao';
+            order.status = 'Shipper đã đến điểm giao hàng';
             await order.save();
 
             // Phát sự kiện cho socket
@@ -298,7 +298,7 @@ const confirmOrderByShipperId = async (orderId, shipperId, io) => {
         // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
         if (order.shipper._id && order.shipper._id.toString() === shipperId) {
             // Cập nhật trạng thái thành "Đơn hàng đã được giao hoàn tất"
-            order.status = 'Giao hàng thành công';
+            order.status = 'Đơn hàng đã được giao hoàn tất';
             await order.save();
 
             // Phát sự kiện cho socket
@@ -336,7 +336,7 @@ const cancelOrderByShipperId = async (orderId, shipperId, reason, io) => {
         // Kiểm tra ID của shipper có đúng trong đơn hàng hay không
         if (order.shipper._id && order.shipper._id.toString() === shipperId) {
             // Cập nhật trạng thái và lý do hủy của shipper
-            order.status = 'Tài xế hủy đơn';
+            order.status = 'Shipper đã hủy đơn';
             order.reasonCancel = reason; // Lưu lý do hủy
             await order.save();
 
