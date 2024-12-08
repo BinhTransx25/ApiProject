@@ -398,7 +398,7 @@ router.put('/restore/available/:id', async (req, res) => {
       return res.status(200).json({
           status: true,
           message: 'User restored and set to available',
-          data: updatedProduct,
+          data: updatedUser,
       });
   } catch (error) {
       console.log('Restore User error:', error);
