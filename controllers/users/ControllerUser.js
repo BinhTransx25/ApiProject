@@ -14,6 +14,7 @@ const register = async (
   phone,
   image,
   role,
+  images,
   shopCategory_ids,
   address,
   latitude,
@@ -64,8 +65,8 @@ const register = async (
         email,
         password,
         phone,
-        image,
         role,
+        images,
         shopCategory: shopCategories, // Thêm thông tin danh mục cửa hàng cho shop owner
         address,
         latitude,
@@ -178,6 +179,7 @@ const login = async (identifier, password) => {
         email: shopOwner.email,
         rating: shopOwner.rating,
         role: "shopOwner",
+        images,
         shopCategory: shopOwner.shopCategory,
         address: shopOwner.address,
         coordinates: shopOwner.coordinates,
@@ -405,7 +407,7 @@ const checkUser = async (email) => {
 };
 
 // Cập nhật thông tin nhà hàng
-const updateUser = async (id, name, phone, email, password, image,birthday) => {
+const updateUser = async (id, name, phone, email, password, image, birthday) => {
 
   try {
     const userInDB = await ModelUser.findById(id);
@@ -469,42 +471,42 @@ const deleteUser = async (id) => {
 // Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Tài khoản bị khóa'
 const removeSoftDeleted = async (id) => {
   try {
-      const userInDB = await ModelUser.findById(id);
-      if (!userInDB) {
-          throw new Error('User not found');
-      }
+    const userInDB = await ModelUser.findById(id);
+    if (!userInDB) {
+      throw new Error('User not found');
+    }
 
-      // Cập nhật trạng thái isDeleted và status
-      let result = await ModelUser.findByIdAndUpdate(
-          id,
-          { isDeleted: true, status: 'Tài khoản bị khóa' },
-          { new: true } // Trả về document đã cập nhật
-      );
-      return result;
+    // Cập nhật trạng thái isDeleted và status
+    let result = await ModelUser.findByIdAndUpdate(
+      id,
+      { isDeleted: true, status: 'Tài khoản bị khóa' },
+      { new: true } // Trả về document đã cập nhật
+    );
+    return result;
   } catch (error) {
-      console.log('Remove User error:', error);
-      throw new Error('Remove User error');
+    console.log('Remove User error:', error);
+    throw new Error('Remove User error');
   }
 };
 
 // Chuyển trạng thái
 const restoreAndSetAvailable = async (id) => {
   try {
-      const userInDB = await ModelUser.findById(id);
-      if (!userInDB) {
-          throw new Error('User not found');
-      }
+    const userInDB = await ModelUser.findById(id);
+    if (!userInDB) {
+      throw new Error('User not found');
+    }
 
-      // Cập nhật trạng thái
-      const result = await ModelUser.findByIdAndUpdate(
-          id,
-          { isDeleted: false, status: 'Hoạt động' },
-          { new: true } // Trả về document đã cập nhật
-      );
-      return result;
+    // Cập nhật trạng thái
+    const result = await ModelUser.findByIdAndUpdate(
+      id,
+      { isDeleted: false, status: 'Hoạt động' },
+      { new: true } // Trả về document đã cập nhật
+    );
+    return result;
   } catch (error) {
-      console.log('Restore User error:', error);
-      throw new Error('Restore User error');
+    console.log('Restore User error:', error);
+    throw new Error('Restore User error');
   }
 };
 
