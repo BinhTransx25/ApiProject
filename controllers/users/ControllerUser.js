@@ -179,7 +179,6 @@ const login = async (identifier, password) => {
         email: shopOwner.email,
         rating: shopOwner.rating,
         role: "shopOwner",
-        images,
         shopCategory: shopOwner.shopCategory,
         address: shopOwner.address,
         coordinates: shopOwner.coordinates,
