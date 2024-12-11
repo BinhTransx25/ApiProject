@@ -22,6 +22,7 @@ const ProductSchema = new Schema({
     },
     status: { type: String, enum: ['Còn món', 'Hết món', 'Ngừng bán' ], default: 'Còn món' },
     isDeleted:{type:Boolean, required:false, default:false},
+    note: { type: String, required: false,default:'' },
     
 });
 

@@ -604,6 +604,38 @@ const restoreAndSetAvailable = async (id) => {
     }
 };
 
+const updateProductNoteInCart = async (cartId, _id, newNote) => {
+    let errors = null; // Biến lưu trữ lỗi
+    try {
+        const cartInDB = await CartModel.findById(cartId);
+        if (!cartInDB) {
+            return { status: false, message: 'Không tìm thấy Cart' };
+        }
+
+        // Tìm sản phẩm trong giỏ hàng
+        const productInCart = cartInDB.products.find(
+            (product) => product._id.toString() === _id.toString()
+        );
+
+        if (!productInCart) {
+            errors = 'Sản phẩm không tồn tại';
+            return { carts, errors };
+        }
+
+        // Cập nhật note
+        productInCart.note = newNote;
+
+        // Lưu thay đổi
+        const updatedCart = await cartInDB.save();
+
+        return updatedCart;
+    } catch (error) {
+        console.log('Update product note error:', error);
+        throw new Error('Update product note error');
+    }
+};
+
+
 module.exports = {
     addToCart,
     deleteCartWhenPayment,
@@ -613,5 +645,6 @@ module.exports = {
     deleteFromCart,
     deleteCartUser,
     removeSoftDeleted,
-    restoreAndSetAvailable
+    restoreAndSetAvailable,
+    updateProductNoteInCart
 };

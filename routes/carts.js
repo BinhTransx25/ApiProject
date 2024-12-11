@@ -343,4 +343,27 @@ router.put('/restore/available/:id', async (req, res) => {
     }
   });
 
+
+  router.put('/update-note/:cartId/:id', async (req, res) => {
+    try {
+        const { cartId, id } = req.params;
+        const { note } = req.body;
+
+        const updatedCart = await cartController.updateProductNoteInCart(
+            cartId,
+            id,
+            note
+        );
+
+        return res.status(200).json({
+            status: true,
+            message: 'Note updated successfully',
+            data: updatedCart,
+        });
+    } catch (error) {
+        console.log('Update product note error:', error);
+        return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
 module.exports = router;
