@@ -15,7 +15,7 @@ const config = {
 router.post('/payment', async (req, res) => {
   const embed_data = {
     //sau khi hoàn tất thanh toán sẽ đi vào link này (thường là link web thanh toán thành công của mình)
-    "redirecturl": "https://www.youtube.com/watch?v=OeYVGtIiEO8&t=412s&ab_channel=Lucin3x",
+    "redirecturl": "coodyfood://fail-payment",
   };
 
   const items = [];

@@ -293,7 +293,7 @@ const deleteFromCart = async (user_id, shopOwner_id, product_id) => {
         const productInDB = await ModelProduct.findById(productObjId);
         if (!productInDB) {
             errors = 'Sản phẩm không tồn tại';
-            return { carts: null, errors };
+            return { carts: [], errors };
         }
 
         // Tìm giỏ hàng hiện tại
@@ -349,7 +349,7 @@ const deleteFromCart = async (user_id, shopOwner_id, product_id) => {
         // Xóa giỏ hàng nếu không còn sản phẩm
         if (existingCart.products.length === 0) {
             await CartModel.deleteOne({ _id: existingCart._id });
-            return { status: true, message: 'Giỏ hàng đã bị xóa do trống', carts: null };
+            return { status: true, message: 'Giỏ hàng đã bị xóa do trống', carts: [] };
         }
 
         // Lưu lại giỏ hàng
