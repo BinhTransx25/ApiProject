@@ -109,7 +109,7 @@ const getProductsByShopOwner = async (shopOwner_id, page, limit) => {
 const getProductsByShopOwnerNormal = async (shopOwner_id, page, limit) => {
     try {
         page = parseInt(page) || 1;
-        limit = parseInt(limit) || 10;
+        limit = parseInt(limit) || 999;
         let skip = (page - 1) * limit;
         let sort = { soldOut: -1 };
 
