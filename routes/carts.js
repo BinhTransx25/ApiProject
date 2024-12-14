@@ -344,7 +344,7 @@ router.put('/restore/available/:id', async (req, res) => {
   });
 
 
-  router.put('/update-note/:cartId/:id', async (req, res) => {
+router.put('/update-note/:cartId/:id', async (req, res) => {
     try {
         const { cartId, id } = req.params;
         const { note } = req.body;
@@ -363,6 +363,26 @@ router.put('/restore/available/:id', async (req, res) => {
     } catch (error) {
         console.log('Update product note error:', error);
         return res.status(500).json({ status: false, error: error.message });
+    }
+});
+
+router.post('/validate/:user/:shopOwner', async (req, res) => {
+    try {
+        const { user, shopOwner } = req.params;
+
+        // Gọi hàm validateCartState để kiểm tra trạng thái giỏ hàng
+        const validationResult = await cartController.validateCartState(user, shopOwner);
+        // Trả về giỏ hàng nếu hợp lệ
+        return res.status(200).json({
+            status: true,
+            data: validationResult
+        });
+    } catch (error) {
+        // Xử lý lỗi hệ thống
+        return res.status(500).json({
+            status: false,
+            message: `Lỗi hệ thống: ${error.message}`
+        });
     }
 });
 
