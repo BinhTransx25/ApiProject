@@ -406,13 +406,18 @@ router.put('/Success-Payment/:orderId', async (req, res) => {
     try {
         const { orderId } = req.params;
         const { paymentMethod } = req.body;
-        const result = await ControllerOrder.updateOrderStatusAfterPayment(orderId, paymentMethod);
+        const io = req.app.get('io'); // Lấy io từ app (nếu được set sẵn)
+
+        // Gọi controller và truyền thêm io
+        const result = await ControllerOrder.updateOrderStatusAfterPayment(orderId, paymentMethod, io);
+
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).json({ error: 'Error updating order status' });
     }
 });
+
 
 router.delete('/softdelete/:id', async function (req, res, next) {
     try {

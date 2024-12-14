@@ -419,38 +419,47 @@ const updateOrderStatus = async (orderId, status) => {
 };
 
 // Người Dùng Bấm 
-const updateOrderStatusAfterPayment = async (orderId, paymentMethod) => {
-    console.log('Order with ID:', orderId); // Log kiểm tra orderId
+const updateOrderStatusAfterPayment = async (orderId, paymentMethod, io) => {
+    console.log('Order with ID:', orderId);
 
     try {
-        // Tìm đơn hàng theo ID
         const order = await ModelOrder.findById(orderId);
         if (!order) {
             throw new Error('Order not found');
         }
 
-        // Cập nhật trạng thái của đơn hàng thành "Người dùng đã hủy đơn"
+        // Cập nhật trạng thái của đơn hàng
         order.paymentMethod = paymentMethod;
         order.status = 'Đang xử lý';
         order.updatedAt = Date.now();
         await order.save();
 
-        // Tìm User có chứa đơn hàng này trong orders và cập nhật trạng thái
+        // Tìm user có đơn hàng và cập nhật trạng thái
         const user = await ModelUser.findOne({ 'orders._id': orderId });
         if (user) {
             const orderItem = user.orders.id(orderId);
             if (orderItem) {
-                orderItem.status = 'Đang xử lý'; // Cập nhật trạng thái trong orders
-                await user.save(); // Lưu lại user với trạng thái đã cập nhật
+                orderItem.status = 'Đang xử lý';
+                await user.save();
             }
+        }
+
+        // Gửi socket thông báo tới cửa hàng
+        if (io && order.shopOwner && order.shopOwner._id) {
+            io.to(String(order.shopOwner._id)).emit('order_status_updated', {
+                orderId: order._id,
+                status: order.status,
+            });
+            console.log(`Order ${order._id} status updated and socket notification sent to shop owner.`);
         }
 
         return order;
     } catch (error) {
-        console.error('Lỗi khi hủy đơn hàng:', error);
-        throw new Error('Lỗi khi hủy đơn hàng');
+        console.error('Error updating order status:', error);
+        throw error;
     }
 };
+
 
 // Cập nhật sản phẩm thành xóa mềm và chuyển trạng thái thành 'Đơn hàng tạm xóa'
 const removeSoftDeleted = async (id) => {
