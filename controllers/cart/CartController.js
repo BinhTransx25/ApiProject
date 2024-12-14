@@ -657,10 +657,9 @@ const validateCartState = async (user, shopOwner) => {
 
         if (["Đóng cửa", "Ngưng hoạt động", "Tài khoản bị khóa"].includes(shopOwnerInDB.status)) {
 
-
             errors = {
                 shopId: shopOwnerInDB._id,
-                reason: shopOwnerInDB.status
+                status: shopOwnerInDB.status
             };
 
         }
