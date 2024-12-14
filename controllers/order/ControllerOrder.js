@@ -51,11 +51,8 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
                 throw new Error(`Sản phẩm với ID ${item._id} không tồn tại`);
             }
             if (product.status !== "Còn món") {
-                return (errors = {
-                    Product_id: product._id,
-                    status: product.status
-                });
-
+                errors = { product_id: product._id, status: product.status };
+                return { errors }
             }
         }
 
