@@ -446,10 +446,7 @@ const updateOrderStatusAfterPayment = async (orderId, paymentMethod, io) => {
 
         // Gửi socket thông báo tới cửa hàng
         if (io && order.shopOwner && order.shopOwner._id) {
-            io.to(String(order.shopOwner._id)).emit('order_status_updated', {
-                orderId: order._id,
-                status: order.status,
-            });
+            io.to(String(order.shopOwner._id)).emit('new_order_created', { orderId: order._id, order: order });
             console.log(`Order ${order._id} status updated and socket notification sent to shop owner.`);
         }
 
