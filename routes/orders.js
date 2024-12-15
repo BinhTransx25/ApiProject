@@ -411,7 +411,7 @@ router.put('/Success-Payment/:orderId', async (req, res) => {
         // Gọi controller và truyền thêm io
         const result = await ControllerOrder.updateOrderStatusAfterPayment(orderId, paymentMethod, io);
 
-        res.status(200).json({ success: true, data: result });
+        res.status(200).json({ status: true, data: result });
     } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).json({ error: 'Error updating order status' });
