@@ -281,15 +281,18 @@ const remove = async (id) => {
         throw new Error('Remove product error');
     }
 };
-
+const escapeRegex = (keyword) => {
+    return keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Thoát các ký tự đặc biệt
+};
 // tìm sản phẩm theo từ khóa 
 const searchProductsAndShops = async (keyword) => {
     try {
+        const escapedKeyword = escapeRegex(keyword); // Xử lý từ khóa
         const results = []; // Kết quả tìm kiếm sản phẩm và cửa hàng.
 
         // **Tìm kiếm sản phẩm có tên khớp với từ khóa**
         const products = await ModelProduct.find({
-            name: { $regex: keyword, $options: 'i' }, // Tìm kiếm không phân biệt chữ hoa, chữ thường.
+            name: { $regex: escapedKeyword, $options: 'i' }, // Tìm kiếm không phân biệt chữ hoa, chữ thường.
             status: 'Còn món' // Chỉ tìm sản phẩm đang còn món.
         })
             .select('name price images shopOwner status') // Chọn thêm trường status để lọc.
