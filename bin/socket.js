@@ -93,7 +93,7 @@ module.exports = function (io) {
       try {
         const order = await confirmOrderByShipperId(orderId, shipperId, io);
         socket.emit("order_confirmed", { orderId, status: order.status });
-        // socket.emit("order_status", { orderId, status: order.status });
+        socket.emit("order_status", { orderId, status: order.status });
         // Gửi thông báo trạng thái mới đến các client trong room của đơn hàng
         io.to(orderId).emit("order_status_updated", {
           orderId,
