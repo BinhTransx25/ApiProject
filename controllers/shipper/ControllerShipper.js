@@ -181,7 +181,7 @@ const confirmOrderShipperExists = async (orderId, shipperId, io) => {
             // Phát sự kiện cho socket
             if (io) {
                 io.emit('order_assigned', { orderId, shipperId, status: order.status });
-                io.emit('order_status', { order, status: order.status });
+                // io.emit('order_status', { order, status: order.status });
                 console.log(`Socket emitted for order ${orderId} assigned to shipper ${shipperId}`);
             }
             return order; // Trả về đơn hàng đã cập nhật
