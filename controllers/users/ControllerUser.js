@@ -226,13 +226,13 @@ const loginWithSocial = async (userInfo) => {
   try {
     let userInDB = await ModelUser.findOne({ email: userInfo.email });
     let user;
-
+    const hashpassword = await bcrypt.hash("123456", 10);
     const body = {
       email: userInfo.email,
       name: userInfo.name,
       image: userInfo.photo,
       phone: userInfo.phone,
-      password: "123456",
+      password: hashpassword,
     };
 
     if (!userInDB) {
