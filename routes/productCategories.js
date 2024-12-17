@@ -317,8 +317,11 @@ router.delete('/:id', async (req, res, next) => {
         const result = await ControllerProductCategory.remove(id);
         return res.status(200).json({ status: true });
     } catch (error) {
-        console.log('Delete category product error:', error);
-        return res.status(500).json({ status: false, error: error });
+        if (error.message === "Error: The category already exists in the products") {
+            res.status(400).json({ status: false, error: error });
+          } else {
+            return res.status(500).json({ status: false, error: error });
+          }
     }
 });
 
