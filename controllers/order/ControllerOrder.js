@@ -355,7 +355,7 @@ const CustomerCancelOrder = async (orderId, io) => {
         // Phát sự kiện cho socket
         if (io) {
             io.emit('order_cancelled', { orderId, status: 'Khách hủy đơn' });
-            io.emit('order_status', { order, status: 'Khách hủy đơn' });
+            // io.emit('order_status', { order, status: 'Khách hủy đơn' });
             console.log(`Socket emitted for order ${orderId} with status 'Khách hủy đơn'`);
         } else {
             console.warn('Socket.io instance not found, cannot emit event');
