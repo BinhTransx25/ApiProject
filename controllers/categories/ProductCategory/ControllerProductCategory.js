@@ -1,5 +1,6 @@
 const ModelProductCategory = require('./ModelProductCategory');
 const ModelShopOwner = require('../../shopowner/ModelShopOwner')
+const ModelProduct = require("../../products/ModelProduct");
 // hàm get all có 2 cái sài cái nào cũng được nha 
 
 // Get all productCategories with pagination and optional keyword search
@@ -130,13 +131,19 @@ const remove = async (id) => {
         const categoryInDB = await ModelProductCategory.findById(id);
         if (!categoryInDB) {
             throw new Error('Category not found');
+        }    
+        // Kiểm tra xem có sản phẩm nào thuộc về danh mục này không
+        const productsInCategory = await ModelProduct.find({
+          categories: { $elemMatch: { categoryProduct_id: id } },
+        });
+        if (productsInCategory.length > 0) {
+          throw new Error("The category already exists in the products");
         }
 
         const result = await ModelProductCategory.findByIdAndDelete(id);
         return result;
     } catch (error) {
-        console.error('Remove category product error:', error);
-        throw new Error('Unable to delete category');
+        throw new Error(error);
     }
 };
 
