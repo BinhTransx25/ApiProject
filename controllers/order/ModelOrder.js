@@ -20,6 +20,7 @@ const OrderSchema = new Schema({
     status: {
         type: String,
         enum: ['Đang xử lý',
+            'Chưa giải quyết',
             'Chờ thanh toán',
             'Tìm tài xế',
             'Tài xế đang đến nhà hàng',
@@ -39,7 +40,7 @@ const OrderSchema = new Schema({
     },
     totalPrice: { type: Number, required: false, default: 0 },
     user: { type: Object, required: true, default: {} },
-    shopOwner: { type: Object, required: true, default: {} }, 
+    shopOwner: { type: Object, required: true, default: {} },
     shipper: { type: Object, required: false, default: {} },
     // image: { type: Array, required: true, default: [] },
     voucher: { type: Object, require: false, default: {} },
@@ -48,7 +49,7 @@ const OrderSchema = new Schema({
     distance: { type: Number, required: false, default: 0 },
     statusReview: { type: Boolean, required: false, default: false }, // Đã thêm cột statusReview
     reasonCancel: { type: String, required: false, default: '' },   // Cột mới reasonCancel
-    isDeleted:{ type:Boolean, required:false, default:false}, // Xóa mềm
+    isDeleted: { type: Boolean, required: false, default: false }, // Xóa mềm
     previousStatus: { type: String, required: false, default: '' } // trạng thái trước khi xóa mềm sẽ lưu ở đây
 
 });
