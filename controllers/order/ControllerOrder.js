@@ -138,7 +138,7 @@ const addOrder = async (userId, order, paymentMethod, shopOwnerId, totalPrice, s
         }
 
         // Chỉ gửi socket nếu đơn hàng không ở trạng thái "Chờ thanh toán"
-        if (newOrder.status !== 'Chờ thanh toán') {
+        if (io && newOrder.status !== 'Chờ thanh toán') {
             // Gửi thông báo đến cửa hàng liên quan
             io.to(String(shopOwner._id)).emit('new_order_created', { orderId: newOrder._id, order: newOrder });
             console.log(`New order created for shop owner ${shopOwner._id}: ${newOrder._id}`);
